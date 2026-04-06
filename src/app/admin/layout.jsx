@@ -1,64 +1,99 @@
-import Link from "next/link";
-import { requireAdmin } from "@/lib/auth";
-import { logout } from "@/app/login/actions";
+import { redirect } from "next/navigation";
+import { createClient } from "../../lib/supabase/server";
+import AdminLogoutButton from "../../components/admin/AdminLogoutButton";
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminLayout({ children }) {
-  const session = await requireAdmin();
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/admin/login");
+  }
+
+  const { data: adminRow } = await supabase
+    .from("admin_users")
+    .select("full_name, role, is_active")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (!adminRow?.is_active) {
+    redirect("/admin/login?error=unauthorized");
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      <header className="border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-green-700">
-              Portal Admin
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      <div className="mx-auto flex max-w-7xl gap-6 px-4 py-6">
+        <aside className="hidden w-72 shrink-0 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:block dark:border-slate-800 dark:bg-slate-900">
+          <div className="mb-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400">
+              Admin Panel
             </p>
-            <h1 className="text-lg font-semibold">
-              Kemenag Barito Utara CMS Bootstrap
-            </h1>
+            <h2 className="mt-2 text-xl font-bold text-slate-900 dark:text-slate-100">
+              Kemenag Barito Utara
+            </h2>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+              {adminRow.full_name ?? user.email}
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-500">
+              Role: {adminRow.role}
+            </p>
           </div>
 
-          <div className="flex items-center gap-3 text-sm">
-            <div className="text-right">
-              <p className="font-medium">{session.profile?.full_name || "Admin"}</p>
-              <p className="text-gray-500 dark:text-gray-400">
-                {session.profile?.role || "admin"}
-              </p>
-            </div>
-            <form>
-              <button
-                formAction={logout}
-                className="rounded-xl border border-gray-300 px-4 py-2 dark:border-gray-700"
-              >
-                Keluar
-              </button>
-            </form>
-          </div>
-        </div>
-      </header>
-
-      <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 md:grid-cols-[240px_minmax(0,1fr)]">
-        <aside className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-          <nav className="space-y-2 text-sm">
-            <Link className="block rounded-xl px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800" href="/admin">
+          <nav className="space-y-2">
+            <a
+              href="/admin"
+              className="block rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
+            >
               Dashboard
-            </Link>
-            <Link className="block rounded-xl px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800" href="/admin?module=berita">
+            </a>
+            <a
+              href="/admin/berita"
+              className="block rounded-xl px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
               Berita
-            </Link>
-            <Link className="block rounded-xl px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800" href="/admin?module=pengumuman">
+            </a>
+            <a
+              href="/admin/pengumuman"
+              className="block rounded-xl px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
               Pengumuman
-            </Link>
-            <Link className="block rounded-xl px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800" href="/admin?module=dokumen">
-              Dokumen Publik
-            </Link>
-            <Link className="block rounded-xl px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800" href="/admin?module=agenda">
+            </a>
+            <a
+              href="/admin/agenda"
+              className="block rounded-xl px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
               Agenda
-            </Link>
+            </a>
+            <a
+              href="/admin/dokumen"
+              className="block rounded-xl px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
+              Dokumen
+            </a>
           </nav>
         </aside>
 
-        <section>{children}</section>
+        <main className="min-w-0 flex-1">
+          <div className="mb-6 flex items-center justify-between rounded-3xl border border-slate-200 bg-white px-5 py-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div>
+              <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+                Dashboard Admin
+              </h1>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                Login berhasil dan akses admin aktif.
+              </p>
+            </div>
+
+            <AdminLogoutButton />
+          </div>
+
+          {children}
+        </main>
       </div>
     </div>
   );
