@@ -69,8 +69,8 @@ export default function AdminLoginPage() {
 
       const loginData = await loginRes.json().catch(() => null);
 
-      if (!res.ok) {
-        setError(data?.message || data?.error || "Login gagal.");
+      if (!loginRes.ok) {
+        setError(loginData?.message || loginData?.error || "Login gagal.");
         return;
       }
 
@@ -83,7 +83,7 @@ export default function AdminLoginPage() {
 
       if (!sessionRes.ok || !sessionData?.permissions?.isAdmin) {
         setError(
-          "Login berhasil, tetapi akun ini belum memiliki role admin/super_admin di tabel profiles.",
+          "Login berhasil, tetapi akun ini belum memiliki role admin/super_admin di tabel profiles."
         );
         return;
       }
@@ -161,7 +161,7 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-70"
+            className="w-full rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
           >
             {submitting ? "Masuk..." : "Login Admin"}
           </button>
