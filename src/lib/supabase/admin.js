@@ -1,5 +1,5 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
-import { assertServiceRoleKey, env } from "@/lib/env";
+import { env, assertServiceRoleKey } from "@/lib/env";
 
 let adminClient;
 
