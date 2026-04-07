@@ -9,10 +9,7 @@ export async function POST(request) {
 
     if (!email || !password) {
       return NextResponse.json(
-        {
-          ok: false,
-          message: "Email dan password wajib diisi.",
-        },
+        { ok: false, message: "Email dan password wajib diisi." },
         { status: 400 }
       );
     }
@@ -26,10 +23,7 @@ export async function POST(request) {
 
     if (error) {
       return NextResponse.json(
-        {
-          ok: false,
-          message: error.message || "Login gagal.",
-        },
+        { ok: false, message: error.message || "Login gagal." },
         { status: 400 }
       );
     }
