@@ -1,5 +1,6 @@
 import Link from "next/link";
 import SectionHeading from "../components/SectionHeading";
+import AnnouncementsSection from "../components/AnnouncementsSection";
 import { getLatestBerita } from "../lib/berita";
 import { serviceHighlights } from "../data/services";
 import {

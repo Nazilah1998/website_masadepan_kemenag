@@ -1,7 +1,40 @@
+import { NextResponse } from "next/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { cleanString, ensureUniqueSlug, validateAdmin } from "@/lib/cms-utils";
 export const dynamic = "force-dynamic";
 const table = "pengumuman";
-const selectFields = ` id, slug, title, excerpt, content, category, is_important, is_published, published_at, author_id, created_at, updated_at `;
+const selectFields = ` id, slug, title, excerpt, content, category, is_important, is_published, published_at, author_id, attachment_url, attachment_name, attachment_path, attachment_source, attachment_type, created_at, updated_at `;
+function inferAttachmentTypeFromUrl(url) {
+  const lower = String(url || "").toLowerCase();
+  if (lower.match(/\.(jpg|jpeg|png|webp|gif|svg)(\?|$)/)) return "image";
+  if (lower.match(/\.pdf(\?|$)/)) return "pdf";
+  if (lower.includes("drive.google.com")) return "link";
+  return "link";
+}
+function normalizeAttachment(body) {
+  const attachmentUrl = cleanString(body.attachment_url);
+  const attachmentName = cleanString(body.attachment_name);
+  const attachmentPath = cleanString(body.attachment_path);
+  const attachmentSource = cleanString(body.attachment_source);
+  const attachmentType = cleanString(body.attachment_type);
+  if (!attachmentUrl) {
+    return {
+      attachment_url: null,
+      attachment_name: null,
+      attachment_path: null,
+      attachment_source: null,
+      attachment_type: null,
+    };
+  }
+  return {
+    attachment_url: attachmentUrl,
+    attachment_name: attachmentName || "Lampiran Pengumuman",
+    attachment_path: attachmentPath || null,
+    attachment_source: attachmentSource || (attachmentPath ? "upload" : "link"),
+    attachment_type:
+      attachmentType || inferAttachmentTypeFromUrl(attachmentUrl),
+  };
+}
 function buildPayload(body) {
   const title = cleanString(body.title);
   const excerpt = cleanString(body.excerpt);
@@ -33,6 +66,7 @@ function buildPayload(body) {
     is_important: isImportant,
     is_published: isPublished,
     published_at: publishedAt.toISOString(),
+    ...normalizeAttachment(body),
   };
 }
 export async function GET() {
