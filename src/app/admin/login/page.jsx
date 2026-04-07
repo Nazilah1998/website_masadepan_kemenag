@@ -69,8 +69,8 @@ export default function AdminLoginPage() {
 
       const loginData = await loginRes.json().catch(() => null);
 
-      if (!loginRes.ok) {
-        setError(loginData?.message || "Login gagal.");
+      if (!res.ok) {
+        setError(data?.message || data?.error || "Login gagal.");
         return;
       }
 
@@ -83,7 +83,7 @@ export default function AdminLoginPage() {
 
       if (!sessionRes.ok || !sessionData?.permissions?.isAdmin) {
         setError(
-          "Login berhasil, tetapi akun ini belum memiliki role admin/super_admin di tabel profiles."
+          "Login berhasil, tetapi akun ini belum memiliki role admin/super_admin di tabel profiles.",
         );
         return;
       }
