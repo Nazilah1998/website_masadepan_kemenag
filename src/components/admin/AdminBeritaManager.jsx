@@ -192,6 +192,8 @@ export default function AdminBeritaManager() {
       ...prev,
       content: html,
     }));
+
+    return html;
   }
 
   function handleEditorInput() {
@@ -200,6 +202,14 @@ export default function AdminBeritaManager() {
 
   function runEditorCommand(command, value = null) {
     editorRef.current?.focus();
+
+    if (typeof document.execCommand !== "function") {
+      setError(
+        "Toolbar editor tidak didukung browser ini. Anda masih bisa menulis isi berita secara manual."
+      );
+      return;
+    }
+
     document.execCommand(command, false, value);
     syncEditorToState();
   }
@@ -235,8 +245,7 @@ export default function AdminBeritaManager() {
         throw new Error(data?.message || "Gagal upload cover image.");
       }
 
-      const nextCoverImage =
-        data?.item?.cover_image || data?.cover_image || data?.url || "";
+      const nextCoverImage = data?.cover_image || data?.url || "";
 
       setForm((prev) => ({
         ...prev,
@@ -270,7 +279,7 @@ export default function AdminBeritaManager() {
 
   async function handleSubmit(event) {
     event.preventDefault();
-    syncEditorToState();
+    const currentContent = syncEditorToState();
 
     try {
       setSaving(true);
@@ -279,7 +288,7 @@ export default function AdminBeritaManager() {
 
       const payload = {
         ...form,
-        content: editorRef.current?.innerHTML || form.content || "",
+        content: currentContent || form.content || "",
       };
 
       const response = await fetch(
@@ -634,12 +643,12 @@ export default function AdminBeritaManager() {
                       <input
                         key="cover-upload"
                         type="file"
-                        accept="image/*"
+                        accept="image/png,image/jpeg,image/webp,image/gif"
                         onChange={handleCoverUpload}
                         className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm"
                       />
                       <p className="text-xs text-slate-500">
-                        Format yang didukung: JPG, PNG, WEBP, GIF, SVG.
+                        Format yang didukung: JPG, PNG, WEBP, GIF. Ukuran maksimal 5 MB.
                       </p>
                     </div>
                   ) : (
