@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { siteInfo } from "@/data/site";
 
 const securityPoints = [
@@ -12,8 +13,24 @@ const securityPoints = [
   "Gunakan password yang kuat dan berbeda dari akun personal.",
 ];
 
+function mapMfaError(error) {
+  const code = error?.code;
+  const message = error?.message || "Gagal memeriksa status MFA admin.";
+
+  if (code === "mfa_totp_enroll_not_enabled") {
+    return "TOTP MFA belum diaktifkan di Supabase Dashboard.";
+  }
+
+  if (code === "mfa_totp_verify_not_enabled") {
+    return "Verifikasi TOTP MFA belum diaktifkan di Supabase Dashboard.";
+  }
+
+  return message;
+}
+
 export default function AdminLoginClient({ initialUnauthorized = false }) {
   const router = useRouter();
+  const supabase = useMemo(() => createClient(), []);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,6 +43,25 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
   const submitDisabled = useMemo(() => {
     return submitting || !email.trim() || !password;
   }, [email, password, submitting]);
+
+  const resolveDestinationAfterAdminAuth = useCallback(async () => {
+    const { data, error } =
+      await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+
+    if (error) {
+      throw error;
+    }
+
+    if (data?.currentLevel === "aal2") {
+      return "/admin";
+    }
+
+    if (data?.nextLevel === "aal2") {
+      return "/admin/mfa?mode=verify";
+    }
+
+    return "/admin/mfa?mode=enroll";
+  }, [supabase]);
 
   useEffect(() => {
     let active = true;
@@ -42,7 +78,11 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
         if (!active) return;
 
         if (res.ok && data?.permissions?.isAdmin) {
-          router.replace("/admin");
+          const destination = await resolveDestinationAfterAdminAuth();
+
+          if (!active) return;
+
+          router.replace(destination);
           router.refresh();
           return;
         }
@@ -52,6 +92,10 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
         }
       } catch (err) {
         console.error("checkSession error:", err);
+
+        if (active && initialUnauthorized) {
+          setError("Akun berhasil login, tetapi role-nya bukan admin.");
+        }
       } finally {
         if (active) {
           setLoadingSession(false);
@@ -64,7 +108,7 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
     return () => {
       active = false;
     };
-  }, [router, initialUnauthorized]);
+  }, [router, initialUnauthorized, resolveDestinationAfterAdminAuth]);
 
   function handlePasswordKeyState(event) {
     setCapsLock(event.getModifierState("CapsLock"));
@@ -108,11 +152,12 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
         return;
       }
 
-      router.replace("/admin");
+      const destination = await resolveDestinationAfterAdminAuth();
+      router.replace(destination);
       router.refresh();
     } catch (err) {
       console.error("handleSubmit error:", err);
-      setError("Terjadi kesalahan jaringan. Coba lagi beberapa saat.");
+      setError(mapMfaError(err) || "Terjadi kesalahan jaringan. Coba lagi beberapa saat.");
     } finally {
       setSubmitting(false);
     }
@@ -220,8 +265,8 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
                   Masuk ke panel admin
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Gunakan akun admin Supabase yang sudah terdaftar. Halaman ini
-                  hanya untuk pengelola website internal.
+                  Gunakan akun admin Supabase yang sudah terdaftar. Setelah login,
+                  akun admin akan dicek status MFA-nya sebelum masuk ke dashboard.
                 </p>
               </div>
 
@@ -301,11 +346,11 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
 
               <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <p className="text-sm font-semibold text-slate-900">
-                  Saran peningkatan keamanan berikutnya
+                  Keamanan admin
                 </p>
                 <p className="mt-2 text-sm leading-7 text-slate-600">
-                  Setelah tampilan login ini stabil, tahap berikut yang paling
-                  layak adalah menambahkan MFA authenticator khusus akun admin.
+                  Setelah email dan password benar, akun admin akan diarahkan ke
+                  verifikasi MFA atau setup authenticator jika belum pernah diaktifkan.
                 </p>
               </div>
             </div>

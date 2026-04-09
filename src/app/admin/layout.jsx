@@ -8,9 +8,11 @@ import AdminHeader from "@/components/admin/AdminHeader";
 export default function AdminLayout({ children }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const isLoginPage = pathname === "/admin/login";
 
-  if (isLoginPage) {
+  const isAuthLikePage =
+    pathname === "/admin/login" || pathname === "/admin/mfa";
+
+  if (isAuthLikePage) {
     return <>{children}</>;
   }
 

@@ -11,21 +11,27 @@ export async function GET() {
           ok: false,
           message: "Belum login.",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     return NextResponse.json({
       ok: true,
       user: {
-        id: session.claims?.sub,
+        id: session.claims?.sub ?? null,
         email: session.profile?.email || null,
         full_name: session.profile?.full_name || null,
-        role: session.role,
+        role: session.role ?? null,
       },
       permissions: {
         isAdmin: session.isAdmin,
         isEditor: session.isEditor,
+      },
+      mfa: {
+        currentLevel: session.aal ?? null,
+        nextLevel: session.nextAal ?? null,
+        isVerified: session.isMfaVerified ?? false,
+        errorMessage: session.mfaErrorMessage ?? null,
       },
     });
   } catch (error) {
@@ -34,7 +40,7 @@ export async function GET() {
         ok: false,
         message: error.message || "Gagal membaca session admin.",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

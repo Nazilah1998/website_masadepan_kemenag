@@ -32,6 +32,21 @@ export async function createServerSupabaseClient() {
   });
 }
 
+async function getAdminMfaContext(supabase) {
+  const { data, error } =
+    await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+
+  if (error) {
+    throw error;
+  }
+
+  return {
+    currentLevel: data?.currentLevel ?? null,
+    nextLevel: data?.nextLevel ?? null,
+    isVerified: data?.currentLevel === "aal2",
+  };
+}
+
 export async function getCurrentSessionContext() {
   const supabase = await createServerSupabaseClient();
 
@@ -53,6 +68,10 @@ export async function getCurrentSessionContext() {
       role: null,
       isAdmin: false,
       isEditor: false,
+      aal: null,
+      nextAal: null,
+      isMfaVerified: false,
+      mfaErrorMessage: null,
     };
   }
 
@@ -64,7 +83,6 @@ export async function getCurrentSessionContext() {
     .eq("id", user.id)
     .maybeSingle();
 
-  // abaikan "tidak ada row", tapi lempar error lain
   if (profileError && profileError.code !== "PGRST116") {
     throw profileError;
   }
@@ -72,11 +90,31 @@ export async function getCurrentSessionContext() {
   profile = profileData ?? {
     id: user.id,
     email: user.email ?? null,
-    full_name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
+    full_name:
+      user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
     role: user.app_metadata?.role ?? user.user_metadata?.role ?? null,
   };
 
   const role = normalizeRole(profile?.role);
+  const isAdmin = ADMIN_ROLES.has(role);
+  const isEditor = EDITOR_ROLES.has(role);
+
+  let aal = null;
+  let nextAal = null;
+  let isMfaVerified = !isAdmin;
+  let mfaErrorMessage = null;
+
+  if (isAdmin) {
+    try {
+      const mfa = await getAdminMfaContext(supabase);
+      aal = mfa.currentLevel;
+      nextAal = mfa.nextLevel;
+      isMfaVerified = mfa.isVerified;
+    } catch (error) {
+      isMfaVerified = false;
+      mfaErrorMessage = error?.message || "Gagal memeriksa status MFA admin.";
+    }
+  }
 
   return {
     isAuthenticated: true,
@@ -87,17 +125,22 @@ export async function getCurrentSessionContext() {
     user,
     profile,
     role,
-    isAdmin: ADMIN_ROLES.has(role),
-    isEditor: EDITOR_ROLES.has(role),
+    isAdmin,
+    isEditor,
+    aal,
+    nextAal,
+    isMfaVerified,
+    mfaErrorMessage,
   };
 }
 
 export async function requireAdmin(options = {}) {
   const {
     loginRedirect = "/admin/login",
-    forbiddenRedirect =
-      "/error?message=" +
+    forbiddenRedirect = "/error?message=" +
       encodeURIComponent("Akun ini tidak memiliki hak akses admin."),
+    mfaRedirect = "/admin/mfa",
+    requireMfa = true,
   } = options;
 
   const session = await getCurrentSessionContext();
@@ -108,6 +151,10 @@ export async function requireAdmin(options = {}) {
 
   if (!session.isAdmin) {
     redirect(forbiddenRedirect);
+  }
+
+  if (requireMfa && !session.isMfaVerified) {
+    redirect(mfaRedirect);
   }
 
   return session;

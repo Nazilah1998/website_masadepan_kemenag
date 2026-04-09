@@ -92,7 +92,7 @@ export async function PUT(request, { params }) {
       table,
       cleanString(body.slug),
       payload.title,
-      id
+      id,
     );
 
     const { data, error } = await supabase
@@ -120,7 +120,7 @@ export async function PUT(request, { params }) {
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }
@@ -152,7 +152,7 @@ export async function DELETE(_request, { params }) {
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }

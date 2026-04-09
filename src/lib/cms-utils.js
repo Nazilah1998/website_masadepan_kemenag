@@ -25,12 +25,10 @@ export async function ensureUniqueSlug(
   table,
   rawSlug,
   fallbackTitle,
-  currentId = null
+  currentId = null,
 ) {
   const baseSlug =
-    slugify(rawSlug) ||
-    slugify(fallbackTitle) ||
-    `${table}-${Date.now()}`;
+    slugify(rawSlug) || slugify(fallbackTitle) || `${table}-${Date.now()}`;
 
   let candidate = baseSlug;
   let counter = 1;
@@ -57,15 +55,20 @@ export async function ensureUniqueSlug(
   }
 }
 
-export async function validateAdmin() {
+export async function validateAdmin(options = {}) {
+  const { requireMfa = true } = options;
+
   const session = await getCurrentSessionContext();
 
   if (!session?.isAuthenticated) {
     return {
       ok: false,
       response: NextResponse.json(
-        { message: "Unauthorized." },
-        { status: 401 }
+        {
+          message: "Unauthorized.",
+          code: "AUTH_REQUIRED",
+        },
+        { status: 401 },
       ),
     };
   }
@@ -74,8 +77,30 @@ export async function validateAdmin() {
     return {
       ok: false,
       response: NextResponse.json(
-        { message: "Forbidden." },
-        { status: 403 }
+        {
+          message: "Forbidden.",
+          code: "ADMIN_REQUIRED",
+        },
+        { status: 403 },
+      ),
+    };
+  }
+
+  if (requireMfa && !session?.isMfaVerified) {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        {
+          message:
+            "MFA admin wajib diselesaikan sebelum mengakses endpoint ini.",
+          code: "MFA_REQUIRED",
+          mfa: {
+            currentLevel: session?.aal ?? null,
+            nextLevel: session?.nextAal ?? null,
+            isVerified: false,
+          },
+        },
+        { status: 403 },
       ),
     };
   }

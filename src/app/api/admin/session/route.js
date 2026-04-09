@@ -22,6 +22,12 @@ export async function GET() {
         isEditor: session.isEditor,
         role: session.role ?? null,
       },
+      mfa: {
+        currentLevel: session.aal ?? null,
+        nextLevel: session.nextAal ?? null,
+        isVerified: session.isMfaVerified ?? false,
+        errorMessage: session.mfaErrorMessage ?? null,
+      },
     });
   } catch {
     return NextResponse.json(
@@ -33,8 +39,14 @@ export async function GET() {
           isEditor: false,
           role: null,
         },
+        mfa: {
+          currentLevel: null,
+          nextLevel: null,
+          isVerified: false,
+          errorMessage: null,
+        },
       },
-      { status: 200 }
+      { status: 200 },
     );
   }
 }

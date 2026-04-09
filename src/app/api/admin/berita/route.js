@@ -1,10 +1,12 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
-import { getCurrentSessionContext } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { normalizeCoverImageUrl } from "@/lib/cover-image";
+import { cleanString, ensureUniqueSlug, validateAdmin } from "@/lib/cms-utils";
 
 export const dynamic = "force-dynamic";
+
+const table = "berita";
 
 const selectFields = `
   id,
@@ -28,21 +30,6 @@ function createHttpError(message, status = 400) {
   return error;
 }
 
-function cleanString(value) {
-  return typeof value === "string" ? value.trim() : "";
-}
-
-function slugify(value) {
-  return cleanString(value)
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
 function buildPayload(body) {
   const title = cleanString(body?.title);
   const excerpt = cleanString(body?.excerpt);
@@ -60,6 +47,7 @@ function buildPayload(body) {
   const publishedAt = publishedAtInput
     ? new Date(publishedAtInput)
     : new Date();
+
   if (Number.isNaN(publishedAt.getTime())) {
     throw createHttpError("Tanggal publish tidak valid.", 400);
   }
@@ -75,57 +63,15 @@ function buildPayload(body) {
   };
 }
 
-async function ensureUniqueSlug(supabase, rawSlug, currentId = null) {
-  const baseSlug = slugify(rawSlug) || `berita-${Date.now()}`;
-  let candidate = baseSlug;
-  let counter = 1;
-
-  while (true) {
-    let query = supabase.from("berita").select("id").eq("slug", candidate);
-    if (currentId) {
-      query = query.neq("id", currentId);
-    }
-
-    const { data, error } = await query.maybeSingle();
-    if (error) throw error;
-    if (!data) return candidate;
-
-    candidate = `${baseSlug}-${counter}`;
-    counter += 1;
-  }
-}
-
-async function validateAdmin() {
-  const session = await getCurrentSessionContext();
-
-  if (!session.isAuthenticated) {
-    return {
-      ok: false,
-      response: NextResponse.json(
-        { message: "Unauthorized." },
-        { status: 401 },
-      ),
-    };
-  }
-
-  if (!session.isAdmin) {
-    return {
-      ok: false,
-      response: NextResponse.json({ message: "Forbidden." }, { status: 403 }),
-    };
-  }
-
-  return { ok: true, session };
-}
-
 export async function GET() {
   const auth = await validateAdmin();
   if (!auth.ok) return auth.response;
 
   try {
     const supabase = createAdminClient();
+
     const { data, error } = await supabase
-      .from("berita")
+      .from(table)
       .select(selectFields)
       .order("published_at", { ascending: false })
       .order("created_at", { ascending: false });
@@ -149,13 +95,16 @@ export async function POST(request) {
     const body = await request.json();
     const supabase = createAdminClient();
     const payload = buildPayload(body);
+
     const slug = await ensureUniqueSlug(
       supabase,
+      table,
       cleanString(body?.slug) || payload.title,
+      payload.title,
     );
 
     const { data, error } = await supabase
-      .from("berita")
+      .from(table)
       .insert({
         ...payload,
         slug,

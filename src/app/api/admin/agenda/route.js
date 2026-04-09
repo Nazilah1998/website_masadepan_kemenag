@@ -104,7 +104,7 @@ export async function GET() {
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }
@@ -125,7 +125,7 @@ export async function POST(request) {
       supabase,
       table,
       cleanString(body.slug),
-      payload.title
+      payload.title,
     );
 
     const { data, error } = await supabase
@@ -149,7 +149,7 @@ export async function POST(request) {
       },
       {
         status: 201,
-      }
+      },
     );
   } catch (error) {
     return NextResponse.json(
@@ -158,7 +158,7 @@ export async function POST(request) {
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }
