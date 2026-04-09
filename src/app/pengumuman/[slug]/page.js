@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import PageBanner from "../../../components/PageBanner";
+import PengumumanAttachmentLink from "@/components/PengumumanAttachmentLink";
 import { createClient } from "@/lib/supabase/server";
 
 function formatDate(value) {
@@ -13,12 +14,6 @@ function formatDate(value) {
     dateStyle: "long",
     timeStyle: "short",
   }).format(date);
-}
-
-function getAttachmentButtonLabel(type) {
-  if (type === "pdf") return "Buka PDF";
-  if (type === "image") return "Buka Gambar";
-  return "Buka Link Lampiran";
 }
 
 export async function generateMetadata({ params }) {
@@ -63,6 +58,7 @@ export default async function DetailPengumumanPage({ params }) {
       attachment_url,
       attachment_name,
       attachment_type,
+      attachment_views,
       created_at
     `,
     )
@@ -143,35 +139,22 @@ export default async function DetailPengumumanPage({ params }) {
                 <div className="mt-8 rounded-3xl border border-slate-200 bg-slate-50 p-6">
                   <h2 className="text-xl font-bold text-slate-900">Lampiran</h2>
 
-                  {item.attachment_type === "image" ? (
-                    <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={item.attachment_url}
-                        alt={item.attachment_name || item.title}
-                        className="h-auto w-full object-cover"
-                      />
-                    </div>
-                  ) : null}
-
                   <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
                       <p className="text-sm font-semibold text-slate-900">
                         {item.attachment_name || "Lampiran Pengumuman"}
                       </p>
                       <p className="mt-1 text-sm text-slate-500">
-                        Klik tombol di samping untuk membuka lampiran.
+                        Klik tombol lihat untuk membuka lampiran Google Drive.
                       </p>
                     </div>
 
-                    <a
-                      href={item.attachment_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center justify-center rounded-2xl bg-sky-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-800"
-                    >
-                      {getAttachmentButtonLabel(item.attachment_type)}
-                    </a>
+                    <PengumumanAttachmentLink
+                      slug={item.slug}
+                      url={item.attachment_url}
+                      initialViews={item.attachment_views}
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-sky-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-800"
+                    />
                   </div>
                 </div>
               ) : null}

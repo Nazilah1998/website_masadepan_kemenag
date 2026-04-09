@@ -1,5 +1,6 @@
 import Link from "next/link";
 import PageBanner from "../../components/PageBanner";
+import PengumumanAttachmentLink from "@/components/PengumumanAttachmentLink";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
@@ -20,8 +21,7 @@ function formatDate(value) {
 }
 
 function getAttachmentLabel(type) {
-  if (type === "image") return "Ada Gambar";
-  if (type === "pdf") return "Ada PDF";
+  if (type === "link") return "Lampiran Drive";
   if (type) return "Ada Lampiran";
   return null;
 }
@@ -45,6 +45,7 @@ export default async function PengumumanPage() {
       attachment_url,
       attachment_name,
       attachment_type,
+      attachment_views,
       created_at
     `,
     )
@@ -127,14 +128,11 @@ export default async function PengumumanPage() {
                       </Link>
 
                       {item.attachment_url ? (
-                        <a
-                          href={item.attachment_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                        >
-                          Buka lampiran
-                        </a>
+                        <PengumumanAttachmentLink
+                          slug={item.slug}
+                          url={item.attachment_url}
+                          initialViews={item.attachment_views}
+                        />
                       ) : null}
                     </div>
                   </article>

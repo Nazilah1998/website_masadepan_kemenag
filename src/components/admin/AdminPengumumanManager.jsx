@@ -70,6 +70,18 @@ function inferAttachmentTypeFromUrl(url) {
   return "link";
 }
 
+function isGoogleDriveUrl(value = "") {
+  try {
+    const url = new URL(String(value || "").trim());
+    return (
+      url.protocol === "https:" &&
+      (url.hostname === "drive.google.com" || url.hostname === "docs.google.com")
+    );
+  } catch {
+    return false;
+  }
+}
+
 function getAttachmentBadge(type) {
   if (type === "image") return "Lampiran Gambar";
   if (type === "pdf") return "Lampiran PDF";
@@ -81,13 +93,11 @@ export default function AdminPengumumanManager() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [openForm, setOpenForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [attachmentMode, setAttachmentMode] = useState("upload");
   const [form, setForm] = useState({
     ...emptyForm,
     published_at: toDateTimeLocal(new Date().toISOString()),
@@ -113,7 +123,7 @@ export default function AdminPengumumanManager() {
         throw new Error(data?.message || "Gagal memuat data pengumuman.");
       }
 
-      setItems(data?.items || []);
+      setItems(Array.isArray(data?.items) ? data.items : []);
     } catch (err) {
       setError(err.message || "Gagal memuat data pengumuman.");
     } finally {
@@ -130,7 +140,6 @@ export default function AdminPengumumanManager() {
       ...emptyForm,
       published_at: toDateTimeLocal(new Date().toISOString()),
     });
-    setAttachmentMode("upload");
     setEditingId(null);
   }
 
@@ -162,7 +171,6 @@ export default function AdminPengumumanManager() {
       attachment_type: item.attachment_type || "",
     });
 
-    setAttachmentMode(item.attachment_source === "link" ? "link" : "upload");
     setOpenForm(true);
   }
 
@@ -180,57 +188,16 @@ export default function AdminPengumumanManager() {
     }));
   }
 
-  async function handleAttachmentUpload(event) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    try {
-      setUploading(true);
-      setError("");
-      setMessage("");
-
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await fetch("/api/admin/pengumuman/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data?.message || "Gagal upload lampiran.");
-      }
-
-      setForm((prev) => ({
-        ...prev,
-        attachment_url: data?.item?.attachment_url || "",
-        attachment_name: data?.item?.attachment_name || "",
-        attachment_path: data?.item?.attachment_path || "",
-        attachment_source: data?.item?.attachment_source || "",
-        attachment_type: data?.item?.attachment_type || "",
-      }));
-
-      setMessage("Lampiran berhasil diupload.");
-    } catch (err) {
-      setError(err.message || "Gagal upload lampiran.");
-    } finally {
-      setUploading(false);
-      event.target.value = "";
-    }
-  }
-
   function handleAttachmentLinkChange(event) {
-    const url = event.target.value;
+    const url = event.target.value.trim();
 
     setForm((prev) => ({
       ...prev,
       attachment_url: url,
-      attachment_name: url ? "Link Lampiran" : "",
+      attachment_name: url ? "Lampiran Pengumuman" : "",
       attachment_path: "",
       attachment_source: url ? "link" : "",
-      attachment_type: url ? inferAttachmentTypeFromUrl(url) : "",
+      attachment_type: url ? "link" : "",
     }));
   }
 
@@ -247,6 +214,11 @@ export default function AdminPengumumanManager() {
 
   async function handleSubmit(event) {
     event.preventDefault();
+
+    if (form.attachment_url && !isGoogleDriveUrl(form.attachment_url)) {
+      setError("Lampiran pengumuman hanya boleh memakai link Google Drive.");
+      return;
+    }
 
     try {
       setSaving(true);
@@ -396,6 +368,9 @@ export default function AdminPengumumanManager() {
                     <span className="rounded-full bg-violet-50 px-3 py-1 text-violet-700">
                       {getAttachmentBadge(item.attachment_type)}
                     </span>
+                    <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-600">
+                      {Number(item.attachment_views || 0).toLocaleString("id-ID")} kali dilihat
+                    </span>
                   </div>
 
                   <div>
@@ -420,7 +395,7 @@ export default function AdminPengumumanManager() {
                         rel="noreferrer"
                         className="font-medium text-sky-700 hover:text-sky-800"
                       >
-                        Buka lampiran
+                        Lihat lampiran
                       </a>
                     ) : null}
                   </div>
@@ -580,88 +555,44 @@ export default function AdminPengumumanManager() {
               </div>
 
               <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                  <div>
-                    <h3 className="text-base font-bold text-slate-900">
-                      Lampiran Pengumuman
-                    </h3>
-                    <p className="mt-1 text-sm text-slate-600">
-                      Untuk pengumuman, lampiran lebih penting daripada cover
-                      image. Kamu bisa upload file atau pakai link.
-                    </p>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setAttachmentMode("upload")}
-                      className={`rounded-2xl px-4 py-2 text-sm font-medium ${attachmentMode === "upload"
-                        ? "bg-sky-700 text-white"
-                        : "bg-white text-slate-700 border border-slate-200"
-                        }`}
-                    >
-                      Upload File
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAttachmentMode("link")}
-                      className={`rounded-2xl px-4 py-2 text-sm font-medium ${attachmentMode === "link"
-                        ? "bg-sky-700 text-white"
-                        : "bg-white text-slate-700 border border-slate-200"
-                        }`}
-                    >
-                      Pakai Link
-                    </button>
-                  </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">
+                    Link Lampiran Pengumuman
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Lampiran pengumuman sekarang hanya memakai link Google Drive,
+                    tanpa upload file.
+                  </p>
                 </div>
 
                 <div className="mt-5 space-y-4">
-                  {attachmentMode === "upload" ? (
-                    <div>
-                      <label className="mb-2 block text-sm font-semibold text-slate-800">
-                        Upload Lampiran
-                      </label>
-                      <input
-                        type="file"
-                        accept=".jpg,.jpeg,.png,.webp,.gif,.pdf"
-                        onChange={handleAttachmentUpload}
-                        className="block w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm"
-                      />
-                      <p className="mt-2 text-xs text-slate-500">
-                        Format yang didukung: JPG, PNG, WEBP, GIF, PDF.
-                      </p>
-                      {uploading ? (
-                        <p className="mt-2 text-sm text-sky-700">
-                          Mengupload lampiran...
-                        </p>
-                      ) : null}
-                    </div>
-                  ) : (
-                    <div>
-                      <label className="mb-2 block text-sm font-semibold text-slate-800">
-                        URL Lampiran
-                      </label>
-                      <input
-                        type="url"
-                        value={form.attachment_url}
-                        onChange={handleAttachmentLinkChange}
-                        placeholder="https://..."
-                        className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-sky-500"
-                      />
-                    </div>
-                  )}
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-slate-800">
+                      URL Google Drive
+                    </label>
+                    <input
+                      type="url"
+                      value={form.attachment_url}
+                      onChange={handleAttachmentLinkChange}
+                      placeholder="https://drive.google.com/..."
+                      className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-sky-500"
+                    />
+                    <p className="mt-2 text-xs text-slate-500">
+                      Gunakan link Google Drive yang sudah bisa diakses publik.
+                    </p>
+                  </div>
 
                   {form.attachment_url ? (
                     <div className="rounded-2xl border border-slate-200 bg-white p-4">
                       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                         <div>
                           <p className="text-sm font-semibold text-slate-900">
-                            Lampiran aktif
+                            Link lampiran aktif
                           </p>
                           <p className="mt-1 text-sm text-slate-600">
                             {form.attachment_name || "Lampiran Pengumuman"}
                           </p>
-                          <p className="mt-1 text-xs text-slate-500 break-all">
+                          <p className="mt-1 break-all text-xs text-slate-500">
                             {form.attachment_url}
                           </p>
                         </div>
@@ -673,7 +604,7 @@ export default function AdminPengumumanManager() {
                             rel="noreferrer"
                             className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
                           >
-                            Buka
+                            Lihat
                           </a>
                           <button
                             type="button"

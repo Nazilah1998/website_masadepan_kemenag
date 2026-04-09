@@ -6,10 +6,6 @@ import { cleanString, ensureUniqueSlug, validateAdmin } from "@/lib/cms-utils";
 export const dynamic = "force-dynamic";
 
 const table = "pengumuman";
-const BUCKET =
-  process.env.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET_PENGUMUMAN ||
-  process.env.SUPABASE_STORAGE_BUCKET_PENGUMUMAN ||
-  "pengumuman-files";
 
 const selectFields = `
   id,
@@ -27,6 +23,7 @@ const selectFields = `
   attachment_path,
   attachment_source,
   attachment_type,
+  attachment_views,
   created_at,
   updated_at
 `;
@@ -37,20 +34,23 @@ function createHttpError(message, status = 400) {
   return error;
 }
 
-function inferAttachmentTypeFromUrl(url) {
-  const lower = String(url || "").toLowerCase();
-
-  if (lower.match(/\.(jpg|jpeg|png|webp|gif|svg)(\?|$)/)) return "image";
-  if (lower.match(/\.pdf(\?|$)/)) return "pdf";
-  if (lower.includes("drive.google.com")) return "link";
-
-  return "link";
-}
-
 function isValidUuid(value) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
     String(value || ""),
   );
+}
+
+function isGoogleDriveUrl(value = "") {
+  try {
+    const url = new URL(String(value || "").trim());
+    return (
+      url.protocol === "https:" &&
+      (url.hostname === "drive.google.com" ||
+        url.hostname === "docs.google.com")
+    );
+  } catch {
+    return false;
+  }
 }
 
 async function resolveId(params) {
@@ -66,10 +66,6 @@ async function resolveId(params) {
 
 function normalizeAttachment(body) {
   const attachmentUrl = cleanString(body.attachment_url);
-  const attachmentName = cleanString(body.attachment_name);
-  const attachmentPath = cleanString(body.attachment_path);
-  const attachmentSource = cleanString(body.attachment_source);
-  const attachmentType = cleanString(body.attachment_type);
 
   if (!attachmentUrl) {
     return {
@@ -81,13 +77,19 @@ function normalizeAttachment(body) {
     };
   }
 
+  if (!isGoogleDriveUrl(attachmentUrl)) {
+    throw createHttpError(
+      "Lampiran pengumuman hanya boleh memakai link Google Drive.",
+      400,
+    );
+  }
+
   return {
     attachment_url: attachmentUrl,
-    attachment_name: attachmentName || "Lampiran Pengumuman",
-    attachment_path: attachmentPath || null,
-    attachment_source: attachmentSource || (attachmentPath ? "upload" : "link"),
-    attachment_type:
-      attachmentType || inferAttachmentTypeFromUrl(attachmentUrl),
+    attachment_name: "Lampiran Pengumuman",
+    attachment_path: null,
+    attachment_source: "link",
+    attachment_type: "link",
   };
 }
 
@@ -156,7 +158,7 @@ export async function PUT(request, { params }) {
 
     const { data: existingItem, error: existingError } = await supabase
       .from(table)
-      .select("id, slug, attachment_path, attachment_source")
+      .select("id, slug")
       .eq("id", id)
       .single();
 
@@ -173,22 +175,6 @@ export async function PUT(request, { params }) {
       payload.title,
       id,
     );
-
-    const nextAttachmentPath = payload.attachment_path;
-    const nextAttachmentSource = payload.attachment_source;
-
-    const shouldRemoveOldUpload =
-      existingItem?.attachment_source === "upload" &&
-      existingItem?.attachment_path &&
-      (!nextAttachmentPath ||
-        nextAttachmentSource !== "upload" ||
-        existingItem.attachment_path !== nextAttachmentPath);
-
-    if (shouldRemoveOldUpload) {
-      await supabase.storage
-        .from(BUCKET)
-        .remove([existingItem.attachment_path]);
-    }
 
     const { data, error } = await supabase
       .from(table)
@@ -235,19 +221,12 @@ export async function DELETE(_request, { params }) {
 
     const { data: currentData, error: fetchError } = await supabase
       .from(table)
-      .select("slug, attachment_path, attachment_source")
+      .select("slug")
       .eq("id", id)
       .single();
 
     if (fetchError) {
       throw fetchError;
-    }
-
-    if (
-      currentData?.attachment_source === "upload" &&
-      currentData?.attachment_path
-    ) {
-      await supabase.storage.from(BUCKET).remove([currentData.attachment_path]);
     }
 
     const { error } = await supabase.from(table).delete().eq("id", id);

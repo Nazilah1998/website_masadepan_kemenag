@@ -134,12 +134,15 @@ function CoverThumb({ src, alt = "Cover berita", className = "" }) {
   }
 
   return (
-    <img
-      src={src}
-      alt={alt}
-      className={`rounded-xl object-cover ${className}`}
-      loading="lazy"
-    />
+    <>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt={alt}
+        className={`rounded-xl object-cover ${className}`}
+        loading="lazy"
+      />
+    </>
   );
 }
 
@@ -149,13 +152,11 @@ export default function AdminBeritaManager() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [openForm, setOpenForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [coverMode, setCoverMode] = useState("upload");
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [form, setForm] = useState({
     ...emptyForm,
@@ -208,7 +209,6 @@ export default function AdminBeritaManager() {
       ...emptyForm,
       published_at: toDateTimeLocal(new Date().toISOString()),
     });
-    setCoverMode("upload");
     setEditingId(null);
     setSlugManuallyEdited(false);
 
@@ -243,7 +243,6 @@ export default function AdminBeritaManager() {
     });
 
     setSlugManuallyEdited(true);
-    setCoverMode(normalizedCoverImage ? "link" : "upload");
     setOpenForm(true);
   }
 
@@ -344,47 +343,6 @@ export default function AdminBeritaManager() {
     event.target.value = "";
   }
 
-  async function handleCoverUpload(event) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    try {
-      setUploading(true);
-      setError("");
-      setMessage("");
-
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await fetch("/api/admin/berita/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data?.message || "Gagal upload cover image.");
-      }
-
-      const nextCoverImage = normalizeCoverImageUrl(
-        data?.cover_image || data?.url || "",
-      );
-
-      setForm((prev) => ({
-        ...prev,
-        cover_image: nextCoverImage,
-      }));
-      setCoverMode("upload");
-      setMessage("Cover image berhasil diupload.");
-    } catch (err) {
-      setError(err.message || "Gagal upload cover image.");
-    } finally {
-      setUploading(false);
-      event.target.value = "";
-    }
-  }
-
   function handleCoverLinkChange(event) {
     const nextValue = event.target.value;
     const normalizedUrl = normalizeCoverImageUrl(nextValue);
@@ -423,13 +381,11 @@ export default function AdminBeritaManager() {
       return;
     }
 
-    if (coverMode === "link" && normalizedCoverImage) {
-      if (!isAllowedCoverUrl(normalizedCoverImage)) {
-        setError(
-          "Link cover hanya mendukung Google Drive, domain website sendiri, atau Supabase Storage publik.",
-        );
-        return;
-      }
+    if (normalizedCoverImage && !isAllowedCoverUrl(normalizedCoverImage)) {
+      setError(
+        "Link cover hanya mendukung Google Drive, domain website sendiri, atau Supabase Storage publik.",
+      );
+      return;
     }
 
     let publishedAtIso = "";
@@ -518,11 +474,10 @@ export default function AdminBeritaManager() {
     <section className="space-y-6">
       {(message || error) && (
         <div
-          className={`rounded-2xl border px-4 py-3 text-sm ${
-            error
-              ? "border-red-200 bg-red-50 text-red-700"
-              : "border-emerald-200 bg-emerald-50 text-emerald-700"
-          }`}
+          className={`rounded-2xl border px-4 py-3 text-sm ${error
+            ? "border-red-200 bg-red-50 text-red-700"
+            : "border-emerald-200 bg-emerald-50 text-emerald-700"
+            }`}
         >
           {error || message}
         </div>
@@ -552,7 +507,7 @@ export default function AdminBeritaManager() {
           </button>
         </div>
 
-        <div className="overflow-hidden rounded-[24px] border border-slate-200">
+        <div className="overflow-hidden rounded-3xl border border-slate-200">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-slate-200">
               <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -623,11 +578,10 @@ export default function AdminBeritaManager() {
 
                       <td className="px-4 py-4">
                         <span
-                          className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-                            item.is_published
-                              ? "bg-emerald-100 text-emerald-700"
-                              : "bg-amber-100 text-amber-700"
-                          }`}
+                          className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${item.is_published
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-amber-100 text-amber-700"
+                            }`}
                         >
                           {item.is_published ? "Tayang" : "Draft"}
                         </span>
@@ -663,7 +617,7 @@ export default function AdminBeritaManager() {
 
       {openForm && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/45 px-4 py-10">
-          <div className="mx-auto max-w-5xl rounded-[32px] bg-white shadow-2xl">
+          <div className="mx-auto max-w-5xl rounded-4xl bg-white shadow-2xl">
             <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-700">
@@ -769,106 +723,60 @@ export default function AdminBeritaManager() {
                       Cover image
                     </span>
                     <p className="text-xs text-slate-500">
-                      Disarankan upload file. Link manual hanya untuk Google Drive,
-                      Supabase Storage publik, atau domain website ini.
+                      Cover berita sekarang hanya memakai link URL. Gunakan link
+                      gambar dari Google Drive, Supabase Storage publik, atau domain
+                      website ini.
                     </p>
                   </div>
 
-                  <div className="grid gap-3 md:grid-cols-2">
-                    <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
-                      <input
-                        type="radio"
-                        name="cover_mode"
-                        checked={coverMode === "upload"}
-                        onChange={() => setCoverMode("upload")}
-                      />
-                      <span className="text-sm font-medium text-slate-700">
-                        Upload file
-                      </span>
-                    </label>
-
-                    <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
-                      <input
-                        type="radio"
-                        name="cover_mode"
-                        checked={coverMode === "link"}
-                        onChange={() => setCoverMode("link")}
-                      />
-                      <span className="text-sm font-medium text-slate-700">
-                        Link gambar
-                      </span>
-                    </label>
+                  <div className="space-y-3">
+                    <input
+                      type="text"
+                      value={form.cover_image ?? ""}
+                      onChange={handleCoverLinkChange}
+                      placeholder="Tempel link gambar cover"
+                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-emerald-500"
+                    />
+                    <p className="text-xs text-slate-500">
+                      Pastikan link gambar bisa diakses publik agar cover tampil di
+                      website.
+                    </p>
                   </div>
 
-                  {coverMode === "upload" ? (
-                    <div className="space-y-3">
-                      <input
-                        key="cover-upload"
-                        type="file"
-                        accept="image/png,image/jpeg,image/webp,image/gif"
-                        onChange={handleCoverUpload}
-                        className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm"
-                      />
-                      <p className="text-xs text-slate-500">
-                        Format yang didukung: JPG, PNG, WEBP, GIF. Ukuran maksimal
-                        5 MB.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <input
-                        key="cover-link"
-                        type="text"
-                        value={form.cover_image ?? ""}
-                        onChange={handleCoverLinkChange}
-                        placeholder="Tempel link gambar cover"
-                        className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-emerald-500"
-                      />
-                    </div>
-                  )}
-
-                  {(uploading || form.cover_image) && (
+                  {form.cover_image ? (
                     <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                      {uploading ? (
-                        <p className="text-sm text-slate-600">
-                          Sedang upload cover image...
-                        </p>
-                      ) : (
-                        <>
-                          <p className="text-sm font-semibold text-slate-800">
-                            Cover saat ini
-                          </p>
-                          <div className="mt-3 overflow-hidden rounded-xl">
-                            <CoverThumb
-                              src={form.cover_image}
-                              alt="Preview cover berita"
-                              className="h-64 w-full"
-                            />
-                          </div>
-                          <p className="mt-3 break-all text-xs text-slate-500">
-                            {form.cover_image}
-                          </p>
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            <a
-                              href={form.cover_image}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                            >
-                              Lihat cover
-                            </a>
-                            <button
-                              type="button"
-                              onClick={clearCoverImage}
-                              className="rounded-xl border border-red-200 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50"
-                            >
-                              Hapus cover
-                            </button>
-                          </div>
-                        </>
-                      )}
+                      <p className="text-sm font-semibold text-slate-800">
+                        Cover saat ini
+                      </p>
+                      <div className="mt-3 overflow-hidden rounded-xl">
+                        <CoverThumb
+                          src={form.cover_image}
+                          alt="Preview cover berita"
+                          className="h-64 w-full"
+                        />
+                      </div>
+                      <p className="mt-3 break-all text-xs text-slate-500">
+                        {form.cover_image}
+                      </p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <a
+                          href={form.cover_image}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                        >
+                          Lihat cover
+                        </a>
+                        <button
+                          type="button"
+                          onClick={clearCoverImage}
+                          className="rounded-xl border border-red-200 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50"
+                        >
+                          Hapus cover
+                        </button>
+                      </div>
                     </div>
-                  )}
+                  ) : null}
                 </div>
 
                 <div className="space-y-4 md:col-span-2">
@@ -992,7 +900,7 @@ export default function AdminBeritaManager() {
                     contentEditable
                     suppressContentEditableWarning
                     onInput={handleEditorInput}
-                    className="min-h-[280px] w-full rounded-2xl border border-slate-300 bg-white px-4 py-4 text-sm leading-7 text-slate-800 outline-none focus:border-emerald-500"
+                    className="min-h-70 w-full rounded-2xl border border-slate-300 bg-white px-4 py-4 text-sm leading-7 text-slate-800 outline-none focus:border-emerald-500"
                     style={{ whiteSpace: "pre-wrap" }}
                   />
                 </div>
@@ -1023,7 +931,7 @@ export default function AdminBeritaManager() {
                 </button>
                 <button
                   type="submit"
-                  disabled={saving || uploading}
+                  disabled={saving}
                   className="rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {saving

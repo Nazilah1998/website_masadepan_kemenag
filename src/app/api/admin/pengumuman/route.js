@@ -23,6 +23,7 @@ const selectFields = `
   attachment_path,
   attachment_source,
   attachment_type,
+  attachment_views,
   created_at,
   updated_at
 `;
@@ -33,22 +34,21 @@ function createHttpError(message, status = 400) {
   return error;
 }
 
-function inferAttachmentTypeFromUrl(url) {
-  const lower = String(url || "").toLowerCase();
-
-  if (lower.match(/\.(jpg|jpeg|png|webp|gif|svg)(\?|$)/)) return "image";
-  if (lower.match(/\.pdf(\?|$)/)) return "pdf";
-  if (lower.includes("drive.google.com")) return "link";
-
-  return "link";
+function isGoogleDriveUrl(value = "") {
+  try {
+    const url = new URL(String(value || "").trim());
+    return (
+      url.protocol === "https:" &&
+      (url.hostname === "drive.google.com" ||
+        url.hostname === "docs.google.com")
+    );
+  } catch {
+    return false;
+  }
 }
 
 function normalizeAttachment(body) {
   const attachmentUrl = cleanString(body.attachment_url);
-  const attachmentName = cleanString(body.attachment_name);
-  const attachmentPath = cleanString(body.attachment_path);
-  const attachmentSource = cleanString(body.attachment_source);
-  const attachmentType = cleanString(body.attachment_type);
 
   if (!attachmentUrl) {
     return {
@@ -60,13 +60,19 @@ function normalizeAttachment(body) {
     };
   }
 
+  if (!isGoogleDriveUrl(attachmentUrl)) {
+    throw createHttpError(
+      "Lampiran pengumuman hanya boleh memakai link Google Drive.",
+      400,
+    );
+  }
+
   return {
     attachment_url: attachmentUrl,
-    attachment_name: attachmentName || "Lampiran Pengumuman",
-    attachment_path: attachmentPath || null,
-    attachment_source: attachmentSource || (attachmentPath ? "upload" : "link"),
-    attachment_type:
-      attachmentType || inferAttachmentTypeFromUrl(attachmentUrl),
+    attachment_name: "Lampiran Pengumuman",
+    attachment_path: null,
+    attachment_source: "link",
+    attachment_type: "link",
   };
 }
 
