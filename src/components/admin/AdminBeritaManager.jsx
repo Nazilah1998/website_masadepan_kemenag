@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { normalizeCoverImageUrl } from "@/lib/cover-image";
 
 const BERITA_CATEGORIES = [
   "Umum",
@@ -152,24 +153,26 @@ export default function AdminBeritaManager() {
   }
 
   function handleOpenEdit(item) {
-    setMessage("");
-    setError("");
-    setEditingId(item.id);
+  setMessage("");
+  setError("");
+  setEditingId(item.id);
 
-    setForm({
-      title: item.title || "",
-      slug: item.slug || "",
-      category: item.category || "Umum",
-      excerpt: item.excerpt || "",
-      content: item.content || "",
-      cover_image: item.cover_image || "",
-      is_published: Boolean(item.is_published),
-      published_at: toDateTimeLocal(item.published_at),
-    });
+  const normalizedCoverImage = normalizeCoverImageUrl(item.cover_image || "");
 
-    setCoverMode(item.cover_image ? "link" : "upload");
-    setOpenForm(true);
-  }
+  setForm({
+    title: item.title || "",
+    slug: item.slug || "",
+    category: item.category || "Umum",
+    excerpt: item.excerpt || "",
+    content: item.content || "",
+    cover_image: normalizedCoverImage,
+    is_published: Boolean(item.is_published),
+    published_at: toDateTimeLocal(item.published_at),
+  });
+
+  setCoverMode(normalizedCoverImage ? "link" : "upload");
+  setOpenForm(true);
+}
 
   function handleCloseForm() {
     setOpenForm(false);
@@ -222,53 +225,56 @@ export default function AdminBeritaManager() {
     event.target.value = "";
   }
 
-  async function handleCoverUpload(event) {
-    const file = event.target.files?.[0];
-    if (!file) return;
+async function handleCoverUpload(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
 
-    try {
-      setUploading(true);
-      setError("");
-      setMessage("");
+  try {
+    setUploading(true);
+    setError("");
+    setMessage("");
 
-      const formData = new FormData();
-      formData.append("file", file);
+    const formData = new FormData();
+    formData.append("file", file);
 
-      const response = await fetch("/api/admin/berita/upload", {
-        method: "POST",
-        body: formData,
-      });
+    const response = await fetch("/api/admin/berita/upload", {
+      method: "POST",
+      body: formData,
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data?.message || "Gagal upload cover image.");
-      }
-
-      const nextCoverImage = data?.cover_image || data?.url || "";
-
-      setForm((prev) => ({
-        ...prev,
-        cover_image: nextCoverImage,
-      }));
-
-      setMessage("Cover image berhasil diupload.");
-    } catch (err) {
-      setError(err.message || "Gagal upload cover image.");
-    } finally {
-      setUploading(false);
-      event.target.value = "";
+    if (!response.ok) {
+      throw new Error(data?.message || "Gagal upload cover image.");
     }
-  }
 
-  function handleCoverLinkChange(event) {
-    const url = event.target.value;
+    const nextCoverImage = normalizeCoverImageUrl(
+      data?.cover_image || data?.url || ""
+    );
 
     setForm((prev) => ({
       ...prev,
-      cover_image: url,
+      cover_image: nextCoverImage,
     }));
+
+    setMessage("Cover image berhasil diupload.");
+  } catch (err) {
+    setError(err.message || "Gagal upload cover image.");
+  } finally {
+    setUploading(false);
+    event.target.value = "";
   }
+}
+
+function handleCoverLinkChange(event) {
+  const nextValue = event.target.value;
+  const normalizedUrl = normalizeCoverImageUrl(nextValue);
+
+  setForm((prev) => ({
+    ...prev,
+    cover_image: normalizedUrl,
+  }));
+}
 
   function clearCoverImage() {
     setForm((prev) => ({
@@ -286,10 +292,11 @@ export default function AdminBeritaManager() {
       setError("");
       setMessage("");
 
-      const payload = {
-        ...form,
-        content: currentContent || form.content || "",
-      };
+     const payload = {
+  ...form,
+  cover_image: normalizeCoverImageUrl(form.cover_image),
+  content: currentContent || form.content || "",
+};
 
       const response = await fetch(
         editingId ? `/api/admin/berita/${editingId}` : "/api/admin/berita",

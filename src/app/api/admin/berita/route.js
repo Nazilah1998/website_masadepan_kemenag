@@ -2,6 +2,7 @@ import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { getCurrentSessionContext } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { normalizeCoverImageUrl } from "@/lib/cover-image";
 
 export const dynamic = "force-dynamic";
 
@@ -40,7 +41,7 @@ function buildPayload(body) {
   const excerpt = cleanString(body.excerpt);
   const category = cleanString(body.category) || "Umum";
   const content = cleanString(body.content);
-  const coverImage = cleanString(body.cover_image) || null;
+  const coverImage = normalizeCoverImageUrl(cleanString(body.cover_image)) || null;
   const isPublished = Boolean(body.is_published);
   const publishedAtInput = cleanString(body.published_at);
 
