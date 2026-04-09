@@ -5,12 +5,9 @@ import { usePathname } from "next/navigation";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminHeader from "@/components/admin/AdminHeader";
 
-export const dynamic = "force-dynamic";
-
 export default function AdminLayout({ children }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-
   const isLoginPage = pathname === "/admin/login";
 
   if (isLoginPage) {
