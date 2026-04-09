@@ -22,6 +22,12 @@ const selectFields = `
   updated_at
 `;
 
+function createHttpError(message, status = 400) {
+  const error = new Error(message);
+  error.status = status;
+  return error;
+}
+
 function cleanString(value) {
   return typeof value === "string" ? value.trim() : "";
 }
@@ -38,22 +44,24 @@ function slugify(value) {
 }
 
 function buildPayload(body) {
-  const title = cleanString(body.title);
-  const excerpt = cleanString(body.excerpt);
-  const category = cleanString(body.category) || "Umum";
-  const content = cleanString(body.content);
-  const coverImage = normalizeCoverImageUrl(cleanString(body.cover_image)) || null;
+  const title = cleanString(body?.title);
+  const excerpt = cleanString(body?.excerpt);
+  const category = cleanString(body?.category) || "Umum";
+  const content = cleanString(body?.content);
+  const coverImage =
+    normalizeCoverImageUrl(cleanString(body?.cover_image)) || null;
   const is_published = Boolean(body?.is_published);
-  const publishedAtInput = cleanString(body.published_at);
+  const publishedAtInput = cleanString(body?.published_at);
 
-  if (!title) throw new Error("Judul berita wajib diisi.");
-  if (!excerpt) throw new Error("Ringkasan berita wajib diisi.");
-  if (!content) throw new Error("Isi berita wajib diisi.");
+  if (!title) throw createHttpError("Judul berita wajib diisi.", 400);
+  if (!excerpt) throw createHttpError("Ringkasan berita wajib diisi.", 400);
+  if (!content) throw createHttpError("Isi berita wajib diisi.", 400);
 
-  const publishedAt = publishedAtInput ? new Date(publishedAtInput) : new Date();
-
+  const publishedAt = publishedAtInput
+    ? new Date(publishedAtInput)
+    : new Date();
   if (Number.isNaN(publishedAt.getTime())) {
-    throw new Error("Tanggal publish tidak valid.");
+    throw createHttpError("Tanggal publish tidak valid.", 400);
   }
 
   return {
@@ -74,7 +82,6 @@ async function ensureUniqueSlug(supabase, rawSlug, currentId = null) {
 
   while (true) {
     let query = supabase.from("berita").select("id").eq("slug", candidate);
-
     if (currentId) {
       query = query.neq("id", currentId);
     }
@@ -94,7 +101,10 @@ async function validateAdmin() {
   if (!session.isAuthenticated) {
     return {
       ok: false,
-      response: NextResponse.json({ message: "Unauthorized." }, { status: 401 }),
+      response: NextResponse.json(
+        { message: "Unauthorized." },
+        { status: 401 },
+      ),
     };
   }
 
@@ -121,15 +131,18 @@ export async function PUT(request, context) {
       .from("berita")
       .select("id, slug")
       .eq("id", id)
-      .single();
+      .maybeSingle();
 
     if (existingError) throw existingError;
+    if (!existingItem) {
+      throw createHttpError("Berita tidak ditemukan.", 404);
+    }
 
     const payload = buildPayload(body);
     const slug = await ensureUniqueSlug(
       supabase,
-      cleanString(body.slug) || payload.title,
-      id
+      cleanString(body?.slug) || payload.title,
+      id,
     );
 
     const { data, error } = await supabase
@@ -146,9 +159,10 @@ export async function PUT(request, context) {
 
     revalidatePath("/");
     revalidatePath("/berita");
+    revalidatePath("/admin/berita");
     revalidatePath(`/berita/${data.slug}`);
 
-    if (existingItem?.slug && existingItem.slug !== data.slug) {
+    if (existingItem.slug && existingItem.slug !== data.slug) {
       revalidatePath(`/berita/${existingItem.slug}`);
     }
 
@@ -159,7 +173,7 @@ export async function PUT(request, context) {
   } catch (error) {
     return NextResponse.json(
       { message: error.message || "Gagal memperbarui berita." },
-      { status: 500 }
+      { status: error.status || 500 },
     );
   }
 }
@@ -176,21 +190,21 @@ export async function DELETE(_request, context) {
       .from("berita")
       .select("id, slug")
       .eq("id", id)
-      .single();
+      .maybeSingle();
 
     if (existingError) throw existingError;
+    if (!existingItem) {
+      throw createHttpError("Berita tidak ditemukan.", 404);
+    }
 
-    const { error } = await supabase
-      .from("berita")
-      .delete()
-      .eq("id", id);
-
+    const { error } = await supabase.from("berita").delete().eq("id", id);
     if (error) throw error;
 
     revalidatePath("/");
     revalidatePath("/berita");
+    revalidatePath("/admin/berita");
 
-    if (existingItem?.slug) {
+    if (existingItem.slug) {
       revalidatePath(`/berita/${existingItem.slug}`);
     }
 
@@ -200,7 +214,7 @@ export async function DELETE(_request, context) {
   } catch (error) {
     return NextResponse.json(
       { message: error.message || "Gagal menghapus berita." },
-      { status: 500 }
+      { status: error.status || 500 },
     );
   }
 }

@@ -35,7 +35,7 @@ export const visionMission = {
     "Profesionalitas",
     "Pelayanan",
     "Akuntabilitas",
-    "Moderasi Beragama",
+    "Moderasi Beragama Islam",
   ],
 };
 
@@ -94,21 +94,21 @@ export const leadershipProfiles = [
     description:
       "Mendukung pelaksanaan layanan keagamaan, pembinaan umat, dan penguatan program pelayanan masyarakat.",
   },
-    {
+  {
     name: "H. Bakti Tawaddin, M.Pd",
     position: "Kepala Seksi Pendidikan Agama Islam",
     image: "/kemenag.svg",
     description:
       "Mendukung pelaksanaan layanan keagamaan, pembinaan umat, dan penguatan program pelayanan masyarakat.",
   },
-      {
+  {
     name: "Supian, SE",
     position: "Kepala Seksi Pendidikan Diniyah & Pondok Pesantren",
     image: "/kemenag.svg",
     description:
       "Mendukung pelaksanaan layanan keagamaan, pembinaan umat, dan penguatan program pelayanan masyarakat.",
   },
-      {
+  {
     name: "Almubasir, S.Pd.I",
     position: "Kepala Seksi Bimbingan Masyarakat Islam",
     image: "/kemenag.svg",
@@ -116,17 +116,17 @@ export const leadershipProfiles = [
       "Mendukung pelaksanaan layanan keagamaan, pembinaan umat, dan penguatan program pelayanan masyarakat.",
   },
   {
-      name: "Hasan Fauzi, S.Ag",
+    name: "Hasan Fauzi, S.Ag",
     position: "Penyelenggara Zakat & Wakaf",
     image: "/kemenag.svg",
     description:
       "Mendukung pelaksanaan layanan keagamaan, pembinaan umat, dan penguatan program pelayanan masyarakat.",
   },
   {
-      name: "Wandi, SH.AH",
+    name: "Wandi, SH.AH",
     position: "Penyelenggara Hindu",
     image: "/kemenag.svg",
     description:
       "Mendukung pelaksanaan layanan keagamaan, pembinaan umat, dan penguatan program pelayanan masyarakat.",
-  }
+  },
 ];

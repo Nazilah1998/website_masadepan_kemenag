@@ -22,6 +22,12 @@ const selectFields = `
   updated_at
 `;
 
+function createHttpError(message, status = 400) {
+  const error = new Error(message);
+  error.status = status;
+  return error;
+}
+
 function cleanString(value) {
   return typeof value === "string" ? value.trim() : "";
 }
@@ -38,22 +44,24 @@ function slugify(value) {
 }
 
 function buildPayload(body) {
-  const title = cleanString(body.title);
-  const excerpt = cleanString(body.excerpt);
-  const category = cleanString(body.category) || "Umum";
-  const content = cleanString(body.content);
-  const coverImage = normalizeCoverImageUrl(cleanString(body.cover_image)) || null;
+  const title = cleanString(body?.title);
+  const excerpt = cleanString(body?.excerpt);
+  const category = cleanString(body?.category) || "Umum";
+  const content = cleanString(body?.content);
+  const coverImage =
+    normalizeCoverImageUrl(cleanString(body?.cover_image)) || null;
   const is_published = Boolean(body?.is_published);
-  const publishedAtInput = cleanString(body.published_at);
+  const publishedAtInput = cleanString(body?.published_at);
 
-  if (!title) throw new Error("Judul berita wajib diisi.");
-  if (!excerpt) throw new Error("Ringkasan berita wajib diisi.");
-  if (!content) throw new Error("Isi berita wajib diisi.");
+  if (!title) throw createHttpError("Judul berita wajib diisi.", 400);
+  if (!excerpt) throw createHttpError("Ringkasan berita wajib diisi.", 400);
+  if (!content) throw createHttpError("Isi berita wajib diisi.", 400);
 
-  const publishedAt = publishedAtInput ? new Date(publishedAtInput) : new Date();
-
+  const publishedAt = publishedAtInput
+    ? new Date(publishedAtInput)
+    : new Date();
   if (Number.isNaN(publishedAt.getTime())) {
-    throw new Error("Tanggal publish tidak valid.");
+    throw createHttpError("Tanggal publish tidak valid.", 400);
   }
 
   return {
@@ -74,7 +82,6 @@ async function ensureUniqueSlug(supabase, rawSlug, currentId = null) {
 
   while (true) {
     let query = supabase.from("berita").select("id").eq("slug", candidate);
-
     if (currentId) {
       query = query.neq("id", currentId);
     }
@@ -94,7 +101,10 @@ async function validateAdmin() {
   if (!session.isAuthenticated) {
     return {
       ok: false,
-      response: NextResponse.json({ message: "Unauthorized." }, { status: 401 }),
+      response: NextResponse.json(
+        { message: "Unauthorized." },
+        { status: 401 },
+      ),
     };
   }
 
@@ -114,7 +124,6 @@ export async function GET() {
 
   try {
     const supabase = createAdminClient();
-
     const { data, error } = await supabase
       .from("berita")
       .select(selectFields)
@@ -123,13 +132,11 @@ export async function GET() {
 
     if (error) throw error;
 
-    return NextResponse.json({
-      items: data ?? [],
-    });
+    return NextResponse.json({ items: data ?? [] });
   } catch (error) {
     return NextResponse.json(
       { message: error.message || "Gagal mengambil daftar berita." },
-      { status: 500 }
+      { status: error.status || 500 },
     );
   }
 }
@@ -141,11 +148,10 @@ export async function POST(request) {
   try {
     const body = await request.json();
     const supabase = createAdminClient();
-
     const payload = buildPayload(body);
     const slug = await ensureUniqueSlug(
       supabase,
-      cleanString(body.slug) || payload.title
+      cleanString(body?.slug) || payload.title,
     );
 
     const { data, error } = await supabase
@@ -162,6 +168,7 @@ export async function POST(request) {
 
     revalidatePath("/");
     revalidatePath("/berita");
+    revalidatePath("/admin/berita");
     revalidatePath(`/berita/${data.slug}`);
 
     return NextResponse.json(
@@ -169,12 +176,12 @@ export async function POST(request) {
         message: "Berita berhasil ditambahkan.",
         item: data,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     return NextResponse.json(
       { message: error.message || "Gagal menambahkan berita." },
-      { status: 500 }
+      { status: error.status || 500 },
     );
   }
 }

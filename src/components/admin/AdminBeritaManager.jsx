@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { normalizeCoverImageUrl } from "@/lib/cover-image";
-import Image from "next/image";
 
 const BERITA_CATEGORIES = [
   "Umum",
@@ -28,7 +27,6 @@ const emptyForm = {
 
 function formatDate(value) {
   if (!value) return "-";
-
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
 
@@ -59,16 +57,89 @@ function slugPreview(title = "") {
     .replace(/^-|-$/g, "");
 }
 
+function stripHtml(html = "") {
+  return String(html)
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function isMeaningfulHtml(html = "") {
+  return stripHtml(html).length > 0;
+}
+
+function isHttpUrl(value = "") {
+  try {
+    const url = new URL(String(value || "").trim());
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function getAllowedCoverHosts() {
+  const hosts = new Set(["drive.google.com", "docs.google.com"]);
+
+  if (typeof window !== "undefined") {
+    hosts.add(window.location.hostname);
+  }
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (supabaseUrl) {
+    try {
+      hosts.add(new URL(supabaseUrl).hostname);
+    } catch {
+      // abaikan env yang tidak valid
+    }
+  }
+
+  return hosts;
+}
+
+function isAllowedCoverUrl(value = "") {
+  if (!value) return true;
+  if (!isHttpUrl(value)) return false;
+
+  try {
+    const url = new URL(value);
+    return getAllowedCoverHosts().has(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
 function ToolbarButton({ type = "button", onClick, children, title }) {
   return (
     <button
       type={type}
       onClick={onClick}
       title={title}
-      className="inline-flex h-10 min-w-10 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+      className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
     >
       {children}
     </button>
+  );
+}
+
+function CoverThumb({ src, alt = "Cover berita", className = "" }) {
+  if (!src) {
+    return (
+      <div
+        className={`flex items-center justify-center rounded-xl bg-slate-100 text-[11px] font-medium text-slate-500 ${className}`}
+      >
+        No image
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={`rounded-xl object-cover ${className}`}
+      loading="lazy"
+    />
   );
 }
 
@@ -80,13 +151,12 @@ export default function AdminBeritaManager() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
-
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-
   const [openForm, setOpenForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [coverMode, setCoverMode] = useState("upload");
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [form, setForm] = useState({
     ...emptyForm,
     published_at: toDateTimeLocal(new Date().toISOString()),
@@ -112,7 +182,7 @@ export default function AdminBeritaManager() {
         throw new Error(data?.message || "Gagal memuat data berita.");
       }
 
-      setItems(data?.items || []);
+      setItems(Array.isArray(data?.items) ? data.items : []);
     } catch (err) {
       setError(err.message || "Gagal memuat data berita.");
     } finally {
@@ -140,6 +210,7 @@ export default function AdminBeritaManager() {
     });
     setCoverMode("upload");
     setEditingId(null);
+    setSlugManuallyEdited(false);
 
     if (editorRef.current) {
       editorRef.current.innerHTML = "";
@@ -171,6 +242,7 @@ export default function AdminBeritaManager() {
       published_at: toDateTimeLocal(item.published_at),
     });
 
+    setSlugManuallyEdited(true);
     setCoverMode(normalizedCoverImage ? "link" : "upload");
     setOpenForm(true);
   }
@@ -183,20 +255,37 @@ export default function AdminBeritaManager() {
   function handleChange(event) {
     const { name, value, type, checked } = event.target;
 
-    setForm((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    setForm((prev) => {
+      if (name === "title") {
+        const nextTitle = value;
+        return {
+          ...prev,
+          title: nextTitle,
+          slug: slugManuallyEdited ? prev.slug : slugPreview(nextTitle),
+        };
+      }
+
+      if (name === "slug") {
+        return {
+          ...prev,
+          slug: value,
+        };
+      }
+
+      return {
+        ...prev,
+        [name]: type === "checkbox" ? checked : value,
+      };
+    });
+
+    if (name === "slug") {
+      setSlugManuallyEdited(true);
+    }
   }
 
   function syncEditorToState() {
     const html = editorRef.current?.innerHTML || "";
-
-    setForm((prev) => ({
-      ...prev,
-      content: html,
-    }));
-
+    setForm((prev) => ({ ...prev, content: html }));
     return html;
   }
 
@@ -286,7 +375,7 @@ export default function AdminBeritaManager() {
         ...prev,
         cover_image: nextCoverImage,
       }));
-
+      setCoverMode("upload");
       setMessage("Cover image berhasil diupload.");
     } catch (err) {
       setError(err.message || "Gagal upload cover image.");
@@ -315,7 +404,43 @@ export default function AdminBeritaManager() {
 
   async function handleSubmit(event) {
     event.preventDefault();
+
     const currentContent = syncEditorToState();
+    const normalizedCoverImage = normalizeCoverImageUrl(form.cover_image);
+
+    if (!form.title.trim()) {
+      setError("Judul berita wajib diisi.");
+      return;
+    }
+
+    if (!form.excerpt.trim()) {
+      setError("Ringkasan berita wajib diisi.");
+      return;
+    }
+
+    if (!isMeaningfulHtml(currentContent || form.content)) {
+      setError("Isi berita wajib diisi.");
+      return;
+    }
+
+    if (coverMode === "link" && normalizedCoverImage) {
+      if (!isAllowedCoverUrl(normalizedCoverImage)) {
+        setError(
+          "Link cover hanya mendukung Google Drive, domain website sendiri, atau Supabase Storage publik.",
+        );
+        return;
+      }
+    }
+
+    let publishedAtIso = "";
+    if (form.published_at) {
+      const publishedDate = new Date(form.published_at);
+      if (Number.isNaN(publishedDate.getTime())) {
+        setError("Tanggal publish tidak valid.");
+        return;
+      }
+      publishedAtIso = publishedDate.toISOString();
+    }
 
     try {
       setSaving(true);
@@ -324,16 +449,20 @@ export default function AdminBeritaManager() {
 
       const payload = {
         ...form,
+        slug: form.slug.trim(),
         is_published: Boolean(form.is_published),
-        cover_image: normalizeCoverImageUrl(form.cover_image),
+        cover_image: normalizedCoverImage,
         content: currentContent || form.content || "",
+        published_at: publishedAtIso,
       };
 
       const response = await fetch(
         editingId ? `/api/admin/berita/${editingId}` : "/api/admin/berita",
         {
           method: editingId ? "PUT" : "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify(payload),
         },
       );
@@ -389,7 +518,7 @@ export default function AdminBeritaManager() {
     <section className="space-y-6">
       {(message || error) && (
         <div
-          className={`rounded-2xl border px-4 py-3 text-sm font-medium ${
+          className={`rounded-2xl border px-4 py-3 text-sm ${
             error
               ? "border-red-200 bg-red-50 text-red-700"
               : "border-emerald-200 bg-emerald-50 text-emerald-700"
@@ -399,112 +528,97 @@ export default function AdminBeritaManager() {
         </div>
       )}
 
-      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-4 rounded-[30px] border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-700">
               Berita
             </p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">
+            <h2 className="mt-2 text-3xl font-bold text-slate-900">
               Daftar berita admin
             </h2>
-            <p className="mt-2 text-sm text-slate-600">
-              Kelola berita website: tambah, edit, hapus, cover image, kategori,
-              dan status tayang.
+            <p className="mt-2 text-sm text-slate-500">
+              Kelola berita website: tambah, edit, hapus, cover image,
+              kategori, tanggal publish, dan status tayang.
             </p>
           </div>
 
           <button
             type="button"
             onClick={handleOpenCreate}
-            className="rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
+            className="inline-flex h-12 items-center justify-center rounded-2xl bg-emerald-600 px-5 text-sm font-semibold text-white transition hover:bg-emerald-700"
           >
             + Tambah Berita
           </button>
         </div>
 
-        <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200">
+        <div className="overflow-hidden rounded-[24px] border border-slate-200">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-200 text-sm">
-              <thead className="bg-slate-50">
-                <tr className="text-left text-slate-600">
-                  <th className="px-4 py-3 text-left">No</th>
-                  <th className="px-4 py-3 text-left">Judul</th>
-                  <th className="px-4 py-3 text-left">Kategori</th>
-                  <th className="px-4 py-3 text-left">Publish</th>
-                  <th className="px-4 py-3 text-left">Dibaca</th>
-                  <th className="px-4 py-3 text-left">Status</th>
-                  <th className="px-4 py-3 text-left">Aksi</th>
+            <table className="min-w-full divide-y divide-slate-200">
+              <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <tr>
+                  <th className="px-4 py-4">No</th>
+                  <th className="px-4 py-4">Judul</th>
+                  <th className="px-4 py-4">Kategori</th>
+                  <th className="px-4 py-4">Publish</th>
+                  <th className="px-4 py-4">Dibaca</th>
+                  <th className="px-4 py-4">Status</th>
+                  <th className="px-4 py-4">Aksi</th>
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-slate-100 bg-white">
+              <tbody className="divide-y divide-slate-100 bg-white text-sm text-slate-700">
                 {loading ? (
                   <tr>
-                    <td
-                      colSpan={6}
-                      className="px-4 py-8 text-center text-slate-500"
-                    >
+                    <td colSpan={7} className="px-4 py-12 text-center text-slate-500">
                       Memuat data berita...
                     </td>
                   </tr>
                 ) : items.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={6}
-                      className="px-4 py-8 text-center text-slate-500"
-                    >
+                    <td colSpan={7} className="px-4 py-12 text-center text-slate-500">
                       Belum ada berita.
                     </td>
                   </tr>
                 ) : (
                   items.map((item, index) => (
                     <tr key={item.id} className="align-top">
-                      <td className="px-4 py-4 text-slate-600">{index + 1}</td>
+                      <td className="px-4 py-4 font-semibold text-slate-500">
+                        {index + 1}
+                      </td>
 
                       <td className="px-4 py-4">
-                        <div className="flex items-start gap-3">
-                          {item.cover_image ? (
-                            <div className="relative h-16 w-24 overflow-hidden rounded-xl">
-                              <Image
-                                src={item.cover_image}
-                                alt={item.title}
-                                fill
-                                sizes="96px"
-                                className="object-cover"
-                              />
-                            </div>
-                          ) : (
-                            <div className="flex h-16 w-24 items-center justify-center rounded-xl bg-slate-100 text-xs text-slate-400">
-                              No image
-                            </div>
-                          )}
+                        <div className="flex gap-4">
+                          <CoverThumb
+                            src={item.cover_image || ""}
+                            alt={item.title || "Cover berita"}
+                            className="h-16 w-20 shrink-0"
+                          />
 
-                          <div className="max-w-md">
-                            <p className="font-semibold text-slate-900">
+                          <div className="min-w-0">
+                            <p className="line-clamp-2 text-sm font-semibold text-slate-900">
                               {item.title}
                             </p>
-                            <p className="mt-1 text-xs text-slate-500">
+                            <p className="mt-1 break-all text-xs text-slate-500">
                               /berita/{item.slug}
                             </p>
-                            <p className="mt-2 line-clamp-2 text-sm text-slate-600">
+                            <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-500">
                               {item.excerpt}
                             </p>
                           </div>
                         </div>
                       </td>
 
-                      <td className="px-4 py-4 text-slate-700">
+                      <td className="px-4 py-4 text-sm text-slate-600">
                         {item.category || "Umum"}
                       </td>
 
-                      <td className="px-4 py-4 text-slate-700">
-                        <div className="inline-flex items-center gap-2 text-sm">
-                          <span>👁</span>
-                          <span>
-                            {Number(item.views || 0).toLocaleString("id-ID")}
-                          </span>
-                        </div>
+                      <td className="px-4 py-4 text-sm text-slate-600">
+                        {formatDate(item.published_at)}
+                      </td>
+
+                      <td className="px-4 py-4 text-sm text-slate-600">
+                        {Number(item.views || 0).toLocaleString("id-ID")}
                       </td>
 
                       <td className="px-4 py-4">
@@ -524,16 +638,15 @@ export default function AdminBeritaManager() {
                           <button
                             type="button"
                             onClick={() => handleOpenEdit(item)}
-                            className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                            className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
                           >
                             Edit
                           </button>
-
                           <button
                             type="button"
                             onClick={() => handleDelete(item)}
                             disabled={deletingId === item.id}
-                            className="rounded-xl border border-red-200 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:opacity-60"
+                            className="rounded-xl border border-red-200 px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             {deletingId === item.id ? "Menghapus..." : "Hapus"}
                           </button>
@@ -549,11 +662,11 @@ export default function AdminBeritaManager() {
       </div>
 
       {openForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
-          <div className="max-h-[95vh] w-full max-w-5xl overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl">
-            <div className="flex items-start justify-between gap-4">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/45 px-4 py-10">
+          <div className="mx-auto max-w-5xl rounded-[32px] bg-white shadow-2xl">
+            <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700">
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-700">
                   Form berita
                 </p>
                 <h3 className="mt-2 text-2xl font-bold text-slate-900">
@@ -564,16 +677,16 @@ export default function AdminBeritaManager() {
               <button
                 type="button"
                 onClick={handleCloseForm}
-                className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
               >
                 Tutup
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-6 px-6 py-6">
               <div className="grid gap-5 md:grid-cols-2">
-                <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-slate-700">
+                <label className="space-y-2 md:col-span-2">
+                  <span className="block text-sm font-medium text-slate-700">
                     Judul berita
                   </span>
                   <input
@@ -582,13 +695,13 @@ export default function AdminBeritaManager() {
                     value={form.title}
                     onChange={handleChange}
                     placeholder="Masukkan judul berita"
-                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-emerald-500"
+                    className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-emerald-500"
                     required
                   />
                 </label>
 
-                <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-slate-700">
+                <label className="space-y-2">
+                  <span className="block text-sm font-medium text-slate-700">
                     Slug
                   </span>
                   <input
@@ -596,23 +709,23 @@ export default function AdminBeritaManager() {
                     name="slug"
                     value={form.slug}
                     onChange={handleChange}
-                    placeholder={slugPreview(form.title)}
-                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-emerald-500"
+                    placeholder="Slug akan dibuat otomatis"
+                    className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-emerald-500"
                   />
-                  <span className="mt-2 block text-xs text-slate-500">
+                  <p className="text-xs text-slate-500">
                     Kosongkan jika ingin dibuat otomatis dari judul.
-                  </span>
+                  </p>
                 </label>
 
-                <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-slate-700">
+                <label className="space-y-2">
+                  <span className="block text-sm font-medium text-slate-700">
                     Kategori
                   </span>
                   <select
                     name="category"
                     value={form.category}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-emerald-500"
+                    className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-emerald-500"
                   >
                     {BERITA_CATEGORIES.map((category) => (
                       <option key={category} value={category}>
@@ -622,8 +735,8 @@ export default function AdminBeritaManager() {
                   </select>
                 </label>
 
-                <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-slate-700">
+                <label className="space-y-2">
+                  <span className="block text-sm font-medium text-slate-700">
                     Tanggal publish
                   </span>
                   <input
@@ -631,21 +744,21 @@ export default function AdminBeritaManager() {
                     name="published_at"
                     value={form.published_at}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-emerald-500"
+                    className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-emerald-500"
                   />
                 </label>
 
-                <label className="block md:col-span-2">
-                  <span className="mb-2 block text-sm font-medium text-slate-700">
+                <label className="space-y-2 md:col-span-2">
+                  <span className="block text-sm font-medium text-slate-700">
                     Ringkasan
                   </span>
                   <textarea
                     name="excerpt"
                     value={form.excerpt}
                     onChange={handleChange}
-                    rows={3}
-                    placeholder="Tulis ringkasan berita"
-                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-emerald-500"
+                    rows={4}
+                    placeholder="Tulis ringkasan singkat berita"
+                    className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-emerald-500"
                     required
                   />
                 </label>
@@ -656,7 +769,8 @@ export default function AdminBeritaManager() {
                       Cover image
                     </span>
                     <p className="text-xs text-slate-500">
-                      Bisa upload gambar atau tempel link gambar.
+                      Disarankan upload file. Link manual hanya untuk Google Drive,
+                      Supabase Storage publik, atau domain website ini.
                     </p>
                   </div>
 
@@ -681,7 +795,7 @@ export default function AdminBeritaManager() {
                         onChange={() => setCoverMode("link")}
                       />
                       <span className="text-sm font-medium text-slate-700">
-                        Link gambar / URL
+                        Link gambar
                       </span>
                     </label>
                   </div>
@@ -696,8 +810,8 @@ export default function AdminBeritaManager() {
                         className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm"
                       />
                       <p className="text-xs text-slate-500">
-                        Format yang didukung: JPG, PNG, WEBP, GIF. Ukuran
-                        maksimal 5 MB.
+                        Format yang didukung: JPG, PNG, WEBP, GIF. Ukuran maksimal
+                        5 MB.
                       </p>
                     </div>
                   ) : (
@@ -724,21 +838,16 @@ export default function AdminBeritaManager() {
                           <p className="text-sm font-semibold text-slate-800">
                             Cover saat ini
                           </p>
-
-                          <div className="relative h-64 w-full overflow-hidden rounded-xl">
-                            <Image
+                          <div className="mt-3 overflow-hidden rounded-xl">
+                            <CoverThumb
                               src={form.cover_image}
                               alt="Preview cover berita"
-                              fill
-                              sizes="(max-width: 768px) 100vw, 768px"
-                              className="object-cover"
+                              className="h-64 w-full"
                             />
                           </div>
-
                           <p className="mt-3 break-all text-xs text-slate-500">
                             {form.cover_image}
                           </p>
-
                           <div className="mt-3 flex flex-wrap gap-2">
                             <a
                               href={form.cover_image}
@@ -748,7 +857,6 @@ export default function AdminBeritaManager() {
                             >
                               Lihat cover
                             </a>
-
                             <button
                               type="button"
                               onClick={clearCoverImage}
@@ -770,7 +878,7 @@ export default function AdminBeritaManager() {
                     </span>
                     <p className="text-xs text-slate-500">
                       Gunakan toolbar untuk format teks seperti bold, italic,
-                      heading, dan list.
+                      heading, list, dan justify.
                     </p>
                   </div>
 
@@ -781,59 +889,51 @@ export default function AdminBeritaManager() {
                     >
                       <strong>B</strong>
                     </ToolbarButton>
-
                     <ToolbarButton
                       onClick={() => runEditorCommand("italic")}
                       title="Italic"
                     >
                       <em>I</em>
                     </ToolbarButton>
-
                     <ToolbarButton
                       onClick={() => runEditorCommand("underline")}
                       title="Underline"
                     >
                       <span className="underline">U</span>
                     </ToolbarButton>
-
                     <ToolbarButton
                       onClick={() => runEditorCommand("insertUnorderedList")}
                       title="Bullet List"
                     >
                       • List
                     </ToolbarButton>
-
                     <ToolbarButton
                       onClick={() => runEditorCommand("insertOrderedList")}
                       title="Number List"
                     >
                       1. List
                     </ToolbarButton>
-
                     <ToolbarButton
                       onClick={() => runEditorCommand("justifyLeft")}
                       title="Rata kiri"
                     >
                       Left
                     </ToolbarButton>
-
                     <ToolbarButton
                       onClick={() => runEditorCommand("justifyCenter")}
                       title="Rata tengah"
                     >
                       Center
                     </ToolbarButton>
-
                     <ToolbarButton
                       onClick={() => runEditorCommand("justifyRight")}
                       title="Rata kanan"
                     >
                       Right
                     </ToolbarButton>
-
                     <ToolbarButton
                       onClick={() => runEditorCommand("justifyFull")}
-                      title="Rata kanan-kiri / justify"
+                      title="Rata kanan-kiri"
                     >
                       Justify
                     </ToolbarButton>
@@ -921,11 +1021,10 @@ export default function AdminBeritaManager() {
                 >
                   Batal
                 </button>
-
                 <button
                   type="submit"
                   disabled={saving || uploading}
-                  className="rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-70"
+                  className="rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {saving
                     ? "Menyimpan..."
