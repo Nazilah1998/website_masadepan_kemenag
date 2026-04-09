@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import PageBanner from "../../../components/PageBanner";
 import { getBeritaBySlug } from "../../../lib/berita";
+import Image from "next/image";
+import BeritaViewCounter from "@/components/BeritaViewCounter";
 
 export const dynamic = "force-dynamic";
 
@@ -28,30 +30,29 @@ export default async function DetailBeritaPage({ params }) {
           ← Kembali ke halaman berita
         </Link>
 
-        <div className="mb-4 text-sm text-emerald-700">
-          {berita.category}
+        <div className="mb-4 text-sm text-emerald-700">{berita.category}</div>
+
+        <h1 className="text-3xl font-bold text-slate-900">{berita.title}</h1>
+
+        <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-slate-500">
+          <p>Dipublikasikan pada {berita.date}</p>
+          <BeritaViewCounter slug={berita.slug} initialViews={berita.views} />
         </div>
 
-        <h1 className="text-3xl font-bold text-slate-900">
-          {berita.title}
-        </h1>
-
-        <p className="mt-3 text-sm text-slate-500">
-          Dipublikasikan pada {berita.date}
-        </p>
-
         {berita.excerpt ? (
-          <p className="mt-6 text-lg text-slate-700">
-            {berita.excerpt}
-          </p>
+          <p className="mt-6 text-lg text-slate-700">{berita.excerpt}</p>
         ) : null}
 
         {berita.coverImage ? (
-          <img
-            src={berita.coverImage}
-            alt={berita.title}
-            className="mt-8 w-full rounded-2xl object-cover"
-          />
+          <div className="mt-8 overflow-hidden rounded-2xl">
+            <Image
+              src={berita.coverImage}
+              alt={berita.title}
+              width={1600}
+              height={900}
+              className="h-auto w-full object-cover"
+            />
+          </div>
         ) : null}
 
         <article

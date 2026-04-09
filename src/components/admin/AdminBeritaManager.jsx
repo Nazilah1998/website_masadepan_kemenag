@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { normalizeCoverImageUrl } from "@/lib/cover-image";
+import Image from "next/image";
 
 const BERITA_CATEGORIES = [
   "Umum",
@@ -153,26 +154,26 @@ export default function AdminBeritaManager() {
   }
 
   function handleOpenEdit(item) {
-  setMessage("");
-  setError("");
-  setEditingId(item.id);
+    setMessage("");
+    setError("");
+    setEditingId(item.id);
 
-  const normalizedCoverImage = normalizeCoverImageUrl(item.cover_image || "");
+    const normalizedCoverImage = normalizeCoverImageUrl(item.cover_image || "");
 
-  setForm({
-    title: item.title || "",
-    slug: item.slug || "",
-    category: item.category || "Umum",
-    excerpt: item.excerpt || "",
-    content: item.content || "",
-    cover_image: normalizedCoverImage,
-    is_published: Boolean(item.is_published),
-    published_at: toDateTimeLocal(item.published_at),
-  });
+    setForm({
+      title: item.title || "",
+      slug: item.slug || "",
+      category: item.category || "Umum",
+      excerpt: item.excerpt || "",
+      content: item.content || "",
+      cover_image: normalizedCoverImage,
+      is_published: Boolean(item.is_published),
+      published_at: toDateTimeLocal(item.published_at),
+    });
 
-  setCoverMode(normalizedCoverImage ? "link" : "upload");
-  setOpenForm(true);
-}
+    setCoverMode(normalizedCoverImage ? "link" : "upload");
+    setOpenForm(true);
+  }
 
   function handleCloseForm() {
     setOpenForm(false);
@@ -208,7 +209,7 @@ export default function AdminBeritaManager() {
 
     if (typeof document.execCommand !== "function") {
       setError(
-        "Toolbar editor tidak didukung browser ini. Anda masih bisa menulis isi berita secara manual."
+        "Toolbar editor tidak didukung browser ini. Anda masih bisa menulis isi berita secara manual.",
       );
       return;
     }
@@ -221,60 +222,86 @@ export default function AdminBeritaManager() {
     const value = event.target.value;
     if (!value) return;
 
+function enableCssStyling() {
+  if (typeof document !== "undefined" && typeof document.execCommand === "function") {
+    document.execCommand("styleWithCSS", false, true);
+  }
+}
+
+function handleFontFamilyChange(event) {
+  const value = event.target.value;
+  if (!value) return;
+
+  editorRef.current?.focus();
+  enableCssStyling();
+  runEditorCommand("fontName", value);
+  event.target.value = "";
+}
+
+function handleFontSizeChange(event) {
+  const value = event.target.value;
+  if (!value) return;
+
+  editorRef.current?.focus();
+  enableCssStyling();
+  runEditorCommand("fontSize", value);
+  event.target.value = "";
+}
+
     runEditorCommand("formatBlock", value);
     event.target.value = "";
   }
 
-async function handleCoverUpload(event) {
-  const file = event.target.files?.[0];
-  if (!file) return;
+  async function handleCoverUpload(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-  try {
-    setUploading(true);
-    setError("");
-    setMessage("");
+    try {
+      setUploading(true);
+      setError("");
+      setMessage("");
 
-    const formData = new FormData();
-    formData.append("file", file);
+      const formData = new FormData();
+      formData.append("file", file);
 
-    const response = await fetch("/api/admin/berita/upload", {
-      method: "POST",
-      body: formData,
-    });
+      const response = await fetch("/api/admin/berita/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(data?.message || "Gagal upload cover image.");
+      if (!response.ok) {
+        throw new Error(data?.message || "Gagal upload cover image.");
+      }
+
+      const nextCoverImage = normalizeCoverImageUrl(
+        data?.cover_image || data?.url || "",
+      );
+
+      setForm((prev) => ({
+        ...prev,
+        cover_image: nextCoverImage,
+      }));
+
+      setMessage("Cover image berhasil diupload.");
+    } catch (err) {
+      setError(err.message || "Gagal upload cover image.");
+    } finally {
+      setUploading(false);
+      event.target.value = "";
     }
+  }
 
-    const nextCoverImage = normalizeCoverImageUrl(
-      data?.cover_image || data?.url || ""
-    );
+  function handleCoverLinkChange(event) {
+    const nextValue = event.target.value;
+    const normalizedUrl = normalizeCoverImageUrl(nextValue);
 
     setForm((prev) => ({
       ...prev,
-      cover_image: nextCoverImage,
+      cover_image: normalizedUrl,
     }));
-
-    setMessage("Cover image berhasil diupload.");
-  } catch (err) {
-    setError(err.message || "Gagal upload cover image.");
-  } finally {
-    setUploading(false);
-    event.target.value = "";
   }
-}
-
-function handleCoverLinkChange(event) {
-  const nextValue = event.target.value;
-  const normalizedUrl = normalizeCoverImageUrl(nextValue);
-
-  setForm((prev) => ({
-    ...prev,
-    cover_image: normalizedUrl,
-  }));
-}
 
   function clearCoverImage() {
     setForm((prev) => ({
@@ -292,11 +319,12 @@ function handleCoverLinkChange(event) {
       setError("");
       setMessage("");
 
-     const payload = {
-  ...form,
-  cover_image: normalizeCoverImageUrl(form.cover_image),
-  content: currentContent || form.content || "",
-};
+      const payload = {
+        ...form,
+        is_published: Boolean(form.is_published),
+        cover_image: normalizeCoverImageUrl(form.cover_image),
+        content: currentContent || form.content || "",
+      };
 
       const response = await fetch(
         editingId ? `/api/admin/berita/${editingId}` : "/api/admin/berita",
@@ -304,7 +332,7 @@ function handleCoverLinkChange(event) {
           method: editingId ? "PUT" : "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
-        }
+        },
       );
 
       const data = await response.json();
@@ -325,7 +353,7 @@ function handleCoverLinkChange(event) {
 
   async function handleDelete(item) {
     const confirmed = window.confirm(
-      `Hapus berita "${item.title}"?\nTindakan ini tidak bisa dibatalkan.`
+      `Hapus berita "${item.title}"?\nTindakan ini tidak bisa dibatalkan.`,
     );
 
     if (!confirmed) return;
@@ -397,12 +425,13 @@ function handleCoverLinkChange(event) {
             <table className="min-w-full divide-y divide-slate-200 text-sm">
               <thead className="bg-slate-50">
                 <tr className="text-left text-slate-600">
-                  <th className="px-4 py-3 font-semibold">No</th>
-                  <th className="px-4 py-3 font-semibold">Judul</th>
-                  <th className="px-4 py-3 font-semibold">Kategori</th>
-                  <th className="px-4 py-3 font-semibold">Publish</th>
-                  <th className="px-4 py-3 font-semibold">Status</th>
-                  <th className="px-4 py-3 font-semibold">Aksi</th>
+                  <th className="px-4 py-3 text-left">No</th>
+                  <th className="px-4 py-3 text-left">Judul</th>
+                  <th className="px-4 py-3 text-left">Kategori</th>
+                  <th className="px-4 py-3 text-left">Publish</th>
+                  <th className="px-4 py-3 text-left">Dibaca</th>
+                  <th className="px-4 py-3 text-left">Status</th>
+                  <th className="px-4 py-3 text-left">Aksi</th>
                 </tr>
               </thead>
 
@@ -433,14 +462,18 @@ function handleCoverLinkChange(event) {
                       <td className="px-4 py-4">
                         <div className="flex items-start gap-3">
                           {item.cover_image ? (
-                            <img
-                              src={item.cover_image}
-                              alt={item.title}
-                              className="h-16 w-24 rounded-xl object-cover"
-                            />
+                            <div className="relative h-16 w-24 overflow-hidden rounded-xl">
+                              <Image
+                                src={item.cover_image}
+                                alt={item.title}
+                                fill
+                                sizes="96px"
+                                className="object-cover"
+                              />
+                            </div>
                           ) : (
                             <div className="flex h-16 w-24 items-center justify-center rounded-xl bg-slate-100 text-xs text-slate-400">
-                              No Image
+                              No image
                             </div>
                           )}
 
@@ -463,7 +496,12 @@ function handleCoverLinkChange(event) {
                       </td>
 
                       <td className="px-4 py-4 text-slate-700">
-                        {formatDate(item.published_at)}
+                        <div className="inline-flex items-center gap-2 text-sm">
+                          <span>👁</span>
+                          <span>
+                            {Number(item.views || 0).toLocaleString("id-ID")}
+                          </span>
+                        </div>
                       </td>
 
                       <td className="px-4 py-4">
@@ -655,7 +693,8 @@ function handleCoverLinkChange(event) {
                         className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm"
                       />
                       <p className="text-xs text-slate-500">
-                        Format yang didukung: JPG, PNG, WEBP, GIF. Ukuran maksimal 5 MB.
+                        Format yang didukung: JPG, PNG, WEBP, GIF. Ukuran
+                        maksimal 5 MB.
                       </p>
                     </div>
                   ) : (
@@ -683,11 +722,13 @@ function handleCoverLinkChange(event) {
                             Cover saat ini
                           </p>
 
-                          <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200">
-                            <img
+                          <div className="relative h-64 w-full overflow-hidden rounded-xl">
+                            <Image
                               src={form.cover_image}
                               alt="Preview cover berita"
-                              className="max-h-64 w-full object-cover"
+                              fill
+                              sizes="(max-width: 768px) 100vw, 768px"
+                              className="object-cover"
                             />
                           </div>
 
@@ -787,6 +828,46 @@ function handleCoverLinkChange(event) {
                       Right
                     </ToolbarButton>
 
+                    <ToolbarButton
+                      onClick={() => runEditorCommand("justifyFull")}
+                      title="Rata kanan-kiri / justify"
+                    >
+                      Justify
+                    </ToolbarButton>
+
+                    <select
+                      onChange={handleFontFamilyChange}
+                      defaultValue=""
+                      className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700"
+                    >
+                      <option value="" disabled>
+                        Font
+                      </option>
+                      <option value="Arial">Arial</option>
+                      <option value="Verdana">Verdana</option>
+                      <option value="Tahoma">Tahoma</option>
+                      <option value="Georgia">Georgia</option>
+                      <option value="Times New Roman">Times New Roman</option>
+                      <option value="Courier New">Courier New</option>
+                    </select>
+
+                    <select
+                      onChange={handleFontSizeChange}
+                      defaultValue=""
+                      className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700"
+                    >
+                      <option value="" disabled>
+                        Ukuran Font
+                      </option>
+                      <option value="1">Sangat Kecil</option>
+                      <option value="2">Kecil</option>
+                      <option value="3">Normal</option>
+                      <option value="4">Sedang</option>
+                      <option value="5">Besar</option>
+                      <option value="6">Sangat Besar</option>
+                      <option value="7">Ekstra Besar</option>
+                    </select>
+
                     <select
                       onChange={handleBlockFormatChange}
                       defaultValue=""
@@ -808,7 +889,7 @@ function handleCoverLinkChange(event) {
                     contentEditable
                     suppressContentEditableWarning
                     onInput={handleEditorInput}
-                    className="min-h-[280px] rounded-2xl border border-slate-300 bg-white px-4 py-4 text-sm text-slate-800 outline-none focus:border-emerald-500"
+                    className="min-h-[280px] w-full rounded-2xl border border-slate-300 bg-white px-4 py-4 text-sm leading-7 text-slate-800 outline-none focus:border-emerald-500"
                     style={{ whiteSpace: "pre-wrap" }}
                   />
                 </div>
@@ -846,8 +927,8 @@ function handleCoverLinkChange(event) {
                   {saving
                     ? "Menyimpan..."
                     : editingId
-                    ? "Update Berita"
-                    : "Simpan Berita"}
+                      ? "Update Berita"
+                      : "Simpan Berita"}
                 </button>
               </div>
             </form>

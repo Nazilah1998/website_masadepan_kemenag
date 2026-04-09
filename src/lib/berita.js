@@ -1,5 +1,6 @@
 import { unstable_noStore as noStore } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { normalizeCoverImageUrl } from "@/lib/cover-image";
 
 function formatDateIndonesia(value) {
   if (!value) return "-";
@@ -23,11 +24,12 @@ function normalizeBerita(item) {
     category: item.category || "Umum",
     date: formatDateIndonesia(item.published_at || item.created_at),
     isoDate: item.published_at || item.created_at,
-    coverImage: item.cover_image || "",
+    coverImage: normalizeCoverImageUrl(item.cover_image || ""),
     content: item.content || "",
     isPublished: Boolean(item.is_published),
     createdAt: item.created_at || null,
     updatedAt: item.updated_at || null,
+    views: Number(item.views || 0),
   };
 }
 
@@ -48,6 +50,7 @@ export async function getAllBerita() {
       cover_image,
       is_published,
       published_at,
+      views,
       created_at,
       updated_at
     `)

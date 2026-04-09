@@ -16,6 +16,7 @@ const selectFields = `
   cover_image,
   is_published,
   published_at,
+  views,
   author_id,
   created_at,
   updated_at
@@ -42,7 +43,7 @@ function buildPayload(body) {
   const category = cleanString(body.category) || "Umum";
   const content = cleanString(body.content);
   const coverImage = normalizeCoverImageUrl(cleanString(body.cover_image)) || null;
-  const isPublished = Boolean(body.is_published);
+  const is_published = Boolean(body?.is_published);
   const publishedAtInput = cleanString(body.published_at);
 
   if (!title) throw new Error("Judul berita wajib diisi.");
@@ -50,6 +51,7 @@ function buildPayload(body) {
   if (!content) throw new Error("Isi berita wajib diisi.");
 
   const publishedAt = publishedAtInput ? new Date(publishedAtInput) : new Date();
+
   if (Number.isNaN(publishedAt.getTime())) {
     throw new Error("Tanggal publish tidak valid.");
   }
@@ -60,7 +62,7 @@ function buildPayload(body) {
     category,
     content,
     cover_image: coverImage,
-    is_published: isPublished,
+    is_published,
     published_at: publishedAt.toISOString(),
   };
 }
