@@ -35,7 +35,7 @@ export const visionMission = {
     "Profesionalitas",
     "Pelayanan",
     "Akuntabilitas",
-    "Moderasi Beragama Islam",
+    "Moderasi Beragama",
   ],
 };
 
