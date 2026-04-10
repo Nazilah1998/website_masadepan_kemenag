@@ -12,13 +12,16 @@ export const siteInfo = {
   tagline: "Melayani Umat dengan Integritas dan Profesionalitas",
   description:
     "Website resmi instansi untuk pelayanan informasi, publikasi kegiatan, pengumuman, agenda, dan akses layanan digital secara terpadu.",
-  email: "kankemenagbarut@kemenag.go.id",
-  phone: "(0534) 123456",
-  phoneRaw: "0534123456",
-  whatsapp: "+62 812-3456-7890",
-  whatsappRaw: "6281234567890",
-  officeHours: "Senin - Jumat, 08.00 - 16.00 WIB",
-  address: "Barito Utara, Kalimantan Tengah",
+  email: "kepegawaiankemenagbarut@gmail.com",
+  phone: "(0519) 21269",
+  phoneRaw: "051921269",
+  whatsapp: "+62 812-0000-0000",
+  whatsappRaw: "6281200000000",
+  officeHours: [
+    "Senin - Kamis, 07.30 - 16.00 WIB",
+    "Jum'at, 07.30 - 16.30 WIB",
+  ],
+  address: "Jl. Ahmad Yani No.126 Muara Teweh 73811",
   complaintHref: "/kontak",
   logoSrc: "/kemenag.svg",
 };
@@ -28,7 +31,7 @@ export const siteLinks = {
   phoneHref: `tel:${siteInfo.phoneRaw}`,
   whatsappHref: buildWhatsAppLink(
     siteInfo.whatsappRaw,
-    "Assalamu’alaikum, saya ingin menanyakan informasi layanan di Kemenag Barito Utara."
+    "Assalamu’alaikum, saya ingin menanyakan informasi layanan di Kemenag Barito Utara.",
   ),
   mapEmbedUrl: `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`,
   mapDirectionUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`,
@@ -55,7 +58,8 @@ export const homeQuickLinks = [
   },
   {
     title: "Dokumen Publik",
-    description: "Akses dokumen, informasi terbuka, dan kebutuhan publik lainnya.",
+    description:
+      "Akses dokumen, informasi terbuka, dan kebutuhan publik lainnya.",
     href: "/dokumen",
   },
   {

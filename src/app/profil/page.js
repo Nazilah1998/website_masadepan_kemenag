@@ -37,7 +37,7 @@ export default function ProfilPage() {
             </p>
           </div>
 
-          <div className="rounded-[28px] border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-8 shadow-sm">
+          <div className="rounded-[28px] border border-slate-200 bg-linear-to-br from-slate-50 to-white p-8 shadow-sm">
             <span className="inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-700">
               Ringkasan Peran
             </span>

@@ -122,27 +122,42 @@ function HeaderSearchForm({
   return (
     <form
       onSubmit={onSubmit}
-      className={`flex items-center gap-3 rounded-full border border-slate-200 bg-white shadow-sm transition focus-within:border-emerald-300 focus-within:ring-4 focus-within:ring-emerald-100 ${compact ? "h-12 w-full px-4" : "h-12 w-full max-w-62.5 px-4"
+      className={`group flex items-center gap-3 rounded-full border border-slate-200/90 bg-white px-3 py-2 shadow-[0_10px_30px_rgba(15,23,42,0.08)] transition duration-200 hover:border-emerald-200 focus-within:border-emerald-400 focus-within:shadow-[0_14px_40px_rgba(16,185,129,0.16)] ${compact ? "w-full" : "w-full max-w-90"
         }`}
     >
-      <SearchIcon className="shrink-0 text-slate-400" />
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 transition group-focus-within:bg-emerald-100">
+        <SearchIcon className="h-4 w-4" />
+      </div>
+
       <input
-        type="search"
+        type="text"
+        inputMode="search"
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className="min-w-0 flex-1 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
+        autoComplete="off"
+        spellCheck={false}
+        className="header-search-input block h-10 w-full min-w-0 flex-1 border-0 bg-transparent p-0 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-0"
+        style={{
+          appearance: "none",
+          WebkitAppearance: "none",
+          MozAppearance: "none",
+          outline: "none",
+          boxShadow: "none",
+          border: "none",
+          background: "transparent",
+        }}
       />
+
       <button
         type="submit"
-        className="inline-flex shrink-0 items-center rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
+        className="inline-flex h-10 shrink-0 items-center rounded-full bg-linear-to-r from-emerald-600 to-teal-600 px-5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(16,185,129,0.22)] transition duration-200 hover:-translate-y-px hover:from-emerald-700 hover:to-teal-700 focus:outline-none focus:ring-4 focus:ring-emerald-100"
       >
         {buttonLabel}
       </button>
     </form>
   );
 }
-
 
 export default function Header() {
   const pathname = usePathname();
@@ -280,35 +295,6 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
-      <div className="hidden border-b border-white/10 bg-slate-900 text-slate-200 lg:block">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-6 text-xs">
-            <a
-              href={siteLinks.emailHref}
-              className="transition hover:text-white"
-              aria-label={`Email ${siteInfo.email}`}
-            >
-              Email: {siteInfo.email}
-            </a>
-
-            <a
-              href={siteLinks.phoneHref}
-              className="transition hover:text-white"
-              aria-label={`Telepon ${siteInfo.phone}`}
-            >
-              Telepon: {siteInfo.phone}
-            </a>
-          </div>
-
-          <div className="flex items-center gap-4 text-xs">
-            <span>{siteInfo.officeHours}</span>
-            <Link href="/kontak" className="font-semibold text-emerald-400">
-              {t("header.contact")}
-            </Link>
-          </div>
-        </div>
-      </div>
-
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-18.5 items-center justify-between gap-4">
           <Link

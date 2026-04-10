@@ -1,4 +1,4 @@
-import { beritaList } from "../data/berita";
+import { beritaItems } from "../data/berita";
 import { publicDocuments } from "../data/documents";
 import { agendaList } from "../data/agenda";
 import {
@@ -32,7 +32,12 @@ const searchIndex = [
     section: "Berita",
     category: item.category,
     href: `/berita/${item.slug}`,
-    keywords: [item.title, item.excerpt, item.category, ...(item.content || [])].join(" "),
+    keywords: [
+      item.title,
+      item.excerpt,
+      item.category,
+      ...(item.content || []),
+    ].join(" "),
   })),
 
   ...publicDocuments.map((item, index) => ({
@@ -42,7 +47,12 @@ const searchIndex = [
     section: "Dokumen",
     category: item.category,
     href: item.isAvailable ? item.href : "/dokumen",
-    keywords: [item.title, item.description, item.category, item.fileLabel].join(" "),
+    keywords: [
+      item.title,
+      item.description,
+      item.category,
+      item.fileLabel,
+    ].join(" "),
   })),
 
   ...agendaList.map((item) => ({
@@ -124,7 +134,7 @@ const searchIndex = [
       profileOverview.title,
       profileOverview.description,
       ...(profileOverview.highlights || []).map(
-        (item) => `${item.title} ${item.description}`
+        (item) => `${item.title} ${item.description}`,
       ),
     ].join(" "),
   },
@@ -173,7 +183,13 @@ export function searchSite(rawQuery = "") {
   return searchIndex
     .map((item) => {
       const haystack = normalizeText(
-        [item.title, item.description, item.section, item.category, item.keywords].join(" ")
+        [
+          item.title,
+          item.description,
+          item.section,
+          item.category,
+          item.keywords,
+        ].join(" "),
       );
 
       let score = 0;

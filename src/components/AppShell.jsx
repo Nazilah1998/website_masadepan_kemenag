@@ -3,7 +3,6 @@
 import { usePathname } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import FloatingActions from "@/components/FloatingActions";
 import AccessibilityWidget from "@/components/AccessibilityWidget";
 
 export default function AppShell({ children }) {
@@ -19,7 +18,6 @@ export default function AppShell({ children }) {
             <Header />
             <main className="min-h-screen">{children}</main>
             <Footer />
-            <FloatingActions />
             <AccessibilityWidget />
         </>
     );
