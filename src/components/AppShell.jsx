@@ -3,7 +3,6 @@
 import { usePathname } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import AccessibilityWidget from "@/components/AccessibilityWidget";
 
 export default function AppShell({ children }) {
     const pathname = usePathname();
@@ -18,7 +17,6 @@ export default function AppShell({ children }) {
             <Header />
             <main className="min-h-screen">{children}</main>
             <Footer />
-            <AccessibilityWidget />
         </>
     );
 }
