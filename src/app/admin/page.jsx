@@ -4,38 +4,55 @@ import { getAllBerita } from "@/lib/berita";
 
 export const dynamic = "force-dynamic";
 
+function formatDate(value) {
+  if (!value) return "-";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
 function StatCard({ label, value, helper }) {
   return (
-    <div className="min-w-0 rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
-      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+    <div className="rounded-[28px] border border-slate-200 bg-white px-5 py-5 shadow-sm">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
         {label}
       </p>
-      <p
-        className="mt-3 wrap-break-word text-3xl font-bold leading-tight text-slate-900"
-        title={String(value)}
-      >
+      <p className="mt-3 text-4xl font-bold leading-none text-slate-900">
         {value}
       </p>
-      <p className="mt-2 wrap-break-word text-sm leading-6 text-slate-500">
-        {helper}
-      </p>
+      <p className="mt-3 text-sm leading-6 text-slate-500">{helper}</p>
     </div>
   );
 }
 
-function QuickLinkCard({ href, title, description }) {
+function FocusCard({ title, description, href, cta }) {
   return (
-    <Link
-      href={href}
-      className="block min-w-0 rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-emerald-200 hover:bg-emerald-50"
-    >
-      <h3 className="text-lg font-bold text-slate-900">{title}</h3>
-      <p className="mt-3 text-sm leading-6 text-slate-600">{description}</p>
-      <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700">
-        Buka modul
-        <span aria-hidden="true">→</span>
-      </span>
-    </Link>
+    <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-700">
+        Modul utama
+      </p>
+
+      <h3 className="mt-3 text-2xl font-bold tracking-tight text-slate-900">
+        {title}
+      </h3>
+
+      <p className="mt-3 text-sm leading-7 text-slate-500">{description}</p>
+
+      <Link
+        href={href}
+        className="mt-5 inline-flex items-center rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
+      >
+        {cta}
+      </Link>
+    </div>
   );
 }
 
@@ -51,11 +68,14 @@ export default async function AdminDashboardPage() {
   const beritaList = await getAllBerita();
 
   const totalBerita = beritaList.length;
-  const totalViews = beritaList.reduce((acc, item) => acc + Number(item.views || 0), 0);
+  const totalViews = beritaList.reduce(
+    (acc, item) => acc + Number(item.views || 0),
+    0,
+  );
+  const averageViews =
+    totalBerita > 0 ? Math.round(totalViews / totalBerita) : 0;
   const latestBerita = beritaList[0] || null;
-  const averageViews = totalBerita > 0 ? Math.round(totalViews / totalBerita) : 0;
 
-  const displayName = user?.full_name?.trim() || "Admin";
   const displayEmail = user?.email || "-";
   const compactName =
     user?.full_name?.trim() ||
@@ -63,91 +83,99 @@ export default async function AdminDashboardPage() {
     "Admin";
 
   return (
-    <div className="space-y-8">
-      <section className="min-w-0 rounded-4xl border border-slate-200 bg-linear-to-br from-white via-emerald-50 to-teal-50 p-6 shadow-sm md:p-8">
+    <section className="space-y-8">
+      <div className="rounded-4xl border border-slate-200 bg-white px-6 py-7 shadow-sm">
         <p className="text-xs font-semibold uppercase tracking-[0.35em] text-emerald-700">
           Dashboard Admin
         </p>
 
-        <h2 className="mt-3 text-3xl font-bold leading-tight text-slate-900 md:text-4xl">
+        <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-900">
           Selamat datang, {compactName}
-        </h2>
+        </h1>
 
-        <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 md:text-base">
-          Panel ini dipakai untuk mengelola konten website publik. Fokus utama saat ini
-          adalah kualitas berita, konsistensi publikasi, dan kemudahan workflow editor.
+        <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500">
+          Panel admin saat ini difokuskan sepenuhnya untuk workflow editorial
+          berita agar proses tulis, edit, publikasi, dan distribusi ke galeri
+          lebih rapi.
         </p>
 
-        <div className="mt-6 flex flex-wrap gap-3 text-sm">
-          <div
-            className="max-w-full rounded-full border border-emerald-200 bg-white px-4 py-2 font-semibold text-emerald-700"
-            title={displayEmail}
-          >
-            <span className="block max-w-70 truncate">{displayEmail}</span>
-          </div>
-
-          <div className="rounded-full border border-slate-200 bg-white px-4 py-2 font-semibold text-slate-700">
-            Role: {user?.role || "admin"}
-          </div>
+        <div className="mt-5 flex flex-wrap gap-3">
+          <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-600">
+            {displayEmail}
+          </span>
+          <span className="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700">
+            Fokus modul: Berita
+          </span>
         </div>
-      </section>
+      </div>
 
-      <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <StatCard
-          label="Berita tayang"
-          value={totalBerita.toLocaleString("id-ID")}
-          helper="Jumlah berita yang sudah tampil di website publik."
+          label="Total berita"
+          value={totalBerita}
+          helper="Jumlah seluruh berita yang tersimpan di panel admin."
         />
         <StatCard
-          label="Total pembaca"
-          value={totalViews.toLocaleString("id-ID")}
-          helper="Akumulasi pembacaan dari seluruh berita yang sudah tayang."
+          label="Total views"
+          value={totalViews}
+          helper="Akumulasi pembaca dari semua berita yang sudah tercatat."
         />
         <StatCard
-          label="Artikel terbaru"
-          value={latestBerita ? latestBerita.date : "-"}
-          helper={latestBerita ? latestBerita.title : "Belum ada berita tayang."}
+          label="Rata-rata views"
+          value={averageViews}
+          helper="Rata-rata pembaca per berita untuk memantau performa konten."
         />
-        <StatCard
-          label="Rata-rata pembaca"
-          value={averageViews.toLocaleString("id-ID")}
-          helper="Rata-rata jumlah pembaca untuk setiap berita yang sudah tayang."
-        />
-      </section>
+      </div>
 
-      <section>
-        <div className="mb-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-700">
-            Modul Utama
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+        <FocusCard
+          title="Kelola berita"
+          description="Masuk ke modul berita untuk menulis artikel baru, mengatur status tayang, memperbarui cover, serta mengirim item ke galeri."
+          href="/admin/berita"
+          cta="Buka modul berita"
+        />
+
+        <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
+            Berita terbaru
           </p>
-          <h2 className="mt-2 text-3xl font-bold text-slate-900">
-            Akses cepat panel admin
-          </h2>
-        </div>
 
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-          <QuickLinkCard
-            href="/admin/berita"
-            title="Berita"
-            description="Kelola artikel, status tayang, cover, ringkasan, dan isi berita."
-          />
-          <QuickLinkCard
-            href="/admin/pengumuman"
-            title="Pengumuman"
-            description="Atur pengumuman resmi agar tetap rapi, jelas, dan mudah ditemukan."
-          />
-          <QuickLinkCard
-            href="/admin/agenda"
-            title="Agenda"
-            description="Kelola agenda kegiatan, jadwal acara, dan publikasi aktivitas instansi."
-          />
-          <QuickLinkCard
-            href="/admin/dokumen"
-            title="Dokumen"
-            description="Kelola unggahan dokumen publik dan arsip yang perlu ditampilkan."
-          />
+          {latestBerita ? (
+            <>
+              <h3 className="mt-3 text-xl font-bold leading-8 text-slate-900">
+                {latestBerita.title}
+              </h3>
+
+              <p className="mt-3 text-sm leading-7 text-slate-500">
+                Rilis terakhir: {formatDate(latestBerita.published_at)}
+              </p>
+
+              <Link
+                href="/admin/berita"
+                className="mt-5 inline-flex items-center text-sm font-semibold text-emerald-700 transition hover:text-emerald-800"
+              >
+                Lanjut kelola berita →
+              </Link>
+            </>
+          ) : (
+            <p className="mt-3 text-sm leading-7 text-slate-500">
+              Belum ada berita yang tersimpan. Mulai dari modul berita untuk
+              membuat publikasi pertama.
+            </p>
+          )}
         </div>
-      </section>
-    </div>
+      </div>
+
+      <div className="rounded-[28px] border border-dashed border-slate-300 bg-slate-50 px-6 py-5">
+        <p className="text-sm font-semibold text-slate-900">
+          Catatan pembaruan panel
+        </p>
+        <p className="mt-2 text-sm leading-7 text-slate-500">
+          Modul Pengumuman, Agenda, dan Dokumen dinonaktifkan sementara agar
+          pengembangan panel admin lebih fokus pada kualitas dan kestabilan
+          workflow berita.
+        </p>
+      </div>
+    </section>
   );
 }

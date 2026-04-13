@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   normalizeCoverImageUrl,
@@ -1709,109 +1710,127 @@ export default function AdminBeritaManager() {
       ) : null}
 
       {openGalleryForm ? (
-        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/45 p-4 md:p-8">
-          <div className="w-full max-w-2xl rounded-4xl border border-slate-200 bg-white shadow-2xl">
-            <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5 md:px-8">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-4 py-6">
+          <div className="w-full max-w-5xl rounded-4xl bg-white shadow-2xl ring-1 ring-slate-200">
+            <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5 sm:px-8">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-sky-700">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-sky-600">
                   Form galeri
                 </p>
-                <h3 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
+                <h3 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
                   Kirim ke galeri
                 </h3>
-                <p className="mt-2 text-sm text-slate-500">
-                  Gunakan cover portrait khusus untuk item galeri yang terhubung
-                  ke berita.
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                  Gunakan cover portrait khusus untuk item galeri yang terhubung ke
+                  berita.
                 </p>
               </div>
 
               <button
                 type="button"
                 onClick={handleCloseGalleryForm}
-                className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-sky-300 hover:text-sky-700"
               >
                 Tutup
               </button>
             </div>
 
-            <div className="space-y-5 px-6 py-6 md:px-8">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Judul berita
-                </label>
-                <input
-                  value={galleryForm.title}
-                  readOnly
-                  className="h-12 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 text-sm text-slate-700"
-                />
-              </div>
+            <div className="px-6 py-6 sm:px-8">
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1.15fr)_400px]">
+                <div className="space-y-5">
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                      Judul berita
+                    </label>
+                    <input
+                      type="text"
+                      value={galleryForm.title}
+                      readOnly
+                      className="h-12 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 text-sm outline-none"
+                    />
+                  </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Link berita
-                </label>
-                <input
-                  value={galleryForm.link_url}
-                  readOnly
-                  className="h-12 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 text-sm text-slate-700"
-                />
-              </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                      Link berita
+                    </label>
+                    <input
+                      type="text"
+                      value={galleryForm.link_url}
+                      readOnly
+                      className="h-12 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 text-sm outline-none"
+                    />
+                  </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  URL cover portrait
-                </label>
-                <input
-                  value={galleryForm.image_url}
-                  onChange={(event) =>
-                    setGalleryForm((prev) => ({
-                      ...prev,
-                      image_url: normalizeCoverImageUrl(event.target.value),
-                    }))
-                  }
-                  placeholder="https://drive.google.com/..."
-                  className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-sky-500"
-                />
-                <p className="mt-2 text-xs leading-5 text-slate-400">
-                  Gunakan gambar portrait/banner khusus galeri dari Google Drive
-                  publik.
-                </p>
-              </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                      URL cover portrait
+                    </label>
+                    <input
+                      type="url"
+                      value={galleryForm.image_url}
+                      onChange={(event) =>
+                        setGalleryForm((prev) => ({
+                          ...prev,
+                          image_url: normalizeCoverImageUrl(event.target.value),
+                        }))
+                      }
+                      placeholder="https://drive.google.com/..."
+                      className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-sky-500"
+                    />
+                    <p className="mt-2 text-xs leading-5 text-slate-500">
+                      Gunakan gambar portrait/banner khusus galeri dari Google Drive
+                      publik.
+                    </p>
+                  </div>
+                </div>
 
-              <div>
-                <p className="mb-2 block text-sm font-medium text-slate-700">
-                  Preview cover
-                </p>
+                <div className="rounded-[28px] border border-slate-200 bg-slate-50 p-4">
+                  <p className="mb-3 text-sm font-semibold text-slate-700">
+                    Preview cover
+                  </p>
 
-                <div className="overflow-hidden rounded-3xl border border-slate-200 bg-slate-50 p-3">
-                  <CoverThumb
-                    src={galleryPreviewUrl}
-                    className="mx-auto aspect-3/4 w-full max-w-65"
-                    fallbackText="Preview portrait akan tampil di sini"
-                  />
+                  <div className="flex min-h-105 items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-white p-4">
+                    {galleryPreviewUrl ? (
+                      <div className="relative h-95 w-full max-w-65 overflow-hidden rounded-2xl">
+                        <Image
+                          src={galleryPreviewUrl}
+                          alt={galleryForm.title || "Preview cover galeri"}
+                          fill
+                          className="object-contain"
+                          sizes="260px"
+                          unoptimized
+                        />
+                      </div>
+                    ) : (
+                      <div className="text-center text-sm leading-6 text-slate-400">
+                        Preview cover akan muncul di sini.
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="flex flex-col gap-3 border-t border-slate-200 px-6 py-4 md:flex-row md:items-center md:justify-end md:px-8">
-              <button
-                type="button"
-                onClick={handleCloseGalleryForm}
-                className="rounded-2xl border border-slate-300 px-5 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-              >
-                Batal
-              </button>
+              <div className="mt-6 flex flex-col-reverse justify-end gap-3 border-t border-slate-200 pt-5 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={handleCloseGalleryForm}
+                  className="rounded-2xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                >
+                  Batal
+                </button>
 
-              <button
-                type="button"
-                onClick={handleSubmitGallery}
-                disabled={gallerySendingId === galleryForm.berita_id}
-                className="rounded-2xl bg-sky-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-800 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {gallerySendingId === galleryForm.berita_id
-                  ? "Mengirim..."
-                  : "Kirim ke galeri"}
-              </button>
+                <button
+                  type="button"
+                  onClick={handleSubmitGallery}
+                  disabled={gallerySendingId === galleryForm.berita_id}
+                  className="rounded-2xl bg-sky-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {gallerySendingId === galleryForm.berita_id
+                    ? "Mengirim..."
+                    : "Kirim ke galeri"}
+                </button>
+              </div>
             </div>
           </div>
         </div>

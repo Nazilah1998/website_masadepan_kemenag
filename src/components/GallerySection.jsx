@@ -6,7 +6,7 @@ export default function GallerySection() {
 
   return (
     <section className="py-10">
-      <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900 md:p-8">
+      <div className="rounded-4xl border border-slate-200 bg-white p-6 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900 md:p-8">
         <div className="mb-8 flex items-end justify-between gap-4">
           <div className="max-w-3xl">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400">
@@ -36,7 +36,7 @@ export default function GallerySection() {
               key={item.slug}
               className="overflow-hidden rounded-3xl border border-slate-200 bg-slate-50 transition hover:border-emerald-200 hover:bg-white hover:shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:hover:border-emerald-500/40 dark:hover:bg-slate-900"
             >
-              <div className="flex h-52 items-center justify-center bg-gradient-to-br from-emerald-100 via-emerald-50 to-white px-6 text-center dark:from-slate-900 dark:via-slate-900 dark:to-slate-950">
+              <div className="flex h-52 items-center justify-center bg-linear-to-br from-emerald-100 via-emerald-50 to-white px-6 text-center dark:from-slate-900 dark:via-slate-900 dark:to-slate-950">
                 <div>
                   <span className="inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-100 dark:bg-slate-900 dark:text-emerald-400 dark:ring-slate-800">
                     {item.category}
