@@ -1,18 +1,64 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useSyncExternalStore,
+} from "react";
 import { messages } from "../data/i18n";
 
 const LanguageContext = createContext(null);
-const STORAGE_KEY = "site-locale";
 
-function getInitialLocale() {
-  if (typeof window === "undefined") return "id";
+const STORAGE_KEY = "site-locale";
+const DEFAULT_LOCALE = "id";
+
+const languageListeners = new Set();
+
+function emitLanguageChange() {
+  languageListeners.forEach((listener) => listener());
+}
+
+function getLanguageSnapshot() {
+  if (typeof window === "undefined") {
+    return DEFAULT_LOCALE;
+  }
 
   const savedLocale = window.localStorage.getItem(STORAGE_KEY);
-  if (savedLocale && messages[savedLocale]) return savedLocale;
 
-  return "id";
+  if (savedLocale && messages[savedLocale]) {
+    return savedLocale;
+  }
+
+  return DEFAULT_LOCALE;
+}
+
+function getLanguageServerSnapshot() {
+  return DEFAULT_LOCALE;
+}
+
+function subscribeLanguage(listener) {
+  languageListeners.add(listener);
+
+  if (typeof window === "undefined") {
+    return () => {
+      languageListeners.delete(listener);
+    };
+  }
+
+  const onStorage = (event) => {
+    if (event.key === STORAGE_KEY) {
+      listener();
+    }
+  };
+
+  window.addEventListener("storage", onStorage);
+
+  return () => {
+    languageListeners.delete(listener);
+    window.removeEventListener("storage", onStorage);
+  };
 }
 
 function getByPath(object, path) {
@@ -20,17 +66,22 @@ function getByPath(object, path) {
 }
 
 export function LanguageProvider({ children }) {
-  const [locale, setLocaleState] = useState(getInitialLocale);
+  const locale = useSyncExternalStore(
+    subscribeLanguage,
+    getLanguageSnapshot,
+    getLanguageServerSnapshot,
+  );
 
   useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, locale);
     document.documentElement.lang = locale;
   }, [locale]);
 
   const setLocale = (nextLocale) => {
-    if (messages[nextLocale]) {
-      setLocaleState(nextLocale);
-    }
+    if (typeof window === "undefined") return;
+    if (!messages[nextLocale]) return;
+
+    window.localStorage.setItem(STORAGE_KEY, nextLocale);
+    emitLanguageChange();
   };
 
   const value = useMemo(
@@ -39,10 +90,10 @@ export function LanguageProvider({ children }) {
       setLocale,
       t: (path) =>
         getByPath(messages[locale], path) ??
-        getByPath(messages.id, path) ??
+        getByPath(messages[DEFAULT_LOCALE], path) ??
         path,
     }),
-    [locale]
+    [locale],
   );
 
   return (

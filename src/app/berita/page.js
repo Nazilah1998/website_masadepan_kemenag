@@ -239,12 +239,9 @@ export default async function BeritaPage({ searchParams }) {
   return (
     <>
       <PageBanner
-        breadcrumbItems={[
-          { label: "Beranda", href: "/" },
-          { label: "Berita", href: "/berita" },
-        ]}
         title="Berita"
-        description="Publikasi berita dan informasi terbaru Kementerian Agama Kabupaten Barito Utara."
+        description="Kumpulan Berita dan Informasi Terbaru Kantor Kementerian Agama Barito Utara."
+        breadcrumb={[{ label: "Beranda", href: "/" }, { label: "Berita" }]}
       />
 
       <section className="mx-auto max-w-7xl px-4 py-10 md:px-6 lg:px-8">

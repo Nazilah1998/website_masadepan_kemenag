@@ -7,7 +7,6 @@ import { cleanString, ensureUniqueSlug, validateAdmin } from "@/lib/cms-utils";
 export const dynamic = "force-dynamic";
 
 const table = "berita";
-
 const selectFields = `
   id,
   slug,
@@ -30,18 +29,32 @@ function createHttpError(message, status = 400) {
   return error;
 }
 
+function stripHtml(html = "") {
+  return String(html)
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function buildExcerptFromHtml(html = "", maxLength = 180) {
+  const plain = stripHtml(html);
+  if (!plain) return "";
+  if (plain.length <= maxLength) return plain;
+  return `${plain.slice(0, maxLength - 3).trim()}...`;
+}
+
 function buildPayload(body) {
   const title = cleanString(body?.title);
-  const excerpt = cleanString(body?.excerpt);
-  const category = cleanString(body?.category) || "Umum";
   const content = cleanString(body?.content);
+  const excerpt =
+    cleanString(body?.excerpt) || buildExcerptFromHtml(content, 180);
+  const category = cleanString(body?.category) || "Umum";
   const coverImage =
     normalizeCoverImageUrl(cleanString(body?.cover_image)) || null;
   const is_published = Boolean(body?.is_published);
   const publishedAtInput = cleanString(body?.published_at);
 
   if (!title) throw createHttpError("Judul berita wajib diisi.", 400);
-  if (!excerpt) throw createHttpError("Ringkasan berita wajib diisi.", 400);
   if (!content) throw createHttpError("Isi berita wajib diisi.", 400);
 
   const publishedAt = publishedAtInput
