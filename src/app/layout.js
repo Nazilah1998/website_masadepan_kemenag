@@ -3,6 +3,8 @@ import "./globals.css";
 import Providers from "@/components/Providers";
 import AppShell from "@/components/AppShell";
 import { siteInfo } from "@/data/site";
+import VercelAnalytics from "@/components/VercelAnalytics";
+import VercelSpeedInsights from "@/components/VercelSpeedInsights";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -67,10 +69,14 @@ export default function RootLayout({ children }) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
+
       <body className={`${inter.className} antialiased`}>
         <Providers>
           <AppShell>{children}</AppShell>
         </Providers>
+
+        <VercelAnalytics />
+        <VercelSpeedInsights />
       </body>
     </html>
   );
