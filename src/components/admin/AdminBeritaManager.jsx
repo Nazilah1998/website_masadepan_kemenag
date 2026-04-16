@@ -181,12 +181,192 @@ function getDefaultPublishedAt() {
   return toDateTimeLocal(new Date().toISOString());
 }
 
-function StatCard({ label, value, helper }) {
+function IconCheckCircle() {
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-      <p className="text-sm font-medium text-slate-500">{label}</p>
-      <p className="mt-2 text-3xl font-bold text-slate-900">{value}</p>
-      <p className="mt-1 text-xs text-slate-500">{helper}</p>
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path d="M9 12.75 11.25 15 15.5 9.75" />
+      <circle cx="12" cy="12" r="9" />
+    </svg>
+  );
+}
+
+function IconAlertCircle() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7.5v5.5" />
+      <circle cx="12" cy="16.5" r="0.8" fill="currentColor" />
+    </svg>
+  );
+}
+
+function IconNewsStat() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path d="M6 7.5h8" />
+      <path d="M6 11.5h8" />
+      <path d="M6 15.5h5" />
+      <rect x="4" y="4" width="16" height="16" rx="3" />
+      <path d="M15 4v16" />
+    </svg>
+  );
+}
+
+function IconPublishedStat() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path d="m8.5 12.5 2.2 2.2 4.8-5.4" />
+      <path d="M12 3.5 5.5 6v5.7c0 4.2 2.6 7.8 6.5 8.8 3.9-1 6.5-4.6 6.5-8.8V6L12 3.5Z" />
+    </svg>
+  );
+}
+
+function IconDraftStat() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path d="M7 4.5h8l3 3V19a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1Z" />
+      <path d="M15 4.5V8h3" />
+      <path d="M9 12h6" />
+      <path d="M9 15h4" />
+    </svg>
+  );
+}
+
+function IconViewsStat() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+function IconPencil() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4.5 w-4.5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path d="m4 20 4.1-.8L18 9.3 14.7 6 4.8 15.9 4 20Z" />
+      <path d="m12.9 7.8 3.3 3.3" />
+    </svg>
+  );
+}
+
+function IconTrash() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4.5 w-4.5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path d="M4 7h16" />
+      <path d="M9 7V4.8a.8.8 0 0 1 .8-.8h4.4a.8.8 0 0 1 .8.8V7" />
+      <path d="M7 7v11a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V7" />
+      <path d="M10 11v5" />
+      <path d="M14 11v5" />
+    </svg>
+  );
+}
+
+function IconGallery() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4.5 w-4.5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <rect x="3.5" y="5" width="17" height="14" rx="2.5" />
+      <circle cx="9" cy="10" r="1.3" fill="currentColor" />
+      <path d="m6.5 17 3.5-3.5 2.7 2.7 2-2 2.8 2.8" />
+    </svg>
+  );
+}
+
+function IconPlus() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4.5 w-4.5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </svg>
+  );
+}
+
+const statToneMap = {
+  emerald: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  sky: "border-sky-200 bg-sky-50 text-sky-700",
+  amber: "border-amber-200 bg-amber-50 text-amber-700",
+  violet: "border-violet-200 bg-violet-50 text-violet-700",
+};
+
+function StatCard({ label, value, helper, icon, tone = "emerald" }) {
+  const toneClasses = statToneMap[tone] || statToneMap.emerald;
+
+  return (
+    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-medium text-slate-500">{label}</p>
+          <p className="mt-2 text-3xl font-bold text-slate-900">{value}</p>
+        </div>
+
+        <div
+          className={`inline-flex h-12 w-12 items-center justify-center rounded-2xl border ${toneClasses}`}
+        >
+          {icon}
+        </div>
+      </div>
+
+      <p className="mt-3 text-xs text-slate-500">{helper}</p>
     </div>
   );
 }
@@ -440,6 +620,88 @@ function ToolbarButton({ title, onClick, children }) {
   );
 }
 
+function ActionIconButton({
+  title,
+  onClick,
+  children,
+  variant = "neutral",
+  disabled = false,
+}) {
+  const variantClasses = {
+    neutral:
+      "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900",
+    danger:
+      "border-rose-200 bg-white text-rose-600 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700",
+    sky: "border-sky-200 bg-white text-sky-600 hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700",
+  };
+
+  return (
+    <button
+      type="button"
+      title={title}
+      aria-label={title}
+      onClick={onClick}
+      disabled={disabled}
+      className={`inline-flex h-9 w-9 items-center justify-center rounded-xl border shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50 ${variantClasses[variant] || variantClasses.neutral}`}
+    >
+      {children}
+      <span className="sr-only">{title}</span>
+    </button>
+  );
+}
+
+function FloatingFeedback({ message, error, onClose }) {
+  if (!message && !error) return null;
+
+  return (
+    <div className="pointer-events-none fixed right-4 top-24 z-70 flex flex-col items-end gap-3 sm:right-6">
+      {error ? (
+        <div className="pointer-events-auto flex max-w-sm items-start gap-3 rounded-2xl border border-rose-200 bg-white px-4 py-3 text-sm text-rose-700 shadow-[0_18px_40px_-20px_rgba(190,24,93,0.45)]">
+          <div className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
+            <IconAlertCircle />
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold text-rose-700">Terjadi kendala</p>
+            <p className="mt-1 wrap-break-word text-rose-600">{error}</p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="pointer-events-auto inline-flex h-8 w-8 items-center justify-center rounded-xl text-rose-400 transition hover:bg-rose-50 hover:text-rose-600"
+            aria-label="Tutup notifikasi error"
+            title="Tutup notifikasi"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M6 6l12 12" />
+              <path d="M18 6 6 18" />
+            </svg>
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={onClose}
+          title={message}
+          aria-label={message}
+          className="pointer-events-auto group relative inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-[0_18px_40px_-18px_rgba(5,150,105,0.6)] ring-4 ring-emerald-100 transition duration-200 hover:scale-[1.03]"
+        >
+          <IconCheckCircle />
+          <span className="sr-only">{message}</span>
+          <span className="absolute -bottom-1 left-1/2 h-1.5 w-10 -translate-x-1/2 rounded-full bg-emerald-200/90" />
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function AdminBeritaManager() {
   const editorRef = useRef(null);
   const galleryPrefillRequestRef = useRef(0);
@@ -502,6 +764,20 @@ export default function AdminBeritaManager() {
   useEffect(() => {
     loadItems();
   }, []);
+
+  useEffect(() => {
+    if (!message && !error) return undefined;
+
+    const timeoutId = window.setTimeout(
+      () => {
+        setMessage("");
+        setError("");
+      },
+      error ? 5000 : 2400
+    );
+
+    return () => window.clearTimeout(timeoutId);
+  }, [message, error]);
 
   useEffect(() => {
     if (!openForm || !editorRef.current) return;
@@ -1134,49 +1410,44 @@ export default function AdminBeritaManager() {
 
   return (
     <>
-      {(message || error) && (
-        <div
-          className={`mb-6 rounded-2xl border px-4 py-3 text-sm ${error
-            ? "border-rose-200 bg-rose-50 text-rose-700"
-            : "border-emerald-200 bg-emerald-50 text-emerald-700"
-            }`}
-        >
-          {error || message}
-        </div>
-      )}
+      <FloatingFeedback
+        message={message}
+        error={error}
+        onClose={() => {
+          setMessage("");
+          setError("");
+        }}
+      />
 
       <section className="space-y-6">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div>
-            <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
-              Panel Admin
-            </span>
-            <h2 className="mt-3 text-3xl font-bold text-slate-900">
-              Kelola Berita
-            </h2>
-          </div>
-        </div>
-
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <StatCard
             label="Total berita"
             value={stats.total}
             helper="Semua artikel pada panel admin"
+            icon={<IconNewsStat />}
+            tone="emerald"
           />
           <StatCard
             label="Tayang"
             value={stats.published}
             helper="Berita yang sudah dipublikasikan"
+            icon={<IconPublishedStat />}
+            tone="sky"
           />
           <StatCard
             label="Draft"
             value={stats.draft}
             helper="Berita yang belum tayang"
+            icon={<IconDraftStat />}
+            tone="amber"
           />
           <StatCard
             label="Total pembaca"
             value={stats.views}
             helper="Akumulasi view seluruh berita"
+            icon={<IconViewsStat />}
+            tone="violet"
           />
         </div>
 
@@ -1194,9 +1465,10 @@ export default function AdminBeritaManager() {
             <button
               type="button"
               onClick={handleOpenCreate}
-              className="inline-flex items-center justify-center rounded-2xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800"
             >
-              + Tambah berita
+              <IconPlus />
+              Tambah berita
             </button>
           </div>
 
@@ -1360,31 +1632,35 @@ export default function AdminBeritaManager() {
                         </td>
 
                         <td className="px-4 py-4">
-                          <div className="flex flex-wrap gap-2">
-                            <button
-                              type="button"
+                          <div className="flex flex-wrap items-center gap-2">
+                            <ActionIconButton
+                              title="Edit berita"
                               onClick={() => handleOpenEdit(item)}
-                              className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-emerald-300 hover:text-emerald-700"
+                              variant="neutral"
                             >
-                              Edit
-                            </button>
+                              <IconPencil />
+                            </ActionIconButton>
 
-                            <button
-                              type="button"
+                            <ActionIconButton
+                              title={
+                                deletingId === item.id
+                                  ? "Menghapus berita"
+                                  : "Hapus berita"
+                              }
                               onClick={() => handleDelete(item)}
                               disabled={deletingId === item.id}
-                              className="rounded-xl border border-rose-200 px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50"
+                              variant="danger"
                             >
-                              {deletingId === item.id ? "Menghapus..." : "Hapus"}
-                            </button>
+                              <IconTrash />
+                            </ActionIconButton>
 
-                            <button
-                              type="button"
+                            <ActionIconButton
+                              title="Kirim atau edit galeri"
                               onClick={() => handleOpenGalleryForm(item)}
-                              className="rounded-xl border border-sky-200 px-3 py-2 text-xs font-semibold text-sky-700 transition hover:bg-sky-50"
+                              variant="sky"
                             >
-                              Kirim / Edit galeri
-                            </button>
+                              <IconGallery />
+                            </ActionIconButton>
                           </div>
                         </td>
                       </tr>
