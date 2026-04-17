@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import DocumentListPage from "@/components/DocumentListPage";
-import { laporanCategories, getLaporanBySlug } from "@/data/laporan";
+import { laporanCategories } from "@/data/laporan";
+import { getLaporanDetailBySlug } from "@/lib/laporan";
 import JsonLd from "@/components/seo/JsonLd";
 import { breadcrumbSchema } from "@/lib/structured-data";
 import { siteInfo } from "@/data/site";
@@ -11,7 +12,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const item = getLaporanBySlug(slug);
+  const item = await getLaporanDetailBySlug(slug);
 
   if (!item) {
     return {
@@ -41,9 +42,11 @@ export async function generateMetadata({ params }) {
   };
 }
 
+export const revalidate = 300;
+
 export default async function LaporanDetailPage({ params }) {
   const { slug } = await params;
-  const item = getLaporanBySlug(slug);
+  const item = await getLaporanDetailBySlug(slug);
 
   if (!item) {
     notFound();
@@ -59,15 +62,15 @@ export default async function LaporanDetailPage({ params }) {
     <>
       <JsonLd data={jsonLd} />
       <DocumentListPage
-      title={item.title}
-      description={item.description}
-      intro={item.intro}
-      documents={item.documents}
-      breadcrumb={[
-        { label: "Beranda", href: "/" },
-        { label: "Laporan", href: "/laporan" },
-        { label: item.title },
-      ]}
+        title={item.title}
+        description={item.description}
+        intro={item.intro}
+        documents={item.documents}
+        breadcrumb={[
+          { label: "Beranda", href: "/" },
+          { label: "Laporan", href: "/laporan" },
+          { label: item.title },
+        ]}
         notice="Dokumen akan diperbarui secara berkala. Silakan hubungi PPID untuk informasi terkini."
       />
     </>

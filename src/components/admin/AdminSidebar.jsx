@@ -70,6 +70,22 @@ function PageIcon() {
   );
 }
 
+function FolderIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" />
+      <path d="M8 12h8" />
+      <path d="M8 16h5" />
+    </svg>
+  );
+}
+
 function NavLink({ href, label, icon, active, onNavigate }) {
   return (
     <Link
@@ -136,6 +152,14 @@ export default function AdminSidebar({ profile, onNavigate }) {
               label="Halaman Statis"
               icon={<PageIcon />}
               active={pathname.startsWith("/admin/halaman")}
+              onNavigate={onNavigate}
+            />
+
+            <NavLink
+              href="/admin/laporan"
+              label="Dokumen Laporan"
+              icon={<FolderIcon />}
+              active={pathname.startsWith("/admin/laporan")}
               onNavigate={onNavigate}
             />
 

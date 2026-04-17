@@ -1,6 +1,6 @@
 import Link from "next/link";
 import PageBanner from "@/components/PageBanner";
-import { laporanCategories } from "@/data/laporan";
+import { getAllLaporanCategories } from "@/lib/laporan";
 
 export const metadata = {
   title: "Laporan dan Akuntabilitas",
@@ -8,16 +8,17 @@ export const metadata = {
     "Dokumen akuntabilitas Kementerian Agama Kabupaten Barito Utara: Renstra, Perjanjian Kinerja, Laporan Kinerja, dan SOP.",
 };
 
-export default function LaporanIndexPage() {
+export const revalidate = 300;
+
+export default async function LaporanIndexPage() {
+  const laporanCategories = await getAllLaporanCategories();
+
   return (
     <>
       <PageBanner
         title="Laporan dan Akuntabilitas"
         description="Transparansi dan akuntabilitas kinerja Kementerian Agama Kabupaten Barito Utara."
-        breadcrumb={[
-          { label: "Beranda", href: "/" },
-          { label: "Laporan" },
-        ]}
+        breadcrumb={[{ label: "Beranda", href: "/" }, { label: "Laporan" }]}
       />
 
       <main className="bg-slate-50/60 dark:bg-slate-950">
@@ -28,8 +29,8 @@ export default function LaporanIndexPage() {
             </h2>
             <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">
               Halaman ini menghimpun dokumen resmi yang mencerminkan
-              perencanaan, pelaksanaan, dan evaluasi kinerja instansi.
-              Setiap dokumen dapat diunduh atau dilihat pratinjaunya.
+              perencanaan, pelaksanaan, dan evaluasi kinerja instansi. Setiap
+              dokumen dapat diunduh atau dilihat pratinjaunya.
             </p>
           </div>
 

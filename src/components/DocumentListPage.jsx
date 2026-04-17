@@ -68,14 +68,14 @@ export default function DocumentListPage({
                   const external = doc.href?.startsWith("http");
                   const linkProps = external
                     ? {
-                        target: "_blank",
-                        rel: "noopener noreferrer",
-                      }
+                      target: "_blank",
+                      rel: "noopener noreferrer",
+                    }
                     : {};
                   return (
-                    <li key={`${doc.title}-${index}`}>
+                    <li key={doc.id || `${doc.title}-${index}`}>
                       <Link
-                        href={doc.href || "#"}
+                        href={doc.href || doc.file_url || "#"}
                         {...linkProps}
                         className="group flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-700"
                       >

@@ -153,3 +153,95 @@ create table if not exists public.documents (
 
 create index if not exists idx_documents_category
   on public.documents (category, created_at desc);
+
+  create table if not exists public.report_categories (
+  id uuid primary key default gen_random_uuid(),
+  slug text not null unique,
+  title text not null,
+  description text not null default '',
+  intro text not null default '',
+  sort_order integer not null default 0,
+  is_active boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.report_documents (
+  id uuid primary key default gen_random_uuid(),
+  category_id uuid not null references public.report_categories(id) on delete cascade,
+  title text not null,
+  description text,
+  year integer,
+  file_name text not null,
+  file_path text not null,
+  file_url text,
+  mime_type text,
+  file_size bigint not null default 0,
+  sort_order integer not null default 0,
+  is_published boolean not null default true,
+  created_by uuid,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists idx_report_categories_sort_order
+  on public.report_categories(sort_order asc);
+
+create index if not exists idx_report_documents_category_id
+  on public.report_documents(category_id);
+
+create index if not exists idx_report_documents_sort_order
+  on public.report_documents(sort_order asc);
+
+insert into public.report_categories (slug, title, description, intro, sort_order)
+values
+  (
+    'sop-dan-standar-pelayanan',
+    'SOP dan Standar Pelayanan',
+    'Standar Operasional Prosedur dan Standar Pelayanan untuk setiap layanan publik Kemenag Barito Utara.',
+    'Dokumen ini menjelaskan alur, persyaratan, waktu, biaya, dan prosedur layanan agar dapat diakses semua pihak secara transparan.',
+    1
+  ),
+  (
+    'renstra',
+    'Rencana Strategis (Renstra)',
+    'Rencana strategis lima tahunan yang memuat visi, misi, tujuan, sasaran, strategi, dan kebijakan.',
+    'Renstra menjadi pedoman arah pembangunan dan prioritas kerja Kementerian Agama Kabupaten Barito Utara.',
+    2
+  ),
+  (
+    'perjanjian-kinerja',
+    'Perjanjian Kinerja',
+    'Perjanjian Kinerja (PK) tahunan antara pimpinan satuan kerja dengan atasan langsung.',
+    'PK memuat kesepakatan terkait target kinerja dan indikator yang akan dicapai dalam satu tahun anggaran.',
+    3
+  ),
+  (
+    'rencana-kinerja',
+    'Rencana Kinerja',
+    'Rencana Kinerja tahunan sebagai penjabaran program dan kegiatan dalam Renstra.',
+    'Dokumen rencana kinerja menjadi acuan pelaksanaan program tahunan unit kerja.',
+    4
+  ),
+  (
+    'capaian-kinerja',
+    'Capaian Kinerja',
+    'Laporan capaian kinerja berdasarkan indikator yang telah ditetapkan dalam Perjanjian Kinerja.',
+    'Capaian kinerja menjadi bahan evaluasi dan perbaikan berkelanjutan pada tahun berikutnya.',
+    5
+  ),
+  (
+    'laporan-kinerja',
+    'Laporan Kinerja (LKj)',
+    'Laporan Kinerja tahunan yang memuat pertanggungjawaban kinerja instansi pemerintah.',
+    'LKj disusun sesuai PermenPAN-RB Nomor 53 Tahun 2014 sebagai bentuk akuntabilitas kinerja.',
+    6
+  ),
+  (
+    'rencana-kerja-tahunan',
+    'Rencana Kerja Tahunan (RKT)',
+    'Rencana Kerja Tahunan yang memuat program, kegiatan, dan anggaran tahun berjalan.',
+    'RKT menjadi penjabaran tahunan dari Renstra dan menjadi dasar penyusunan RKA-KL.',
+    7
+  )
+on conflict (slug) do nothing;
