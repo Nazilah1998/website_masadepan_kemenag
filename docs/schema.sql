@@ -184,6 +184,16 @@ create table if not exists public.report_documents (
   updated_at timestamptz not null default now()
 );
 
+alter table public.report_documents
+  add constraint report_documents_year_check
+  check (year is null or (year >= 2000 and year <= 2100));
+
+create index if not exists idx_report_documents_published
+  on public.report_documents(category_id, is_published, year desc);
+
+create index if not exists idx_report_categories_active
+  on public.report_categories(is_active, sort_order asc);
+
 create index if not exists idx_report_categories_sort_order
   on public.report_categories(sort_order asc);
 

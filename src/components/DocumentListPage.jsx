@@ -2,13 +2,26 @@ import Link from "next/link";
 import PageBanner from "./PageBanner";
 import PublicDocumentBrowser from "./laporan/PublicDocumentBrowser";
 
+function StatCard({ label, value }) {
+  return (
+    <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+        {label}
+      </p>
+      <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
+        {value}
+      </p>
+    </div>
+  );
+}
+
 export default function DocumentListPage({
   title,
   description,
   breadcrumb = [],
   intro,
   documents = [],
-  notice,
+  stats = [],
 }) {
   const hasDocuments = Array.isArray(documents) && documents.length > 0;
 
@@ -18,12 +31,13 @@ export default function DocumentListPage({
         title={title}
         description={description}
         breadcrumb={breadcrumb}
+        eyebrow="Laporan dan Akuntabilitas"
       />
 
       <main className="bg-slate-50/60 dark:bg-slate-950">
         <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6 md:py-14 lg:px-8">
           {intro ? (
-            <div className="rounded-2xl border border-emerald-100 bg-white p-6 shadow-sm dark:border-emerald-900/40 dark:bg-slate-900">
+            <div className="rounded-3xl border border-emerald-100 bg-white p-6 shadow-sm dark:border-emerald-900/40 dark:bg-slate-900">
               <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
                 Ringkasan
               </h2>
@@ -33,11 +47,25 @@ export default function DocumentListPage({
             </div>
           ) : null}
 
+          {Array.isArray(stats) && stats.length > 0 ? (
+            <div className="mt-8 grid gap-4 sm:grid-cols-2">
+              {stats.map((item, index) => (
+                <StatCard
+                  key={`${item.label}-${index}`}
+                  label={item.label}
+                  value={item.value}
+                />
+              ))}
+            </div>
+          ) : null}
+
           <div className="mt-8">
             {hasDocuments ? (
-              <PublicDocumentBrowser documents={documents} />
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                <PublicDocumentBrowser documents={documents} />
+              </div>
             ) : (
-              <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center dark:border-slate-700 dark:bg-slate-900">
+              <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center dark:border-slate-700 dark:bg-slate-900">
                 <p className="text-sm text-slate-600 dark:text-slate-300">
                   Dokumen belum dipublikasikan. Silakan kembali lagi nanti atau
                   hubungi kami untuk informasi lebih lanjut.
@@ -51,12 +79,6 @@ export default function DocumentListPage({
               </div>
             )}
           </div>
-
-          {notice ? (
-            <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-900 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-200">
-              {notice}
-            </div>
-          ) : null}
         </section>
       </main>
     </>

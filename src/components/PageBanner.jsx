@@ -1,15 +1,58 @@
 import Link from "next/link";
 
+function ChevronRightIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className="h-3.5 w-3.5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <polyline points="9 18 15 12 9 6" />
+    </svg>
+  );
+}
+
+function SparkIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z" />
+    </svg>
+  );
+}
+
 export default function PageBanner({
   title,
   description,
   breadcrumb = [],
+  eyebrow = "Layanan Informasi Publik",
 }) {
   return (
-    <section className="relative overflow-hidden bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.18),transparent_28%),linear-gradient(135deg,#031127_0%,#071b3a_45%,#062b2b_100%)] text-white">
-      <div className="mx-auto max-w-7xl px-4 py-10 md:px-6 md:py-12 lg:px-8 lg:py-14">
+    <section className="relative isolate overflow-hidden border-b border-white/10 bg-[linear-gradient(135deg,#052033_0%,#0b3b46_52%,#0e5f55_100%)] text-white">
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_24%),radial-gradient(circle_at_left,rgba(16,185,129,0.20),transparent_30%),radial-gradient(circle_at_bottom,rgba(255,255,255,0.08),transparent_30%)]" />
+      <div className="absolute inset-0 -z-10 opacity-20 bg-[linear-gradient(rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-size-[28px_28px]" />
+
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 md:py-14 lg:px-8 lg:py-16">
         {breadcrumb.length > 0 ? (
-          <nav className="mb-5 flex flex-wrap items-center gap-2 text-sm text-white/75">
+          <nav
+            aria-label="Breadcrumb"
+            className="mb-5 flex flex-wrap items-center gap-2 text-sm text-white/75"
+          >
             {breadcrumb.map((item, index) => {
               const isLast = index === breadcrumb.length - 1;
 
@@ -18,12 +61,12 @@ export default function PageBanner({
                   key={`${item.label}-${index}`}
                   className="flex items-center gap-2"
                 >
-                  {index > 0 ? <span className="text-white/40">/</span> : null}
+                  {index > 0 ? <ChevronRightIcon /> : null}
 
                   {item.href && !isLast ? (
                     <Link
                       href={item.href}
-                      className="transition hover:text-white"
+                      className="rounded-lg px-1 py-0.5 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                     >
                       {item.label}
                     </Link>
@@ -38,16 +81,33 @@ export default function PageBanner({
           </nav>
         ) : null}
 
-        <div className="max-w-5xl">
-          <h1 className="text-3xl font-bold leading-[1.15] tracking-tight text-white md:text-5xl lg:text-6xl">
-            {title}
-          </h1>
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_260px] lg:items-end">
+          <div className="max-w-4xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-white/90 backdrop-blur">
+              <SparkIcon />
+              <span>{eyebrow}</span>
+            </div>
 
-          {description ? (
-            <p className="mt-4 max-w-3xl text-base leading-7 text-white/80 md:text-lg">
-              {description}
+            <h1 className="mt-4 text-3xl font-bold leading-[1.12] tracking-tight text-white md:text-5xl lg:text-6xl">
+              {title}
+            </h1>
+
+            {description ? (
+              <p className="mt-4 max-w-3xl text-base leading-7 text-white/80 md:text-lg">
+                {description}
+              </p>
+            ) : null}
+          </div>
+
+          <div className="rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/70">
+              Akses Cepat
             </p>
-          ) : null}
+            <p className="mt-3 text-sm leading-6 text-white/85">
+              Telusuri informasi secara terbuka, terstruktur, dan mudah diakses oleh
+              masyarakat melalui halaman ini.
+            </p>
+          </div>
         </div>
       </div>
     </section>

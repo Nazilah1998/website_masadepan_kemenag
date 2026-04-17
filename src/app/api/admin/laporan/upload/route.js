@@ -51,8 +51,6 @@ function revalidateLaporanPaths(slug) {
 }
 
 async function resolveCategory(supabase, categoryId, categorySlug) {
-  // Hanya query by id jika format UUID valid
-  // Mencegah error "invalid input syntax for type uuid"
   if (categoryId && isValidUuid(categoryId)) {
     const byId = await supabase
       .from("report_categories")
@@ -64,7 +62,6 @@ async function resolveCategory(supabase, categoryId, categorySlug) {
     if (byId.data) return byId.data;
   }
 
-  // Fallback: cari by slug
   const slugToTry = categorySlug || categoryId;
 
   if (slugToTry) {
@@ -119,7 +116,6 @@ export async function POST(request) {
       return noStoreJson({ message: "Hanya file PDF yang diizinkan." }, 400);
     }
 
-    // Resolve kategori: coba UUID dulu, fallback ke slug
     const category = await resolveCategory(supabase, categoryId, categorySlug);
 
     if (!category) {
@@ -169,11 +165,23 @@ export async function POST(request) {
         is_published: isPublished,
         created_by: session?.profile?.id || null,
       })
-      .select("id, title")
+      .select(
+        `
+        id,
+        title,
+        description,
+        year,
+        file_name,
+        file_path,
+        file_url,
+        mime_type,
+        file_size,
+        is_published
+      `,
+      )
       .single();
 
     if (insertResult.error) {
-      // Rollback file dari storage jika insert database gagal
       await supabase.storage.from("laporan-documents").remove([filePath]);
       throw insertResult.error;
     }

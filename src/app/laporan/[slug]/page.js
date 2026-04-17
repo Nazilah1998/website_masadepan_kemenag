@@ -15,27 +15,42 @@ export async function generateMetadata({ params }) {
   const item = await getLaporanDetailBySlug(slug);
 
   if (!item) {
-    return { title: "Dokumen Tidak Ditemukan" };
+    return {
+      title: "Dokumen Tidak Ditemukan",
+      description: "Kategori laporan yang Anda cari tidak tersedia.",
+    };
   }
 
   const url = `/laporan/${item.slug}`;
+  const totalDocuments = Array.isArray(item.documents)
+    ? item.documents.length
+    : 0;
 
   return {
-    title: item.title,
-    description: item.description,
+    title: `${item.title} | Laporan`,
+    description:
+      item.description ||
+      `Dokumen ${item.title} Kementerian Agama Kabupaten Barito Utara.`,
     alternates: { canonical: url },
     openGraph: {
       type: "website",
       locale: "id_ID",
       url,
       siteName: siteInfo.shortName,
-      title: item.title,
-      description: item.description,
+      title: `${item.title} | Laporan`,
+      description:
+        item.description ||
+        `Dokumen ${item.title} Kementerian Agama Kabupaten Barito Utara.`,
     },
     twitter: {
       card: "summary",
-      title: item.title,
-      description: item.description,
+      title: `${item.title} | Laporan`,
+      description:
+        item.description ||
+        `Dokumen ${item.title} Kementerian Agama Kabupaten Barito Utara.`,
+    },
+    other: {
+      "document:count": String(totalDocuments),
     },
   };
 }
@@ -49,6 +64,13 @@ export default async function LaporanDetailPage({ params }) {
   if (!item) {
     notFound();
   }
+
+  const totalDocuments = Array.isArray(item.documents)
+    ? item.documents.length
+    : 0;
+  const totalViews = Array.isArray(item.documents)
+    ? item.documents.reduce((sum, doc) => sum + Number(doc?.view_count || 0), 0)
+    : 0;
 
   const jsonLd = breadcrumbSchema([
     { name: "Beranda", url: "/" },
@@ -69,7 +91,16 @@ export default async function LaporanDetailPage({ params }) {
           { label: "Laporan", href: "/laporan" },
           { label: item.title },
         ]}
-        notice="Dokumen ditampilkan dalam format PDF. Gunakan filter tahun untuk mempercepat pencarian dokumen."
+        stats={[
+          {
+            label: "Total Dokumen",
+            value: totalDocuments,
+          },
+          {
+            label: "Total Dibaca",
+            value: totalViews,
+          },
+        ]}
       />
     </>
   );
