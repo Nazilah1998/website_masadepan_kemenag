@@ -159,7 +159,7 @@ export default function AdminSidebar({ profile, onNavigate }) {
               href="/admin/laporan"
               label="Dokumen Laporan"
               icon={<FolderIcon />}
-              active={pathname.startsWith("/admin/laporan")}
+              active={pathname === "/admin/laporan" || pathname.startsWith("/admin/laporan/")}
               onNavigate={onNavigate}
             />
 

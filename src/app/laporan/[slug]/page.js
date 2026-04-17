@@ -15,9 +15,7 @@ export async function generateMetadata({ params }) {
   const item = await getLaporanDetailBySlug(slug);
 
   if (!item) {
-    return {
-      title: "Dokumen Tidak Ditemukan",
-    };
+    return { title: "Dokumen Tidak Ditemukan" };
   }
 
   const url = `/laporan/${item.slug}`;
@@ -71,7 +69,7 @@ export default async function LaporanDetailPage({ params }) {
           { label: "Laporan", href: "/laporan" },
           { label: item.title },
         ]}
-        notice="Dokumen akan diperbarui secara berkala. Silakan hubungi PPID untuk informasi terkini."
+        notice="Dokumen ditampilkan dalam format PDF. Gunakan filter tahun untuk mempercepat pencarian dokumen."
       />
     </>
   );

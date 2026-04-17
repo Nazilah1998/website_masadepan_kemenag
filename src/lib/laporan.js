@@ -21,7 +21,7 @@ function normalizeDocument(doc) {
   const metaParts = [];
 
   if (year) metaParts.push(year);
-  if (doc?.mime_type) metaParts.push(doc.mime_type);
+  if (doc?.mime_type) metaParts.push("PDF");
   if (fileSize > 0) metaParts.push(`${Math.round(fileSize / 1024)} KB`);
 
   return {
@@ -29,11 +29,10 @@ function normalizeDocument(doc) {
     title: doc?.title || "Dokumen",
     description: doc?.description || "",
     href,
-    meta: doc?.meta || metaParts.join(" • "),
+    meta: metaParts.join(" • "),
     year: doc?.year || null,
     file_url: doc?.file_url || href,
     file_name: doc?.file_name || "",
-    sort_order: Number(doc?.sort_order || 0),
     is_published:
       typeof doc?.is_published === "boolean" ? doc.is_published : true,
   };
@@ -72,29 +71,28 @@ export async function getLaporanDetailBySlug(slug) {
       .from("report_categories")
       .select(
         `
+        id,
+        slug,
+        title,
+        description,
+        intro,
+        sort_order,
+        is_active,
+        documents:report_documents (
           id,
-          slug,
           title,
           description,
-          intro,
-          sort_order,
-          is_active,
-          documents:report_documents (
-            id,
-            title,
-            description,
-            year,
-            file_name,
-            file_path,
-            file_url,
-            mime_type,
-            file_size,
-            sort_order,
-            is_published,
-            created_at,
-            updated_at
-          )
-        `,
+          year,
+          file_name,
+          file_path,
+          file_url,
+          mime_type,
+          file_size,
+          is_published,
+          created_at,
+          updated_at
+        )
+      `,
       )
       .eq("slug", slug)
       .eq("is_active", true)
@@ -107,11 +105,14 @@ export async function getLaporanDetailBySlug(slug) {
       ...data,
       documents: Array.isArray(data.documents)
         ? data.documents
-            .filter((item) => item?.is_published)
+            .filter(
+              (item) =>
+                item?.is_published !== false || item?.is_published === true,
+            )
             .sort((a, b) => {
-              const sortDiff =
-                Number(a?.sort_order || 0) - Number(b?.sort_order || 0);
-              if (sortDiff !== 0) return sortDiff;
+              const yearA = Number(a?.year || 0);
+              const yearB = Number(b?.year || 0);
+              if (yearA !== yearB) return yearB - yearA;
               return String(a?.title || "").localeCompare(
                 String(b?.title || ""),
                 "id",

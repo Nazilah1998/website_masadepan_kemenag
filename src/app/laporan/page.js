@@ -30,7 +30,7 @@ export default async function LaporanIndexPage() {
             <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">
               Halaman ini menghimpun dokumen resmi yang mencerminkan
               perencanaan, pelaksanaan, dan evaluasi kinerja instansi. Setiap
-              dokumen dapat diunduh atau dilihat pratinjaunya.
+              dokumen dapat dibaca langsung pada halaman detail kategori.
             </p>
           </div>
 
@@ -41,12 +41,21 @@ export default async function LaporanIndexPage() {
                 href={`/laporan/${item.slug}`}
                 className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-700"
               >
-                <h3 className="text-base font-semibold text-slate-900 group-hover:text-emerald-700 dark:text-slate-100 dark:group-hover:text-emerald-400">
-                  {item.title}
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                  {item.description}
-                </p>
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="text-base font-semibold text-slate-900 group-hover:text-emerald-700 dark:text-slate-100 dark:group-hover:text-emerald-400">
+                      {item.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                      {item.description}
+                    </p>
+                  </div>
+
+                  <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+                    {item.documents?.length || 0} dokumen
+                  </span>
+                </div>
+
                 <span className="mt-4 inline-flex items-center text-sm font-semibold text-emerald-700 dark:text-emerald-400">
                   Buka Dokumen →
                 </span>

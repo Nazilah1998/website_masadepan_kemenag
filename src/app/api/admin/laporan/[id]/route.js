@@ -16,12 +16,12 @@ function noStoreJson(data, status = 200) {
 }
 
 function revalidateLaporanPaths(slug) {
-  revalidatePath("/admin");
   revalidatePath("/admin/laporan");
-  revalidatePath("/laporan");
   if (slug) {
+    revalidatePath(`/admin/laporan/${slug}`);
     revalidatePath(`/laporan/${slug}`);
   }
+  revalidatePath("/laporan");
 }
 
 async function getSafeId(paramsPromise) {
@@ -47,7 +47,6 @@ export async function PUT(request, context) {
       title: cleanString(body?.title, 180),
       description: cleanString(body?.description, 1000),
       year: body?.year ? Number(body.year) : null,
-      sort_order: Number(body?.sort_order || 0),
       is_published: Boolean(body?.is_published),
       updated_at: new Date().toISOString(),
     };
@@ -99,9 +98,7 @@ export async function DELETE(_request, context) {
         .from("laporan-documents")
         .remove([doc.file_path]);
 
-      if (removeStorage.error) {
-        throw removeStorage.error;
-      }
+      if (removeStorage.error) throw removeStorage.error;
     }
 
     const { error } = await supabase
