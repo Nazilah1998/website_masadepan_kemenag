@@ -1,6 +1,5 @@
 import { beritaItems } from "../data/berita";
 import { publicDocuments } from "../data/documents";
-import { agendaList } from "../data/agenda";
 import {
   serviceHighlights,
   serviceCategories,
