@@ -1,23 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-
-const AVAILABLE_PERMISSIONS = [
-    { key: "dashboard:view", label: "Dashboard" },
-    { key: "berita:view", label: "Lihat berita" },
-    { key: "berita:create", label: "Tambah berita" },
-    { key: "berita:update", label: "Edit berita" },
-    { key: "berita:delete", label: "Hapus berita" },
-    { key: "berita:publish", label: "Publish berita" },
-    { key: "halaman:view", label: "Lihat halaman statis" },
-    { key: "halaman:create", label: "Tambah halaman statis" },
-    { key: "halaman:update", label: "Edit halaman statis" },
-    { key: "halaman:delete", label: "Hapus halaman statis" },
-    { key: "halaman:publish", label: "Publish halaman statis" },
-    { key: "laporan:view", label: "Lihat laporan" },
-    { key: "laporan:manage", label: "Kelola laporan" },
-    { key: "audit:view", label: "Lihat audit log" },
-];
+import {
+    AVAILABLE_EDITOR_PERMISSIONS,
+    getPermissionLabel,
+} from "@/lib/permissions";
 
 function Badge({ children, tone = "slate" }) {
     const tones = {
@@ -26,6 +13,7 @@ function Badge({ children, tone = "slate" }) {
         amber: "bg-amber-50 text-amber-700 ring-amber-200",
         rose: "bg-rose-50 text-rose-700 ring-rose-200",
         blue: "bg-blue-50 text-blue-700 ring-blue-200",
+        violet: "bg-violet-50 text-violet-700 ring-violet-200",
     };
 
     return (
@@ -37,7 +25,137 @@ function Badge({ children, tone = "slate" }) {
     );
 }
 
+function CheckIcon() {
+    return (
+        <svg
+            viewBox="0 0 24 24"
+            className="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+        >
+            <path d="M5 12l5 5L20 7" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+    );
+}
+
+function XIcon() {
+    return (
+        <svg
+            viewBox="0 0 24 24"
+            className="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+        >
+            <path d="M18 6L6 18" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+    );
+}
+
+function PowerIcon() {
+    return (
+        <svg
+            viewBox="0 0 24 24"
+            className="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+        >
+            <path d="M12 2v10" strokeLinecap="round" />
+            <path
+                d="M7.05 4.93a9 9 0 1010.9 0"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+        </svg>
+    );
+}
+
+function ShieldIcon() {
+    return (
+        <svg
+            viewBox="0 0 24 24"
+            className="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+        >
+            <path
+                d="M12 3l7 4v5c0 5-3.5 8-7 9-3.5-1-7-4-7-9V7l7-4z"
+                strokeLinejoin="round"
+            />
+            <path
+                d="M9.5 12.5l1.5 1.5 3.5-4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+        </svg>
+    );
+}
+
+function SearchIcon() {
+    return (
+        <svg
+            viewBox="0 0 24 24"
+            className="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+        >
+            <circle cx="11" cy="11" r="7" />
+            <path d="M20 20l-3.5-3.5" strokeLinecap="round" />
+        </svg>
+    );
+}
+
+function IconButton({
+    label,
+    icon,
+    onClick,
+    disabled = false,
+    tone = "slate",
+}) {
+    const tones = {
+        emerald:
+            "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
+        rose: "border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100",
+        slate: "border-slate-200 bg-white text-slate-700 hover:bg-slate-50",
+        blue: "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100",
+    };
+
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            disabled={disabled}
+            title={label}
+            aria-label={label}
+            className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl border transition disabled:cursor-not-allowed disabled:opacity-50 ${tones[tone]}`}
+        >
+            {icon}
+        </button>
+    );
+}
+
+function FilterButton({ active, children, onClick }) {
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            className={`inline-flex h-10 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition ${active
+                ? "bg-emerald-700 text-white shadow-sm"
+                : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
+                }`}
+        >
+            {children}
+        </button>
+    );
+}
+
 function EditorCard({
+    index,
     editor,
     onApprove,
     onReject,
@@ -45,79 +163,140 @@ function EditorCard({
     onOpenPermissions,
     busyAction,
 }) {
+    const role = editor.role || "editor";
     const isPending = editor.status === "pending";
     const isApproved = editor.status === "approved";
     const isRejected = editor.status === "rejected";
-    const isActive = Boolean(editor.profile?.is_active);
+    const isActive = Boolean(editor.is_active);
+
+    const approving = busyAction === `approve:${editor.user_id}`;
+    const rejecting = busyAction === `reject:${editor.user_id}`;
+    const toggling = busyAction === `toggle:${editor.user_id}`;
 
     return (
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div className="min-w-0">
-                    <h3 className="text-lg font-bold text-slate-900">{editor.full_name}</h3>
-                    <p className="mt-1 break-all text-sm text-slate-600">{editor.email}</p>
-                    <p className="mt-1 text-sm text-slate-500">
-                        Unit kerja:{" "}
-                        <span className="font-medium text-slate-700">
-                            {editor.unit_name || "-"}
-                        </span>
-                    </p>
+        <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md sm:p-6">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-3">
+                        <div className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-900 text-sm font-bold text-white">
+                            {index}
+                        </div>
+                        <div className="min-w-0">
+                            <h3 className="text-lg font-bold text-slate-900">
+                                {editor.full_name}
+                            </h3>
+                            <p className="mt-0.5 break-all text-sm text-slate-600">
+                                {editor.email}
+                            </p>
+                        </div>
+                    </div>
 
-                    <div className="mt-3 flex flex-wrap gap-2">
+                    <div className="mt-4 grid gap-3 text-sm text-slate-600 sm:grid-cols-2 xl:grid-cols-3">
+                        <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                                Unit kerja
+                            </p>
+                            <p className="mt-2 font-medium text-slate-800">
+                                {editor.unit_name || "-"}
+                            </p>
+                        </div>
+
+                        <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                                Role
+                            </p>
+                            <p className="mt-2 font-medium text-slate-800">{role}</p>
+                        </div>
+
+                        <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                                Permission
+                            </p>
+                            <p className="mt-2 font-medium text-slate-800">
+                                {editor.permissions?.length || 0} akses
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap gap-2">
                         {isPending ? <Badge tone="amber">Pending</Badge> : null}
                         {isApproved ? <Badge tone="emerald">Approved</Badge> : null}
                         {isRejected ? <Badge tone="rose">Rejected</Badge> : null}
                         <Badge tone={isActive ? "blue" : "slate"}>
                             {isActive ? "Akun aktif" : "Akun nonaktif"}
                         </Badge>
+                        <Badge tone="violet">
+                            {role === "admin" ? "Admin" : "Editor"}
+                        </Badge>
                     </div>
 
-                    <div className="mt-4 text-xs leading-6 text-slate-500">
+                    <div className="mt-4 grid gap-2 text-xs leading-6 text-slate-500 sm:grid-cols-2">
                         <p>Requested at: {editor.requested_at || "-"}</p>
                         <p>Reviewed at: {editor.reviewed_at || "-"}</p>
-                        <p>Permissions: {editor.permissions?.length || 0}</p>
                     </div>
                 </div>
 
-                <div className="grid gap-2 sm:grid-cols-2 lg:w-[320px]">
-                    <button
-                        type="button"
-                        onClick={() => onApprove(editor)}
-                        disabled={busyAction === `approve:${editor.user_id}`}
-                        className="inline-flex h-11 items-center justify-center rounded-2xl bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-300"
-                    >
-                        {busyAction === `approve:${editor.user_id}` ? "Memproses..." : "Approve"}
-                    </button>
+                <div className="lg:w-auto lg:min-w-47">
+                    <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                        Aksi cepat
+                    </p>
 
-                    <button
-                        type="button"
-                        onClick={() => onReject(editor)}
-                        disabled={busyAction === `reject:${editor.user_id}`}
-                        className="inline-flex h-11 items-center justify-center rounded-2xl border border-rose-200 bg-rose-50 px-4 text-sm font-semibold text-rose-700 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                        {busyAction === `reject:${editor.user_id}` ? "Memproses..." : "Reject"}
-                    </button>
+                    <div className="flex flex-wrap gap-2">
+                        <IconButton
+                            label={approving ? "Memproses approve" : "Approve editor"}
+                            icon={
+                                approving ? (
+                                    <span className="text-xs font-bold">...</span>
+                                ) : (
+                                    <CheckIcon />
+                                )
+                            }
+                            onClick={() => onApprove(editor)}
+                            disabled={approving}
+                            tone="emerald"
+                        />
 
-                    <button
-                        type="button"
-                        onClick={() => onToggleActive(editor)}
-                        disabled={busyAction === `toggle:${editor.user_id}`}
-                        className="inline-flex h-11 items-center justify-center rounded-2xl border border-slate-200 px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                        {busyAction === `toggle:${editor.user_id}`
-                            ? "Memproses..."
-                            : isActive
-                                ? "Nonaktifkan akun"
-                                : "Aktifkan akun"}
-                    </button>
+                        <IconButton
+                            label={rejecting ? "Memproses reject" : "Reject editor"}
+                            icon={
+                                rejecting ? (
+                                    <span className="text-xs font-bold">...</span>
+                                ) : (
+                                    <XIcon />
+                                )
+                            }
+                            onClick={() => onReject(editor)}
+                            disabled={rejecting}
+                            tone="rose"
+                        />
 
-                    <button
-                        type="button"
-                        onClick={() => onOpenPermissions(editor)}
-                        className="inline-flex h-11 items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 px-4 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
-                    >
-                        Atur permission
-                    </button>
+                        <IconButton
+                            label={
+                                toggling
+                                    ? "Memproses status akun"
+                                    : isActive
+                                        ? "Nonaktifkan akun"
+                                        : "Aktifkan akun"
+                            }
+                            icon={
+                                toggling ? (
+                                    <span className="text-xs font-bold">...</span>
+                                ) : (
+                                    <PowerIcon />
+                                )
+                            }
+                            onClick={() => onToggleActive(editor)}
+                            disabled={toggling}
+                            tone="slate"
+                        />
+
+                        <IconButton
+                            label="Atur permission"
+                            icon={<ShieldIcon />}
+                            onClick={() => onOpenPermissions(editor)}
+                            tone="blue"
+                        />
+                    </div>
                 </div>
             </div>
         </div>
@@ -159,12 +338,12 @@ function PermissionsModal({
                 </div>
 
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                    {AVAILABLE_PERMISSIONS.map((item) => {
-                        const checked = selectedPermissions.includes(item.key);
+                    {AVAILABLE_EDITOR_PERMISSIONS.map((permission) => {
+                        const checked = selectedPermissions.includes(permission);
 
                         return (
                             <label
-                                key={item.key}
+                                key={permission}
                                 className={`flex cursor-pointer items-start gap-3 rounded-2xl border px-4 py-4 transition ${checked
                                     ? "border-emerald-300 bg-emerald-50"
                                     : "border-slate-200 bg-white hover:bg-slate-50"
@@ -173,12 +352,14 @@ function PermissionsModal({
                                 <input
                                     type="checkbox"
                                     checked={checked}
-                                    onChange={() => onTogglePermission(item.key)}
+                                    onChange={() => onTogglePermission(permission)}
                                     className="mt-1 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                                 />
                                 <div>
-                                    <p className="text-sm font-semibold text-slate-900">{item.label}</p>
-                                    <p className="mt-1 text-xs text-slate-500">{item.key}</p>
+                                    <p className="text-sm font-semibold text-slate-900">
+                                        {getPermissionLabel(permission)}
+                                    </p>
+                                    <p className="mt-1 text-xs text-slate-500">{permission}</p>
                                 </div>
                             </label>
                         );
@@ -214,6 +395,8 @@ export default function EditorsManagementClient({ initialEditors = [] }) {
     const [error, setError] = useState("");
     const [editors, setEditors] = useState(initialEditors);
     const [loading, setLoading] = useState(false);
+    const [search, setSearch] = useState("");
+    const [filterRole, setFilterRole] = useState("all");
 
     const [modalOpen, setModalOpen] = useState(false);
     const [activeEditor, setActiveEditor] = useState(null);
@@ -246,7 +429,9 @@ export default function EditorsManagementClient({ initialEditors = [] }) {
 
     function openPermissions(editor) {
         setActiveEditor(editor);
-        setSelectedPermissions(Array.isArray(editor.permissions) ? editor.permissions : []);
+        setSelectedPermissions(
+            Array.isArray(editor.permissions) ? editor.permissions : []
+        );
         setModalOpen(true);
     }
 
@@ -335,11 +520,36 @@ export default function EditorsManagementClient({ initialEditors = [] }) {
         [editors]
     );
 
+    const filteredEditors = useMemo(() => {
+        const keyword = search.trim().toLowerCase();
+
+        return editors.filter((item) => {
+            const role = String(item.role || "editor").toLowerCase();
+            const matchesRole = filterRole === "all" ? true : role === filterRole;
+
+            if (!matchesRole) return false;
+            if (!keyword) return true;
+
+            const haystack = [
+                item.full_name,
+                item.email,
+                item.unit_name,
+                item.status,
+                role,
+            ]
+                .filter(Boolean)
+                .join(" ")
+                .toLowerCase();
+
+            return haystack.includes(keyword);
+        });
+    }, [editors, search, filterRole]);
+
     return (
         <>
             <div className="space-y-6">
                 <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
-                    <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-emerald-700">
                                 Super Admin Only
@@ -355,7 +565,46 @@ export default function EditorsManagementClient({ initialEditors = [] }) {
 
                         <div className="flex flex-wrap gap-2">
                             <Badge tone="amber">Pending: {pendingCount}</Badge>
-                            <Badge tone="blue">Total: {editors.length}</Badge>
+                            <Badge tone="blue">Total tampil: {filteredEditors.length}</Badge>
+                            <Badge tone="slate">Total data: {editors.length}</Badge>
+                        </div>
+                    </div>
+
+                    <div className="mt-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="relative w-full lg:max-w-md">
+                            <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+                                <SearchIcon />
+                            </span>
+                            <input
+                                type="text"
+                                value={search}
+                                onChange={(event) => setSearch(event.target.value)}
+                                placeholder="Cari nama, email, unit kerja, role, atau status"
+                                className="h-11 w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100"
+                            />
+                        </div>
+
+                        <div className="flex flex-wrap gap-2">
+                            <FilterButton
+                                active={filterRole === "all"}
+                                onClick={() => setFilterRole("all")}
+                            >
+                                Semua
+                            </FilterButton>
+
+                            <FilterButton
+                                active={filterRole === "admin"}
+                                onClick={() => setFilterRole("admin")}
+                            >
+                                Admin
+                            </FilterButton>
+
+                            <FilterButton
+                                active={filterRole === "editor"}
+                                onClick={() => setFilterRole("editor")}
+                            >
+                                Editor
+                            </FilterButton>
                         </div>
                     </div>
                 </div>
@@ -379,11 +628,12 @@ export default function EditorsManagementClient({ initialEditors = [] }) {
                             Memuat data editor...
                         </p>
                     </div>
-                ) : editors.length ? (
+                ) : filteredEditors.length ? (
                     <div className="space-y-4">
-                        {editors.map((editor) => (
+                        {filteredEditors.map((editor, index) => (
                             <EditorCard
                                 key={editor.user_id}
+                                index={index + 1}
                                 editor={editor}
                                 busyAction={busyAction}
                                 onApprove={(item) =>
@@ -406,10 +656,10 @@ export default function EditorsManagementClient({ initialEditors = [] }) {
                                     updateEditor(
                                         item.user_id,
                                         {
-                                            action: item.profile?.is_active ? "deactivate" : "activate",
+                                            action: item.is_active ? "deactivate" : "activate",
                                         },
                                         "toggle",
-                                        item.profile?.is_active
+                                        item.is_active
                                             ? "Akun editor berhasil dinonaktifkan."
                                             : "Akun editor berhasil diaktifkan."
                                     )
@@ -420,9 +670,11 @@ export default function EditorsManagementClient({ initialEditors = [] }) {
                     </div>
                 ) : (
                     <div className="rounded-[28px] border border-slate-200 bg-white p-8 text-center shadow-sm">
-                        <h2 className="text-lg font-bold text-slate-900">Belum ada editor</h2>
+                        <h2 className="text-lg font-bold text-slate-900">
+                            Data editor tidak ditemukan
+                        </h2>
                         <p className="mt-2 text-sm text-slate-500">
-                            Data pengajuan editor belum tersedia.
+                            Coba ubah kata kunci pencarian atau filter jenis akun.
                         </p>
                     </div>
                 )}

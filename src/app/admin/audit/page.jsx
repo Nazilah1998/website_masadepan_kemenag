@@ -1,7 +1,7 @@
-import { requireAdmin } from "@/lib/auth";
-import { listAudit } from "@/lib/audit";
-import { hasPermission, PERMISSIONS } from "@/lib/permissions";
 import { redirect } from "next/navigation";
+import { getCurrentUserPermissionContext } from "@/lib/user-permissions";
+import { PERMISSIONS } from "@/lib/permissions";
+import { listAudit } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -40,12 +40,26 @@ function ActionBadge({ action }) {
 }
 
 export default async function AdminAuditPage() {
-  const session = await requireAdmin();
+  const { session, permissionContext } = await getCurrentUserPermissionContext();
 
-  if (!hasPermission(session.role, PERMISSIONS.AUDIT_VIEW)) {
+  if (!session?.isAuthenticated) {
+    redirect("/admin/login");
+  }
+
+  if (!session?.isEditor && !session?.isAdmin) {
     redirect(
       "/error?message=" +
-        encodeURIComponent("Anda tidak memiliki izin melihat audit log."),
+      encodeURIComponent("Anda tidak memiliki akses ke panel admin."),
+    );
+  }
+
+  if (
+    !permissionContext?.isSuperAdmin &&
+    !permissionContext?.permissions?.includes(PERMISSIONS.AUDIT_VIEW)
+  ) {
+    redirect(
+      "/error?message=" +
+      encodeURIComponent("Anda tidak memiliki izin melihat audit log."),
     );
   }
 

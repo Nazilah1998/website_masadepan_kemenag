@@ -104,9 +104,13 @@ export default function AdminMfaClient() {
 
                 if (!active) return;
 
-                if (!sessionRes.ok || !sessionData?.permissions?.isAdmin) {
+                const hasAdminPanelAccess =
+                    sessionData?.permissions?.hasAdminPanelAccess ||
+                    sessionData?.permissions?.isAdmin ||
+                    sessionData?.permissions?.isEditor;
+
+                if (!sessionRes.ok || !hasAdminPanelAccess) {
                     router.replace("/admin/login?error=unauthorized");
-                    router.refresh();
                     return;
                 }
 
@@ -128,7 +132,6 @@ export default function AdminMfaClient() {
 
                 if (currentLevel === "aal2") {
                     router.replace(resolvedNext);
-                    router.refresh();
                     return;
                 }
 
@@ -373,6 +376,8 @@ export default function AdminMfaClient() {
                                                 <img
                                                     src={qrCode}
                                                     alt={uri || "QR Code MFA Admin"}
+                                                    width={208}
+                                                    height={208}
                                                     className="h-52 w-52"
                                                 />
                                             </div>

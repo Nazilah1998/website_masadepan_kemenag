@@ -79,7 +79,7 @@ export async function GET() {
       user_id: item.user_id,
       full_name: item.full_name,
       email: item.email,
-      unit_name: item.unit_name,
+      unit_name: item.unit_name || "-",
       status: item.status,
       requested_at: item.requested_at,
       reviewed_at: item.reviewed_at,

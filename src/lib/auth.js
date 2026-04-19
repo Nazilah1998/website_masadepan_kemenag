@@ -8,7 +8,6 @@ const EDITOR_ROLES = new Set(["editor", "admin", "super_admin"]);
 
 export function normalizeRole(role) {
   if (!role || typeof role !== "string") return null;
-
   const normalized = role.trim().toLowerCase();
   return normalized || null;
 }
@@ -16,7 +15,6 @@ export function normalizeRole(role) {
 function isMissingSessionError(error) {
   const message = String(error?.message || "").toLowerCase();
   const code = String(error?.code || "").toLowerCase();
-
   return (
     message.includes("auth session missing") ||
     message.includes("session missing") ||
@@ -31,7 +29,6 @@ function buildForbiddenUrl(message, fallback = "/error") {
 
 export async function createServerSupabaseClient() {
   const cookieStore = await cookies();
-
   return createServerClient(env.supabaseUrl, env.supabasePublishableKey, {
     cookies: {
       getAll() {
@@ -42,9 +39,7 @@ export async function createServerSupabaseClient() {
           cookiesToSet.forEach(({ name, value, options }) => {
             cookieStore.set(name, value, options);
           });
-        } catch {
-          // Tidak semua context mengizinkan set cookie
-        }
+        } catch {}
       },
     },
   });
@@ -64,7 +59,6 @@ async function getAdminMfaContext(supabase) {
           errorMessage: null,
         };
       }
-
       return {
         currentLevel: null,
         nextLevel: null,
@@ -105,9 +99,7 @@ async function getUserProfile(supabase, userId) {
       if (!error && data) {
         return data;
       }
-    } catch {
-      // lanjut ke kandidat berikutnya
-    }
+    } catch {}
   }
 
   return null;
@@ -135,6 +127,8 @@ export async function getCurrentSessionContext() {
       isAuthenticated: false,
       isAdmin: false,
       isEditor: false,
+      // TAMBAHAN: flag gabungan untuk akses panel admin
+      hasAdminAccess: false,
       aal: null,
       nextAal: null,
       isMfaVerified: false,
@@ -151,6 +145,8 @@ export async function getCurrentSessionContext() {
   );
 
   const mfa = await getAdminMfaContext(supabase);
+  const isAdmin = ADMIN_ROLES.has(role);
+  const isEditor = EDITOR_ROLES.has(role);
 
   return {
     supabase,
@@ -159,8 +155,10 @@ export async function getCurrentSessionContext() {
     claims: user?.app_metadata || {},
     role,
     isAuthenticated: true,
-    isAdmin: ADMIN_ROLES.has(role),
-    isEditor: EDITOR_ROLES.has(role),
+    isAdmin,
+    isEditor,
+    // hasAdminAccess = true untuk semua role yang boleh masuk panel admin
+    hasAdminAccess: isAdmin || isEditor,
     aal: mfa.currentLevel,
     nextAal: mfa.nextLevel,
     isMfaVerified: mfa.isVerified,
@@ -193,6 +191,8 @@ export async function requireEditor({
   return session;
 }
 
+// requireAdmin tetap KETAT: hanya admin dan super_admin.
+// Dipakai untuk halaman super admin saja (misal: manajemen editor, settings global).
 export async function requireAdmin({
   loginRedirect = "/admin/login",
   forbiddenRedirect = buildForbiddenUrl(
@@ -202,6 +202,23 @@ export async function requireAdmin({
   const session = await requireAuth({ loginRedirect });
 
   if (!session.isAdmin) {
+    redirect(forbiddenRedirect);
+  }
+
+  return session;
+}
+
+// BARU: requireAdminAccess = boleh masuk panel admin, termasuk editor.
+// Dipakai untuk layout admin dan halaman umum panel (bukan halaman super admin).
+export async function requireAdminAccess({
+  loginRedirect = "/admin/login",
+  forbiddenRedirect = buildForbiddenUrl(
+    "Akun ini tidak memiliki hak akses untuk masuk panel admin.",
+  ),
+} = {}) {
+  const session = await requireAuth({ loginRedirect });
+
+  if (!session.hasAdminAccess) {
     redirect(forbiddenRedirect);
   }
 

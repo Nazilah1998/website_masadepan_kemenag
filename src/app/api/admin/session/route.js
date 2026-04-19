@@ -17,20 +17,22 @@ function createNoStoreResponse(data, status = 200) {
 export async function GET() {
   try {
     const session = await getCurrentSessionContext();
+    const hasAdminPanelAccess = session.isAdmin || session.isEditor;
 
     return createNoStoreResponse({
       authenticated: session.isAuthenticated,
       user: session.isAuthenticated
         ? {
-            id: session.profile?.id ?? session.claims?.sub ?? null,
-            email: session.profile?.email ?? null,
+            id: session.profile?.id ?? session.user?.id ?? null,
+            email: session.profile?.email ?? session.user?.email ?? null,
             full_name: session.profile?.full_name ?? null,
-            role: session.profile?.role ?? null,
+            role: session.profile?.role ?? session.role ?? null,
           }
         : null,
       permissions: {
         isAdmin: session.isAdmin,
         isEditor: session.isEditor,
+        hasAdminPanelAccess,
         role: session.role ?? null,
       },
       mfa: {
@@ -47,6 +49,7 @@ export async function GET() {
       permissions: {
         isAdmin: false,
         isEditor: false,
+        hasAdminPanelAccess: false,
         role: null,
       },
       mfa: {

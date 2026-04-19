@@ -60,15 +60,17 @@ export async function POST(request) {
       );
     }
 
-    if (!session?.isAdmin) {
+    const hasAdminPanelAccess = session?.isAdmin || session?.isEditor;
+
+    if (!hasAdminPanelAccess) {
       await supabase.auth.signOut();
 
       return createNoStoreResponse(
         {
           ok: false,
-          code: "ADMIN_REQUIRED",
+          code: "ADMIN_PANEL_ACCESS_REQUIRED",
           message:
-            "Login berhasil, tetapi akun ini tidak memiliki hak akses admin.",
+            "Login berhasil, tetapi akun ini tidak memiliki hak akses ke panel admin.",
         },
         403,
       );
@@ -81,7 +83,12 @@ export async function POST(request) {
         id: session.profile?.id ?? session.claims?.sub ?? null,
         email: session.profile?.email ?? null,
         full_name: session.profile?.full_name ?? null,
-        role: session.profile?.role ?? null,
+        role: session.profile?.role ?? session.role ?? null,
+      },
+      permissions: {
+        isAdmin: session.isAdmin ?? false,
+        isEditor: session.isEditor ?? false,
+        hasAdminPanelAccess,
       },
       mfa: {
         currentLevel: session.aal ?? null,

@@ -125,7 +125,7 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
 
         if (!active) return;
 
-        if (res.ok && data?.permissions?.isAdmin) {
+        if (res.ok && data?.permissions?.hasAdminPanelAccess) {
           const destination = await resolveDestinationAfterAdminAuth();
 
           if (!active) return;
@@ -136,13 +136,17 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
         }
 
         if (initialUnauthorized) {
-          setError("Akun berhasil login, tetapi role-nya bukan admin.");
+          setError(
+            "Akun berhasil login, tetapi role ini tidak memiliki akses ke panel admin."
+          );
         }
       } catch (err) {
         console.error("checkSession error:", err);
 
         if (active && initialUnauthorized) {
-          setError("Akun berhasil login, tetapi role-nya bukan admin.");
+          setError(
+            "Akun berhasil login, tetapi role ini tidak memiliki akses ke panel admin."
+          );
         }
       } finally {
         if (active) {
@@ -193,9 +197,9 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
 
       const sessionData = await sessionRes.json().catch(() => null);
 
-      if (!sessionRes.ok || !sessionData?.permissions?.isAdmin) {
+      if (!sessionRes.ok || !sessionData?.permissions?.hasAdminPanelAccess) {
         setError(
-          "Login berhasil, tetapi akun ini belum memiliki role admin/super_admin di tabel profiles."
+          "Login berhasil, tetapi akun ini tidak memiliki hak akses ke panel admin. Hubungi super admin."
         );
         return;
       }

@@ -53,6 +53,61 @@ export const PERMISSIONS = {
   SETTINGS_MANAGE: "settings:manage",
 };
 
+export const PERMISSION_LABELS = {
+  [PERMISSIONS.DASHBOARD_VIEW]: "Dashboard",
+
+  [PERMISSIONS.BERITA_VIEW]: "Lihat berita",
+  [PERMISSIONS.BERITA_CREATE]: "Tambah berita",
+  [PERMISSIONS.BERITA_UPDATE]: "Edit berita",
+  [PERMISSIONS.BERITA_DELETE]: "Hapus berita",
+  [PERMISSIONS.BERITA_PUBLISH]: "Publish berita",
+
+  [PERMISSIONS.GALERI_VIEW]: "Lihat galeri",
+  [PERMISSIONS.GALERI_MANAGE]: "Kelola galeri",
+
+  [PERMISSIONS.KONTAK_VIEW]: "Lihat kontak",
+  [PERMISSIONS.KONTAK_RESPOND]: "Respon kontak",
+
+  [PERMISSIONS.HALAMAN_VIEW]: "Lihat halaman statis",
+  [PERMISSIONS.HALAMAN_CREATE]: "Tambah halaman statis",
+  [PERMISSIONS.HALAMAN_UPDATE]: "Edit halaman statis",
+  [PERMISSIONS.HALAMAN_DELETE]: "Hapus halaman statis",
+  [PERMISSIONS.HALAMAN_PUBLISH]: "Publish halaman statis",
+
+  [PERMISSIONS.LAPORAN_VIEW]: "Lihat laporan",
+  [PERMISSIONS.LAPORAN_MANAGE]: "Kelola laporan",
+
+  [PERMISSIONS.AUDIT_VIEW]: "Lihat audit log",
+
+  [PERMISSIONS.USER_VIEW]: "Lihat pengguna",
+  [PERMISSIONS.USER_INVITE]: "Undang pengguna",
+  [PERMISSIONS.USER_UPDATE_ROLE]: "Ubah role pengguna",
+  [PERMISSIONS.USER_DELETE]: "Hapus pengguna",
+
+  [PERMISSIONS.SETTINGS_MANAGE]: "Kelola pengaturan situs",
+};
+
+export const AVAILABLE_EDITOR_PERMISSIONS = [
+  PERMISSIONS.DASHBOARD_VIEW,
+
+  PERMISSIONS.BERITA_VIEW,
+  PERMISSIONS.BERITA_CREATE,
+  PERMISSIONS.BERITA_UPDATE,
+  PERMISSIONS.BERITA_DELETE,
+  PERMISSIONS.BERITA_PUBLISH,
+
+  PERMISSIONS.HALAMAN_VIEW,
+  PERMISSIONS.HALAMAN_CREATE,
+  PERMISSIONS.HALAMAN_UPDATE,
+  PERMISSIONS.HALAMAN_DELETE,
+  PERMISSIONS.HALAMAN_PUBLISH,
+
+  PERMISSIONS.LAPORAN_VIEW,
+  PERMISSIONS.LAPORAN_MANAGE,
+
+  PERMISSIONS.AUDIT_VIEW,
+];
+
 const ROLE_PERMISSIONS = {
   [ROLES.SUPER_ADMIN]: Object.values(PERMISSIONS),
 
@@ -84,11 +139,7 @@ const ROLE_PERMISSIONS = {
     PERMISSIONS.USER_VIEW,
   ],
 
-  [ROLES.EDITOR]: [
-    // Default role editor dibuat minimal.
-    // Nanti akses final editor mengikuti approval + tabel user_permissions.
-    PERMISSIONS.DASHBOARD_VIEW,
-  ],
+  [ROLES.EDITOR]: [PERMISSIONS.DASHBOARD_VIEW],
 };
 
 export function normalizeRole(role) {
@@ -100,6 +151,10 @@ export function getRolePermissions(role) {
   const normalized = normalizeRole(role);
   if (!normalized) return [];
   return ROLE_PERMISSIONS[normalized] || [];
+}
+
+export function getPermissionLabel(permission) {
+  return PERMISSION_LABELS[permission] || permission;
 }
 
 export function hasPermission(role, permission) {

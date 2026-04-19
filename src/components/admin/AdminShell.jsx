@@ -42,7 +42,10 @@ export default function AdminShell({ children }) {
 
                 if (!active) return;
 
-                if (!sessionRes.ok || !session?.permissions?.isAdmin) {
+                const hasAdminPanelAccess =
+                    session?.permissions?.isAdmin || session?.permissions?.isEditor;
+
+                if (!sessionRes.ok || !hasAdminPanelAccess) {
                     router.replace("/admin/login");
                     return;
                 }
@@ -136,7 +139,7 @@ export default function AdminShell({ children }) {
             <div className="min-w-0 flex-1">
                 <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
                     <div className="flex min-h-16 items-center justify-between gap-3 px-4 py-3 sm:px-6 xl:px-8">
-                        <div className="flex min-w-0 items-center gap-3">
+                        <div className="min-w-0 flex items-center gap-3">
                             <button
                                 type="button"
                                 onClick={() => setSidebarOpen(true)}
@@ -150,7 +153,7 @@ export default function AdminShell({ children }) {
                                 <h1 className="truncate text-lg font-bold text-slate-900 sm:text-xl">Kemenag Barito Utara</h1>
                             </div>
                         </div>
-                        <div className="hidden min-w-0 max-w-[40%] rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 sm:block">
+                        <div className="hidden max-w-[40%] min-w-0 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 sm:block">
                             <p className="truncate text-sm font-semibold text-slate-900">{compactName}</p>
                             <p className="truncate text-xs text-slate-500">{profile?.email || "-"}</p>
                         </div>
