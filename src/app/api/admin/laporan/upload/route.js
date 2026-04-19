@@ -8,6 +8,7 @@ import {
   validatePdfFile,
 } from "@/lib/laporan-upload-validation";
 import { logError, logInfo, logWarn } from "@/lib/logger";
+import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -170,6 +171,25 @@ export async function POST(request) {
       documentId: document.id,
       categoryId: category.id,
       isPublished: document.is_published,
+    });
+
+    await recordAudit({
+      session: guard.session,
+      action: AUDIT_ACTIONS.CREATE,
+      entity: AUDIT_ENTITIES.LAPORAN_DOKUMEN,
+      entityId: document?.id,
+      summary: `Menambah dokumen laporan "${document?.title || payloadValidation.data.title}"`,
+      after: {
+        id: document?.id,
+        category_id: category.id,
+        category_slug: category.slug,
+        title: document?.title,
+        year: document?.year,
+        is_published: document?.is_published,
+        file_name: document?.file_name,
+        file_size: document?.file_size,
+      },
+      request,
     });
 
     return NextResponse.json({

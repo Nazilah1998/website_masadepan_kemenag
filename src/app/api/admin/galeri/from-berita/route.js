@@ -6,6 +6,7 @@ import {
   removeStorageFileByPublicUrl,
   uploadBase64Image,
 } from "@/lib/storage-media";
+import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -311,6 +312,33 @@ export async function POST(request) {
 
       revalidateGaleriPaths(slug);
 
+      await recordAudit({
+        session: auth.session,
+        action: AUDIT_ACTIONS.UPDATE,
+        entity: AUDIT_ENTITIES.GALERI,
+        entityId: existingItem.id,
+        summary: `Memperbarui item galeri dari berita "${title}"`,
+        before: {
+          image_url: existingItem?.image_url || null,
+          image_size_kb: existingItem?.image_size_kb || 0,
+          image_size_bytes: existingItem?.image_size_bytes || 0,
+          source_type: "berita",
+          source_id: beritaId,
+        },
+        after: {
+          title,
+          image_url: finalImage.publicUrl,
+          image_size_kb: finalImage.sizeKB,
+          image_size_bytes: finalImage.sizeBytes,
+          link_url: linkUrl,
+          source_type: "berita",
+          source_id: beritaId,
+          is_published: true,
+          published_at: publishedAtIso,
+        },
+        request,
+      });
+
       return createNoStoreResponse({
         message: `Item galeri berhasil diperbarui. Ukuran gambar aktif ${finalImage.sizeKB} KB.`,
         mode: "updated",
@@ -339,6 +367,26 @@ export async function POST(request) {
     }
 
     revalidateGaleriPaths(slug);
+
+    await recordAudit({
+      session: auth.session,
+      action: AUDIT_ACTIONS.CREATE,
+      entity: AUDIT_ENTITIES.GALERI,
+      entityId: insertedItem?.id ?? null,
+      summary: `Menambah item galeri dari berita "${title}"`,
+      after: {
+        title,
+        image_url: finalImage.publicUrl,
+        image_size_kb: finalImage.sizeKB,
+        image_size_bytes: finalImage.sizeBytes,
+        link_url: linkUrl,
+        source_type: "berita",
+        source_id: beritaId,
+        is_published: true,
+        published_at: publishedAtIso,
+      },
+      request,
+    });
 
     return createNoStoreResponse({
       message: `Berita berhasil dikirim ke galeri. Ukuran gambar tersimpan ${finalImage.sizeKB} KB.`,

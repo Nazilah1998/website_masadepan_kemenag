@@ -7,6 +7,7 @@ import {
   validateDocumentPayload,
   validatePdfFile,
 } from "@/lib/laporan-upload-validation";
+import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -168,6 +169,33 @@ export async function PUT(request, context) {
         .remove([existingDoc.file_path]);
     }
 
+    await recordAudit({
+      session: guard.session,
+      action: AUDIT_ACTIONS.UPDATE,
+      entity: AUDIT_ENTITIES.LAPORAN_DOKUMEN,
+      entityId: updatedDoc?.id || id,
+      summary: `Memperbarui dokumen laporan "${updatedDoc?.title || existingDoc?.title || id}"`,
+      before: {
+        title: existingDoc?.title,
+        description: existingDoc?.description,
+        year: existingDoc?.year,
+        is_published: existingDoc?.is_published,
+        file_name: existingDoc?.file_name,
+        file_path: existingDoc?.file_path,
+        file_size: existingDoc?.file_size,
+      },
+      after: {
+        title: updatedDoc?.title,
+        description: updatedDoc?.description,
+        year: updatedDoc?.year,
+        is_published: updatedDoc?.is_published,
+        file_name: updatedDoc?.file_name,
+        file_path: updatedDoc?.file_path,
+        file_size: updatedDoc?.file_size,
+      },
+      request,
+    });
+
     return NextResponse.json({
       message: "Dokumen berhasil diperbarui.",
       document: updatedDoc,
@@ -233,6 +261,20 @@ export async function DELETE(_request, context) {
         .from(STORAGE_BUCKET)
         .remove([existingDoc.file_path]);
     }
+
+    await recordAudit({
+      session: guard.session,
+      action: AUDIT_ACTIONS.DELETE,
+      entity: AUDIT_ENTITIES.LAPORAN_DOKUMEN,
+      entityId: existingDoc?.id || id,
+      summary: `Menghapus dokumen laporan "${existingDoc?.id || id}"`,
+      before: {
+        id: existingDoc?.id,
+        file_path: existingDoc?.file_path,
+      },
+      after: null,
+      request: _request,
+    });
 
     return NextResponse.json({
       message: "Dokumen berhasil dihapus.",

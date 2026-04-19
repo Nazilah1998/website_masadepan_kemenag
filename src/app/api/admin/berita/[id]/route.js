@@ -6,6 +6,8 @@ import {
   removeStorageFileByPublicUrl,
   uploadBase64Image,
 } from "@/lib/storage-media";
+import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
+import { PERMISSIONS } from "@/lib/permissions";
 
 export const dynamic = "force-dynamic";
 
@@ -290,7 +292,10 @@ async function getSafeIdFromContext(context) {
 }
 
 export async function PUT(request, context) {
-  const auth = await validateAdmin();
+  const auth = await validateAdmin({
+    allowEditor: true,
+    permission: PERMISSIONS.BERITA_UPDATE,
+  });
   if (!auth.ok) return auth.response;
 
   try {
@@ -301,7 +306,7 @@ export async function PUT(request, context) {
     const { data: existingItem, error: existingError } = await supabase
       .from(table)
       .select(
-        "id, slug, cover_image, cover_size_kb, cover_size_bytes, published_at",
+        "id, slug, title, excerpt, category, content, is_published, published_at, cover_image, cover_size_kb, cover_size_bytes",
       )
       .eq("id", safeId)
       .maybeSingle();
@@ -344,6 +349,35 @@ export async function PUT(request, context) {
       revalidatePath(`/berita/${existingItem.slug}`);
     }
 
+    await recordAudit({
+      session: auth.session,
+      action: AUDIT_ACTIONS.UPDATE,
+      entity: AUDIT_ENTITIES.BERITA,
+      entityId: data?.id || safeId,
+      summary: `Memperbarui berita "${data?.title || existingItem?.title || safeId}"`,
+      before: {
+        slug: existingItem?.slug,
+        title: existingItem?.title,
+        excerpt: existingItem?.excerpt,
+        category: existingItem?.category,
+        content: existingItem?.content,
+        is_published: existingItem?.is_published,
+        published_at: existingItem?.published_at,
+        cover_image: existingItem?.cover_image,
+      },
+      after: {
+        slug: data?.slug,
+        title: data?.title,
+        excerpt: data?.excerpt,
+        category: data?.category,
+        content: data?.content,
+        is_published: data?.is_published,
+        published_at: data?.published_at,
+        cover_image: data?.cover_image,
+      },
+      request,
+    });
+
     return createNoStoreResponse({
       message: `Berita berhasil diperbarui. Ukuran cover aktif ${data?.cover_size_kb || payload.cover_size_kb} KB.`,
       item: data,
@@ -358,8 +392,11 @@ export async function PUT(request, context) {
   }
 }
 
-export async function DELETE(_request, context) {
-  const auth = await validateAdmin();
+export async function DELETE(request, context) {
+  const auth = await validateAdmin({
+    allowEditor: true,
+    permission: PERMISSIONS.BERITA_DELETE,
+  });
   if (!auth.ok) return auth.response;
 
   try {
@@ -426,6 +463,26 @@ export async function DELETE(_request, context) {
     }
 
     revalidateBeritaPaths(existingItem?.slug);
+
+    await recordAudit({
+      session: auth.session,
+      action: AUDIT_ACTIONS.DELETE,
+      entity: AUDIT_ENTITIES.BERITA,
+      entityId: existingItem?.id || safeId,
+      summary: `Menghapus berita "${existingItem?.slug || safeId}"`,
+      before: {
+        slug: existingItem?.slug,
+        cover_image: existingItem?.cover_image,
+        related_gallery_count: (relatedGalleryRows || []).length,
+      },
+      after: null,
+      request,
+      metadata: {
+        deleted_gallery_ids: (relatedGalleryRows || [])
+          .map((row) => row?.id)
+          .filter(Boolean),
+      },
+    });
 
     return createNoStoreResponse({
       message: "Berita berhasil dihapus.",
