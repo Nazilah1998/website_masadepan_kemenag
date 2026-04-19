@@ -128,39 +128,39 @@ export default function AdminHalamanManager() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
       <header className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
           CMS Halaman Statis
         </h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
           Kelola halaman informatif yang dapat diakses lewat{" "}
-          <code className="rounded bg-slate-100 px-1 py-0.5">/halaman/[slug]</code>.
+          <code className="rounded bg-slate-100 px-1 py-0.5 dark:bg-slate-800 dark:text-slate-200">/halaman/[slug]</code>.
         </p>
       </header>
 
       {message ? (
-        <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+        <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-700/50 dark:bg-emerald-900/20 dark:text-emerald-300">
           {message}
         </div>
       ) : null}
       {errorMessage ? (
-        <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">
+        <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800 dark:border-rose-700/50 dark:bg-rose-900/20 dark:text-rose-300">
           {errorMessage}
         </div>
       ) : null}
 
       <form
         onSubmit={handleSubmit}
-        className="mb-10 space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+        className="mb-10 space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/80"
       >
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
             {form.id ? "Edit Halaman" : "Halaman Baru"}
           </h2>
           {form.id ? (
             <button
               type="button"
               onClick={handleReset}
-              className="text-sm font-semibold text-slate-500 hover:text-slate-900"
+              className="text-sm font-semibold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
             >
               Batal Edit
             </button>
@@ -169,7 +169,6 @@ export default function AdminHalamanManager() {
 
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block">
-            <span className="text-sm font-semibold text-slate-700">Judul *</span>
             <input
               required
               minLength={3}
@@ -177,11 +176,11 @@ export default function AdminHalamanManager() {
               type="text"
               value={form.title}
               onChange={handleChange("title")}
-              className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+              className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             />
           </label>
           <label className="block">
-            <span className="text-sm font-semibold text-slate-700">
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
               Slug (opsional)
             </span>
             <input
@@ -189,13 +188,13 @@ export default function AdminHalamanManager() {
               value={form.slug}
               onChange={handleChange("slug")}
               placeholder="otomatis dari judul"
-              className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+              className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             />
           </label>
         </div>
 
         <label className="block">
-          <span className="text-sm font-semibold text-slate-700">
+          <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
             Deskripsi singkat (SEO)
           </span>
           <input
@@ -203,12 +202,12 @@ export default function AdminHalamanManager() {
             maxLength={500}
             value={form.description}
             onChange={handleChange("description")}
-            className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+            className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
           />
         </label>
 
         <label className="block">
-          <span className="text-sm font-semibold text-slate-700">Konten HTML *</span>
+          <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Konten HTML *</span>
           <textarea
             required
             minLength={10}
@@ -216,9 +215,9 @@ export default function AdminHalamanManager() {
             value={form.content}
             onChange={handleChange("content")}
             placeholder="<p>Isi halaman dalam HTML sederhana.</p>"
-            className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 font-mono text-xs focus:border-emerald-500 focus:outline-none"
+            className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 font-mono text-xs text-slate-900 focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
           />
-          <span className="mt-1 block text-xs text-slate-500">
+          <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
             Tag yang diperbolehkan dibersihkan otomatis (anti XSS).
           </span>
         </label>
@@ -230,7 +229,7 @@ export default function AdminHalamanManager() {
             onChange={handleChange("is_published")}
             className="h-4 w-4 rounded border-slate-300"
           />
-          <span className="text-sm font-semibold text-slate-700">
+          <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
             Terbitkan sekarang
           </span>
         </label>
@@ -247,20 +246,20 @@ export default function AdminHalamanManager() {
       </form>
 
       <section>
-        <h2 className="mb-3 text-lg font-semibold text-slate-900">
+        <h2 className="mb-3 text-lg font-semibold text-slate-900 dark:text-slate-100">
           Daftar Halaman
         </h2>
 
         {loading ? (
-          <p className="text-sm text-slate-500">Memuat daftar halaman...</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Memuat daftar halaman...</p>
         ) : items.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500">
+          <p className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-400">
             Belum ada halaman statis. Buat halaman pertama Anda di atas.
           </p>
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <table className="w-full min-w-[720px] text-left text-sm">
-              <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-500">
+          <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+            <table className="w-full min-w-180 text-left text-sm">
+              <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:bg-slate-800/70 dark:text-slate-300">
                 <tr>
                   <th className="px-4 py-3">Judul</th>
                   <th className="px-4 py-3">Slug</th>
@@ -269,13 +268,13 @@ export default function AdminHalamanManager() {
                   <th className="px-4 py-3 text-right">Aksi</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {items.map((item) => (
-                  <tr key={item.id}>
-                    <td className="px-4 py-3 font-semibold text-slate-900">
+                  <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/60">
+                    <td className="px-4 py-3 font-semibold text-slate-900 dark:text-slate-100">
                       {item.title}
                     </td>
-                    <td className="px-4 py-3 text-slate-600">
+                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
                       <a
                         href={`/halaman/${item.slug}`}
                         target="_blank"

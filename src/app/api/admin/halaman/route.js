@@ -2,12 +2,7 @@ import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { cleanString, ensureUniqueSlug, validateAdmin } from "@/lib/cms-utils";
-import {
-  ValidationError,
-  cleanHtml,
-  requireFields,
-  validationErrorResponse,
-} from "@/lib/validation";
+import { ValidationError, cleanHtml, requireFields } from "@/lib/validation";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import { PERMISSIONS } from "@/lib/permissions";
 
@@ -110,7 +105,17 @@ export async function POST(request) {
     try {
       payload = normalizePayload(body);
     } catch (err) {
-      return validationErrorResponse(err);
+      if (err instanceof ValidationError) {
+        return NextResponse.json(
+          {
+            message: err.message,
+            code: "VALIDATION_ERROR",
+            field: err.field ?? null,
+          },
+          { status: 400 },
+        );
+      }
+      throw err;
     }
 
     const supabase = createAdminClient();
@@ -176,7 +181,17 @@ export async function PUT(request) {
     try {
       payload = normalizePayload(body, { isUpdate: true });
     } catch (err) {
-      return validationErrorResponse(err);
+      if (err instanceof ValidationError) {
+        return NextResponse.json(
+          {
+            message: err.message,
+            code: "VALIDATION_ERROR",
+            field: err.field ?? null,
+          },
+          { status: 400 },
+        );
+      }
+      throw err;
     }
 
     const supabase = createAdminClient();

@@ -48,12 +48,7 @@ function buildCsp() {
       "https://vercel.live",
     ],
     "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-    "img-src": [
-      "'self'",
-      "data:",
-      "blob:",
-      "https:",
-    ],
+    "img-src": ["'self'", "data:", "blob:", "https:"],
     "font-src": ["'self'", "data:", "https://fonts.gstatic.com"],
     "connect-src": [
       "'self'",
@@ -104,7 +99,9 @@ if (isProd) {
 const nextConfig = {
   images: {
     remotePatterns,
+    qualities: [70, 75],
   },
+  allowedDevOrigins: ["127.0.0.1"],
   async headers() {
     return [
       {

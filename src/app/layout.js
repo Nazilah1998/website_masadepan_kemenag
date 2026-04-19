@@ -65,7 +65,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="id" suppressHydrationWarning>
+    <html lang="id" data-scroll-behavior="smooth" suppressHydrationWarning>
       <body className={`${inter.className} antialiased`}>
         <ThemeInitializer />
         <JsonLd data={[organizationSchema(), websiteSchema()]} />

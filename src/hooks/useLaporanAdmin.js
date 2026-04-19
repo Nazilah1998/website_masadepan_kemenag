@@ -38,10 +38,18 @@ function createInitialState({ initialCategory, categories }) {
 
   const initialSlug = initialCategory?.slug || categories?.[0]?.slug || "";
 
+  const docsBySlug = buildInitialDocsBySlug(categories);
+
+  if (initialCategory?.slug) {
+    docsBySlug[initialCategory.slug] = Array.isArray(initialCategory.documents)
+      ? initialCategory.documents
+      : [];
+  }
+
   return {
     ...baseState,
     activeSlug: initialSlug,
-    docsBySlug: buildInitialDocsBySlug(categories),
+    docsBySlug,
   };
 }
 

@@ -67,7 +67,10 @@ async function getEditors() {
         reviewed_at: item.reviewed_at,
         reviewed_by: item.reviewed_by,
         review_notes: item.review_notes,
-        role: item.profiles?.role || "editor",
+        role:
+            item.status === "approved"
+                ? item.profiles?.role || "editor"
+                : "editor",
         is_active: Boolean(item.profiles?.is_active),
         permissions: permissionMap.get(item.user_id) || [],
     }));

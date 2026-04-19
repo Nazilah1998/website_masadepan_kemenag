@@ -1,34 +1,35 @@
 import { requirePermission } from "@/lib/user-permissions";
 import { PERMISSIONS } from "@/lib/permissions";
 import { getDashboardStats } from "@/lib/admin-stats";
-import DashboardCharts from "@/components/admin/DashboardCharts";
 
 export const dynamic = "force-dynamic";
 
 function StatCard({ label, value, helper, tone = "slate" }) {
   const tones = {
-    slate: "border-slate-200 bg-white",
-    emerald: "border-emerald-200 bg-emerald-50/80",
-    amber: "border-amber-200 bg-amber-50/80",
-    sky: "border-sky-200 bg-sky-50/80",
-    rose: "border-rose-200 bg-rose-50/80",
+    slate: "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900/80",
+    emerald:
+      "border-emerald-200 bg-emerald-50/80 dark:border-emerald-700/60 dark:bg-emerald-900/20",
+    amber:
+      "border-amber-200 bg-amber-50/80 dark:border-amber-700/60 dark:bg-amber-900/20",
+    sky: "border-sky-200 bg-sky-50/80 dark:border-sky-700/60 dark:bg-sky-900/20",
+    rose: "border-rose-200 bg-rose-50/80 dark:border-rose-700/60 dark:bg-rose-900/20",
   };
 
   const textTones = {
-    slate: "text-slate-900",
-    emerald: "text-emerald-900",
-    amber: "text-amber-900",
-    sky: "text-sky-900",
-    rose: "text-rose-900",
+    slate: "text-slate-900 dark:text-slate-100",
+    emerald: "text-emerald-900 dark:text-emerald-200",
+    amber: "text-amber-900 dark:text-amber-200",
+    sky: "text-sky-900 dark:text-sky-200",
+    rose: "text-rose-900 dark:text-rose-200",
   };
 
   return (
     <div className={`rounded-3xl border p-5 shadow-sm ${tones[tone] || tones.slate}`}>
-      <p className="text-sm font-medium text-slate-500">{label}</p>
+      <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{label}</p>
       <p className={`mt-2 text-3xl font-bold ${textTones[tone] || textTones.slate}`}>
         {value}
       </p>
-      <p className="mt-2 text-sm text-slate-500">{helper}</p>
+      <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{helper}</p>
     </div>
   );
 }
@@ -67,23 +68,23 @@ export default async function AdminDashboardPage() {
 
   return (
     <section className="space-y-6">
-      <div className="rounded-3xl border border-emerald-100 bg-linear-to-br from-emerald-50 via-white to-white p-6 shadow-sm">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700">
+      <div className="rounded-3xl border border-emerald-100 bg-linear-to-br from-emerald-50 via-white to-white p-6 shadow-sm dark:border-emerald-700/50 dark:from-emerald-900/25 dark:via-slate-900 dark:to-slate-900">
+        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-400">
           Dashboard Admin
         </p>
 
-        <h1 className="mt-3 text-3xl font-bold text-slate-900">
+        <h1 className="mt-3 text-3xl font-bold text-slate-900 dark:text-slate-100">
           Selamat datang, {compactName}
         </h1>
 
-        <p className="mt-2 text-sm text-slate-600">
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
           {displayEmail} · Peran:{" "}
           <span className="font-semibold capitalize">
             {session.role || "tidak diketahui"}
           </span>
         </p>
 
-        <div className="mt-4 inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+        <div className="mt-4 inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:border-emerald-700/60 dark:bg-emerald-900/30 dark:text-emerald-300">
           {session?.isMfaVerified
             ? "MFA admin aktif"
             : "MFA admin belum terverifikasi"}
@@ -115,8 +116,6 @@ export default async function AdminDashboardPage() {
           tone="sky"
         />
       </div>
-
-      <DashboardCharts stats={stats} />
     </section>
   );
 }

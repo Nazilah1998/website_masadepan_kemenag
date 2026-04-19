@@ -41,7 +41,7 @@ function TrendBarChart({ trend = [] }) {
                   y={y - 0.8}
                   textAnchor="middle"
                   fontSize={2.6}
-                  fill="#0f172a"
+                  fill="currentColor"
                   fontWeight={600}
                 >
                   {t.count}
@@ -60,7 +60,7 @@ function TrendBarChart({ trend = [] }) {
         />
       </svg>
 
-      <div className="mt-2 grid grid-cols-7 gap-1 text-[10px] text-slate-500 md:grid-cols-14">
+      <div className="mt-2 grid grid-cols-7 gap-1 text-[10px] text-slate-500 dark:text-slate-400 md:grid-cols-14">
         {trend.map((t) => (
           <span key={t.date} className="truncate text-center">
             {t.date.slice(5)}
@@ -73,7 +73,7 @@ function TrendBarChart({ trend = [] }) {
 
 function TopBeritaList({ items = [] }) {
   if (!items || items.length === 0) {
-    return <p className="text-sm text-slate-500">Belum ada data berita.</p>;
+    return <p className="text-sm text-slate-500 dark:text-slate-400">Belum ada data berita.</p>;
   }
 
   const max = Math.max(...items.map((i) => i.views), 1);
@@ -86,14 +86,14 @@ function TopBeritaList({ items = [] }) {
         return (
           <li key={item.id} className="text-sm">
             <div className="flex items-center justify-between gap-3">
-              <span className="line-clamp-1 font-medium text-slate-800">
+              <span className="line-clamp-1 font-medium text-slate-800 dark:text-slate-100">
                 {i + 1}. {item.title}
               </span>
-              <span className="shrink-0 font-semibold text-emerald-700">
+              <span className="shrink-0 font-semibold text-emerald-700 dark:text-emerald-400">
                 {formatter.format(item.views)}
               </span>
             </div>
-            <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+            <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
               <div
                 className="h-full rounded-full bg-emerald-500"
                 style={{ width: `${pct}%` }}
@@ -122,7 +122,7 @@ function formatDate(iso) {
 function RecentActivity({ items = [] }) {
   if (!items || items.length === 0) {
     return (
-      <p className="text-sm text-slate-500">Belum ada aktivitas tercatat.</p>
+      <p className="text-sm text-slate-500 dark:text-slate-400">Belum ada aktivitas tercatat.</p>
     );
   }
 
@@ -131,17 +131,17 @@ function RecentActivity({ items = [] }) {
       {items.map((it) => (
         <li
           key={it.id}
-          className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-slate-50/60 p-3"
+          className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-slate-50/60 p-3 dark:border-slate-700 dark:bg-slate-800/50"
         >
           <span
             className="mt-1 inline-flex h-2 w-2 shrink-0 rounded-full bg-emerald-500"
             aria-hidden="true"
           />
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-slate-800">
+            <p className="text-sm font-medium text-slate-800 dark:text-slate-100">
               {it.summary || `${it.action} ${it.entity}`}
             </p>
-            <p className="mt-0.5 text-xs text-slate-500">
+            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
               {it.actor_email || "-"} · {formatDate(it.created_at)}
             </p>
           </div>
@@ -154,20 +154,20 @@ function RecentActivity({ items = [] }) {
 export default function DashboardCharts({ trend, topBerita, recentActivity }) {
   return (
     <div className="grid gap-5 lg:grid-cols-3">
-      <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2">
+      <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2 dark:border-slate-800 dark:bg-slate-900/80">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-slate-900">
             Tren Publikasi 14 Hari
           </h2>
-          <span className="text-xs text-slate-500">Harian</span>
+          <span className="text-xs text-slate-500 dark:text-slate-400">Harian</span>
         </div>
         <div className="mt-4">
           <TrendBarChart trend={trend} />
         </div>
       </div>
 
-      <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-sm font-semibold text-slate-900">
+      <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
           Berita Terpopuler
         </h2>
         <div className="mt-4">
@@ -175,8 +175,8 @@ export default function DashboardCharts({ trend, topBerita, recentActivity }) {
         </div>
       </div>
 
-      <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-3">
-        <h2 className="text-sm font-semibold text-slate-900">
+      <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-3 dark:border-slate-800 dark:bg-slate-900/80">
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
           Aktivitas Terbaru
         </h2>
         <div className="mt-4">

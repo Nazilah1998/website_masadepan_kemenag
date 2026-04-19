@@ -8,12 +8,12 @@ import {
 
 function Badge({ children, tone = "slate" }) {
     const tones = {
-        slate: "bg-slate-100 text-slate-700 ring-slate-200",
-        emerald: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-        amber: "bg-amber-50 text-amber-700 ring-amber-200",
-        rose: "bg-rose-50 text-rose-700 ring-rose-200",
-        blue: "bg-blue-50 text-blue-700 ring-blue-200",
-        violet: "bg-violet-50 text-violet-700 ring-violet-200",
+        slate: "bg-slate-100 text-slate-700 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700",
+        emerald: "bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:ring-emerald-900",
+        amber: "bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:ring-amber-900",
+        rose: "bg-rose-50 text-rose-700 ring-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:ring-rose-900",
+        blue: "bg-blue-50 text-blue-700 ring-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:ring-blue-900",
+        violet: "bg-violet-50 text-violet-700 ring-violet-200 dark:bg-violet-950/40 dark:text-violet-300 dark:ring-violet-900",
     };
 
     return (
@@ -119,10 +119,10 @@ function IconButton({
 }) {
     const tones = {
         emerald:
-            "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
-        rose: "border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100",
-        slate: "border-slate-200 bg-white text-slate-700 hover:bg-slate-50",
-        blue: "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100",
+            "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:bg-emerald-900/40",
+        rose: "border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-300 dark:hover:bg-rose-900/40",
+        slate: "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700",
+        blue: "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-900/40",
     };
 
     return (
@@ -146,7 +146,7 @@ function FilterButton({ active, children, onClick }) {
             onClick={onClick}
             className={`inline-flex h-10 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition ${active
                 ? "bg-emerald-700 text-white shadow-sm"
-                : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
+                : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-700"
                 }`}
         >
             {children}
@@ -174,7 +174,7 @@ function EditorCard({
     const toggling = busyAction === `toggle:${editor.user_id}`;
 
     return (
-        <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md sm:p-6">
+        <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-900/80 sm:p-6">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                 <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-3">
@@ -182,37 +182,37 @@ function EditorCard({
                             {index}
                         </div>
                         <div className="min-w-0">
-                            <h3 className="text-lg font-bold text-slate-900">
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
                                 {editor.full_name}
                             </h3>
-                            <p className="mt-0.5 break-all text-sm text-slate-600">
+                            <p className="mt-0.5 break-all text-sm text-slate-600 dark:text-slate-400">
                                 {editor.email}
                             </p>
                         </div>
                     </div>
 
-                    <div className="mt-4 grid gap-3 text-sm text-slate-600 sm:grid-cols-2 xl:grid-cols-3">
-                        <div className="rounded-2xl bg-slate-50 px-4 py-3">
-                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                    <div className="mt-4 grid gap-3 text-sm text-slate-600 dark:text-slate-400 sm:grid-cols-2 xl:grid-cols-3">
+                        <div className="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-800">
+                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
                                 Unit kerja
                             </p>
-                            <p className="mt-2 font-medium text-slate-800">
+                            <p className="mt-2 font-medium text-slate-800 dark:text-slate-100">
                                 {editor.unit_name || "-"}
                             </p>
                         </div>
 
-                        <div className="rounded-2xl bg-slate-50 px-4 py-3">
-                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                        <div className="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-800">
+                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
                                 Role
                             </p>
-                            <p className="mt-2 font-medium text-slate-800">{role}</p>
+                            <p className="mt-2 font-medium text-slate-800 dark:text-slate-100">{role}</p>
                         </div>
 
-                        <div className="rounded-2xl bg-slate-50 px-4 py-3">
-                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                        <div className="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-800">
+                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
                                 Permission
                             </p>
-                            <p className="mt-2 font-medium text-slate-800">
+                            <p className="mt-2 font-medium text-slate-800 dark:text-slate-100">
                                 {editor.permissions?.length || 0} akses
                             </p>
                         </div>
@@ -230,14 +230,14 @@ function EditorCard({
                         </Badge>
                     </div>
 
-                    <div className="mt-4 grid gap-2 text-xs leading-6 text-slate-500 sm:grid-cols-2">
+                    <div className="mt-4 grid gap-2 text-xs leading-6 text-slate-500 dark:text-slate-400 sm:grid-cols-2">
                         <p>Requested at: {editor.requested_at || "-"}</p>
                         <p>Reviewed at: {editor.reviewed_at || "-"}</p>
                     </div>
                 </div>
 
                 <div className="lg:w-auto lg:min-w-47">
-                    <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                    <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
                         Aksi cepat
                     </p>
 
@@ -316,22 +316,22 @@ function PermissionsModal({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4">
-            <div className="w-full max-w-3xl rounded-[28px] border border-slate-200 bg-white p-6 shadow-2xl sm:p-8">
+            <div className="w-full max-w-3xl rounded-[28px] border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900 sm:p-8">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                     <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.25em] text-emerald-700">
                             Permission Editor
                         </p>
-                        <h3 className="mt-2 text-2xl font-bold text-slate-900">
+                        <h3 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
                             {editor.full_name}
                         </h3>
-                        <p className="mt-1 text-sm text-slate-500">{editor.email}</p>
+                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{editor.email}</p>
                     </div>
 
                     <button
                         type="button"
                         onClick={onClose}
-                        className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 text-slate-700 hover:bg-slate-50"
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                     >
                         ✕
                     </button>
@@ -345,8 +345,8 @@ function PermissionsModal({
                             <label
                                 key={permission}
                                 className={`flex cursor-pointer items-start gap-3 rounded-2xl border px-4 py-4 transition ${checked
-                                    ? "border-emerald-300 bg-emerald-50"
-                                    : "border-slate-200 bg-white hover:bg-slate-50"
+                                    ? "border-emerald-300 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/30"
+                                    : "border-slate-200 bg-white hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
                                     }`}
                             >
                                 <input
@@ -356,10 +356,10 @@ function PermissionsModal({
                                     className="mt-1 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                                 />
                                 <div>
-                                    <p className="text-sm font-semibold text-slate-900">
+                                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                                         {getPermissionLabel(permission)}
                                     </p>
-                                    <p className="mt-1 text-xs text-slate-500">{permission}</p>
+                                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{permission}</p>
                                 </div>
                             </label>
                         );
@@ -370,7 +370,7 @@ function PermissionsModal({
                     <button
                         type="button"
                         onClick={onClose}
-                        className="inline-flex h-11 items-center justify-center rounded-2xl border border-slate-200 px-5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                        className="inline-flex h-11 items-center justify-center rounded-2xl border border-slate-200 px-5 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                     >
                         Batal
                     </button>
@@ -548,16 +548,16 @@ export default function EditorsManagementClient({ initialEditors = [] }) {
     return (
         <>
             <div className="space-y-6">
-                <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
+                <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/80 sm:p-7">
                     <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-emerald-700">
                                 Super Admin Only
                             </p>
-                            <h1 className="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">
+                            <h1 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100 sm:text-3xl">
                                 Manajemen Editor
                             </h1>
-                            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+                            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 dark:text-slate-400">
                                 Verifikasi akun editor baru, aktifkan atau nonaktifkan akun, dan
                                 tentukan akses menu sesuai kebutuhan kerja masing-masing editor.
                             </p>
@@ -572,7 +572,7 @@ export default function EditorsManagementClient({ initialEditors = [] }) {
 
                     <div className="mt-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                         <div className="relative w-full lg:max-w-md">
-                            <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+                            <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 dark:text-slate-500">
                                 <SearchIcon />
                             </span>
                             <input
@@ -580,7 +580,7 @@ export default function EditorsManagementClient({ initialEditors = [] }) {
                                 value={search}
                                 onChange={(event) => setSearch(event.target.value)}
                                 placeholder="Cari nama, email, unit kerja, role, atau status"
-                                className="h-11 w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100"
+                                className="h-11 w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-emerald-900/40"
                             />
                         </div>
 
@@ -610,21 +610,21 @@ export default function EditorsManagementClient({ initialEditors = [] }) {
                 </div>
 
                 {message ? (
-                    <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                    <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-300">
                         {message}
                     </div>
                 ) : null}
 
                 {error ? (
-                    <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                    <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-300">
                         {error}
                     </div>
                 ) : null}
 
                 {loading ? (
-                    <div className="rounded-[28px] border border-slate-200 bg-white p-8 text-center shadow-sm">
-                        <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-emerald-600" />
-                        <p className="text-sm font-medium text-slate-600">
+                    <div className="rounded-[28px] border border-slate-200 bg-white p-8 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
+                        <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-emerald-600 dark:border-slate-700 dark:border-t-emerald-500" />
+                        <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
                             Memuat data editor...
                         </p>
                     </div>
@@ -669,11 +669,11 @@ export default function EditorsManagementClient({ initialEditors = [] }) {
                         ))}
                     </div>
                 ) : (
-                    <div className="rounded-[28px] border border-slate-200 bg-white p-8 text-center shadow-sm">
-                        <h2 className="text-lg font-bold text-slate-900">
+                    <div className="rounded-[28px] border border-slate-200 bg-white p-8 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
+                        <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
                             Data editor tidak ditemukan
                         </h2>
-                        <p className="mt-2 text-sm text-slate-500">
+                        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
                             Coba ubah kata kunci pencarian atau filter jenis akun.
                         </p>
                     </div>

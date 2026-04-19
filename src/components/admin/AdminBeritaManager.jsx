@@ -210,6 +210,25 @@ function IconAlertCircle() {
   );
 }
 
+function IconTrashWarning() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path d="M4 7h16" />
+      <path d="M9 7V4.8a.8.8 0 0 1 .8-.8h4.4a.8.8 0 0 1 .8.8V7" />
+      <path d="M7 7v11a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V7" />
+      <path d="M10 11v5" />
+      <path d="M14 11v5" />
+      <path d="M12 9.2v.1" />
+    </svg>
+  );
+}
+
 function IconNewsStat() {
   return (
     <svg
@@ -350,11 +369,11 @@ function StatCard({ label, value, helper, icon, tone = "emerald" }) {
   const toneClasses = statToneMap[tone] || statToneMap.emerald;
 
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
+    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/80">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-slate-500">{label}</p>
-          <p className="mt-2 text-3xl font-bold text-slate-900">{value}</p>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{label}</p>
+          <p className="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-100">{value}</p>
         </div>
 
         <div
@@ -364,7 +383,7 @@ function StatCard({ label, value, helper, icon, tone = "emerald" }) {
         </div>
       </div>
 
-      <p className="mt-3 text-xs text-slate-500">{helper}</p>
+      <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">{helper}</p>
     </div>
   );
 }
@@ -395,7 +414,7 @@ function CoverThumb({
   if (showFallback) {
     return (
       <div
-        className={`flex items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 text-center text-sm text-slate-500 ${className}`.trim()}
+        className={`flex items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 text-center text-sm text-slate-500 dark:text-slate-400 ${className}`.trim()}
       >
         {fallbackText}
       </div>
@@ -417,10 +436,10 @@ function CoverThumb({
 
 function ToggleSwitch({ checked, onChange, label, description }) {
   return (
-    <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4">
+    <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
       <div>
-        <p className="text-sm font-semibold text-slate-900">{label}</p>
-        <p className="mt-1 text-xs text-slate-500">{description}</p>
+        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{label}</p>
+        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{description}</p>
       </div>
 
       <button
@@ -611,7 +630,7 @@ function ToolbarButton({ title, onClick, children }) {
       aria-label={title}
       onMouseDown={(event) => event.preventDefault()}
       onClick={onClick}
-      className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition hover:border-emerald-300 hover:text-emerald-700"
+      className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition hover:border-emerald-300 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-emerald-600 dark:hover:text-emerald-300"
     >
       {children}
     </button>
@@ -627,10 +646,10 @@ function ActionIconButton({
 }) {
   const variantClasses = {
     neutral:
-      "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900",
+      "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-100",
     danger:
-      "border-rose-200 bg-white text-rose-600 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700",
-    sky: "border-sky-200 bg-white text-sky-600 hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700",
+      "border-rose-200 bg-white text-rose-600 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700 dark:border-rose-900 dark:bg-slate-800 dark:text-rose-300 dark:hover:border-rose-700 dark:hover:bg-rose-950/40 dark:hover:text-rose-200",
+    sky: "border-sky-200 bg-white text-sky-600 hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700 dark:border-sky-900 dark:bg-slate-800 dark:text-sky-300 dark:hover:border-sky-700 dark:hover:bg-sky-950/40 dark:hover:text-sky-200",
   };
 
   return (
@@ -651,24 +670,57 @@ function ActionIconButton({
 function FloatingFeedback({ message, error, onClose }) {
   if (!message && !error) return null;
 
+  const isError = Boolean(error);
+  const title = isError ? "Terjadi kendala" : "Berhasil";
+  const detail = isError
+    ? error
+    : String(message || "")
+      .replace(/\s*Ukuran[^.]*\.?/gi, "")
+      .replace(/\s{2,}/g, " ")
+      .trim();
+
   return (
-    <div className="pointer-events-none fixed right-4 top-24 z-70 flex flex-col items-end gap-3 sm:right-6">
-      {error ? (
-        <div className="pointer-events-auto flex max-w-sm items-start gap-3 rounded-2xl border border-rose-200 bg-white px-4 py-3 text-sm text-rose-700 shadow-[0_18px_40px_-20px_rgba(190,24,93,0.45)]">
-          <div className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
-            <IconAlertCircle />
+    <div className="pointer-events-none fixed right-3 top-24 z-70 flex w-[min(92vw,380px)] flex-col items-end gap-3 sm:right-6">
+      <div
+        className={`pointer-events-auto w-full overflow-hidden rounded-2xl border shadow-[0_18px_40px_-20px_rgba(15,23,42,0.35)] backdrop-blur transition-all duration-200 ${isError
+          ? "border-rose-200 bg-white/95 text-rose-700 dark:border-rose-900/70 dark:bg-slate-900/95 dark:text-rose-300"
+          : "border-emerald-200 bg-white/95 text-emerald-700 dark:border-emerald-900/70 dark:bg-slate-900/95 dark:text-emerald-300"
+          }`}
+        role="status"
+        aria-live="polite"
+      >
+        <div className="flex items-start gap-3 px-4 py-3.5">
+          <div
+            className={`mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${isError
+              ? "bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-300"
+              : "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-300"
+              }`}
+          >
+            {isError ? <IconAlertCircle /> : <IconCheckCircle />}
           </div>
 
           <div className="min-w-0 flex-1">
-            <p className="font-semibold text-rose-700">Terjadi kendala</p>
-            <p className="mt-1 wrap-break-word text-rose-600">{error}</p>
+            <p
+              className={`text-sm font-semibold ${isError
+                ? "text-rose-700 dark:text-rose-300"
+                : "text-emerald-700 dark:text-emerald-300"
+                }`}
+            >
+              {title}
+            </p>
+            <p className="mt-1 text-sm leading-5 text-slate-600 dark:text-slate-300">
+              {detail}
+            </p>
           </div>
 
           <button
             type="button"
             onClick={onClose}
-            className="pointer-events-auto inline-flex h-8 w-8 items-center justify-center rounded-xl text-rose-400 transition hover:bg-rose-50 hover:text-rose-600"
-            aria-label="Tutup notifikasi error"
+            className={`pointer-events-auto inline-flex h-8 w-8 items-center justify-center rounded-lg transition ${isError
+              ? "text-rose-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/40"
+              : "text-emerald-400 hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-950/40"
+              }`}
+            aria-label="Tutup notifikasi"
             title="Tutup notifikasi"
           >
             <svg
@@ -683,19 +735,103 @@ function FloatingFeedback({ message, error, onClose }) {
             </svg>
           </button>
         </div>
-      ) : (
-        <button
-          type="button"
-          onClick={onClose}
-          title={message}
-          aria-label={message}
-          className="pointer-events-auto group relative inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-[0_18px_40px_-18px_rgba(5,150,105,0.6)] ring-4 ring-emerald-100 transition duration-200 hover:scale-[1.03]"
+
+        <div
+          className={`h-1 w-full ${isError
+            ? "bg-rose-100 dark:bg-rose-950/60"
+            : "bg-emerald-100 dark:bg-emerald-950/60"
+            }`}
         >
-          <IconCheckCircle />
-          <span className="sr-only">{message}</span>
-          <span className="absolute -bottom-1 left-1/2 h-1.5 w-10 -translate-x-1/2 rounded-full bg-emerald-200/90" />
-        </button>
-      )}
+          <div
+            className={`h-full ${isError
+              ? "bg-rose-400/90 dark:bg-rose-500/80"
+              : "bg-emerald-500/90 dark:bg-emerald-500/80"
+              }`}
+            style={{ width: "100%" }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DeleteConfirmModal({
+  open,
+  item,
+  deleting,
+  onClose,
+  onConfirm,
+}) {
+  if (!open || !item) return null;
+
+  return (
+    <div className="fixed inset-0 z-80 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-lg overflow-hidden rounded-3xl border border-rose-200 bg-white shadow-[0_30px_80px_-30px_rgba(15,23,42,0.45)] dark:border-rose-900/60 dark:bg-slate-900">
+        <div className="flex items-start gap-4 px-6 py-5">
+          <div className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-300">
+            <IconTrashWarning />
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+              Konfirmasi hapus berita
+            </h3>
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+              Tindakan ini tidak bisa dibatalkan.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={deleting}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+            aria-label="Tutup konfirmasi hapus"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M6 6l12 12" />
+              <path d="M18 6 6 18" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="px-6 pb-2">
+          <div className="rounded-2xl border border-rose-100 bg-rose-50/70 px-4 py-3 dark:border-rose-900/40 dark:bg-rose-950/20">
+            <p className="text-xs font-semibold uppercase tracking-wide text-rose-700 dark:text-rose-300">
+              Berita yang akan dihapus
+            </p>
+            <p className="mt-1 text-sm font-medium leading-6 text-slate-800 dark:text-slate-100">
+              {item.title}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col-reverse gap-2 px-6 py-5 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={deleting}
+            className="inline-flex items-center justify-center rounded-2xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+          >
+            Batal
+          </button>
+
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={deleting}
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {deleting ? "Menghapus..." : "Ya, hapus berita"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -726,6 +862,7 @@ export default function AdminBeritaManager() {
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [uploadingCover, setUploadingCover] = useState(false);
 
   const [openGalleryForm, setOpenGalleryForm] = useState(false);
@@ -1324,19 +1461,19 @@ export default function AdminBeritaManager() {
     }
   }
 
-  async function handleDelete(item) {
-    const confirmed = window.confirm(
-      `Hapus berita "${item.title}"?\nTindakan ini tidak bisa dibatalkan.`
-    );
+  function handleAskDelete(item) {
+    setDeleteTarget(item);
+  }
 
-    if (!confirmed) return;
+  async function handleDeleteConfirmed() {
+    if (!deleteTarget?.id) return;
 
     try {
-      setDeletingId(item.id);
+      setDeletingId(deleteTarget.id);
       setError("");
       setMessage("");
 
-      const response = await fetch(`/api/admin/berita/${item.id}`, {
+      const response = await fetch(`/api/admin/berita/${deleteTarget.id}`, {
         method: "DELETE",
       });
 
@@ -1352,7 +1489,13 @@ export default function AdminBeritaManager() {
       setError(err.message || "Gagal menghapus berita.");
     } finally {
       setDeletingId(null);
+      setDeleteTarget(null);
     }
+  }
+
+  function handleCloseDeleteModal() {
+    if (deletingId) return;
+    setDeleteTarget(null);
   }
 
   async function handleSubmitGallery() {
@@ -1408,6 +1551,14 @@ export default function AdminBeritaManager() {
 
   return (
     <>
+      <DeleteConfirmModal
+        open={Boolean(deleteTarget)}
+        item={deleteTarget}
+        deleting={Boolean(deletingId)}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleDeleteConfirmed}
+      />
+
       <FloatingFeedback
         message={message}
         error={error}
@@ -1449,13 +1600,13 @@ export default function AdminBeritaManager() {
           />
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
           <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+              <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
                 Berita
               </p>
-              <h3 className="mt-2 text-2xl font-bold text-slate-900">
+              <h3 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
                 Daftar berita
               </h3>
             </div>
@@ -1472,25 +1623,25 @@ export default function AdminBeritaManager() {
 
           <div className="grid gap-4 xl:grid-cols-[minmax(0,2.3fr)_minmax(180px,1fr)_minmax(180px,1fr)_minmax(180px,1fr)] xl:items-end">
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-700">
+              <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
                 Cari berita
               </label>
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Cari judul, slug, kategori, atau ringkasan..."
-                className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500"
+                className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-700">
+              <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
                 Filter status
               </label>
               <select
                 value={statusFilter}
                 onChange={(event) => setStatusFilter(event.target.value)}
-                className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500"
+                className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               >
                 <option value="all">Semua status</option>
                 <option value="published">Tayang</option>
@@ -1499,13 +1650,13 @@ export default function AdminBeritaManager() {
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-700">
+              <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
                 Filter tahun
               </label>
               <select
                 value={yearFilter}
                 onChange={(event) => setYearFilter(event.target.value)}
-                className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500"
+                className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               >
                 <option value="all">Semua tahun</option>
                 {yearOptions.map((item) => (
@@ -1517,13 +1668,13 @@ export default function AdminBeritaManager() {
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-700">
+              <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
                 Filter bulan
               </label>
               <select
                 value={monthFilter}
                 onChange={(event) => setMonthFilter(event.target.value)}
-                className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500"
+                className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               >
                 <option value="all">Semua bulan</option>
                 {monthOptions.map((item) => (
@@ -1535,13 +1686,13 @@ export default function AdminBeritaManager() {
             </div>
           </div>
 
-          <div className="mt-4 text-sm text-slate-500">
+          <div className="mt-4 text-sm text-slate-500 dark:text-slate-400">
             Menampilkan {filteredItems.length} dari {items.length} berita.
           </div>
 
-          <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200">
+          <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-700">
             <div className="overflow-x-auto">
-              <table className="min-w-300 w-full border-collapse bg-white">
+              <table className="min-w-300 w-full border-collapse bg-white dark:bg-slate-900/40">
                 <colgroup>
                   <col style={{ width: "6%" }} />
                   <col style={{ width: "54%" }} />
@@ -1551,24 +1702,24 @@ export default function AdminBeritaManager() {
                   <col style={{ width: "12%" }} />
                 </colgroup>
 
-                <thead className="bg-slate-50">
+                <thead className="bg-slate-50 dark:bg-slate-800/70">
                   <tr>
-                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                       No
                     </th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                       Judul
                     </th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                       Kategori
                     </th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                       Dibaca
                     </th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                       Status
                     </th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                       Aksi
                     </th>
                   </tr>
@@ -1579,7 +1730,7 @@ export default function AdminBeritaManager() {
                     <tr>
                       <td
                         colSpan={6}
-                        className="px-4 py-10 text-center text-sm text-slate-500"
+                        className="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400"
                       >
                         Memuat data berita...
                       </td>
@@ -1588,7 +1739,7 @@ export default function AdminBeritaManager() {
                     <tr>
                       <td
                         colSpan={6}
-                        className="px-4 py-10 text-center text-sm text-slate-500"
+                        className="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400"
                       >
                         Belum ada data yang cocok.
                       </td>
@@ -1597,31 +1748,31 @@ export default function AdminBeritaManager() {
                     paginatedItems.map((item, index) => (
                       <tr
                         key={item.id}
-                        className="border-t border-slate-100 align-top"
+                        className="border-t border-slate-100 align-top dark:border-slate-800"
                       >
-                        <td className="px-4 py-4 text-sm text-slate-600">
+                        <td className="px-4 py-4 text-sm text-slate-600 dark:text-slate-400">
                           {startIndex + index + 1}
                         </td>
 
                         <td className="px-4 py-4">
                           <div className="pr-10">
-                            <p className="text-base font-semibold leading-7 text-slate-900">
+                            <p className="text-base font-semibold leading-7 text-slate-900 dark:text-slate-100">
                               {item.title}
                             </p>
-                            <p className="mt-1 wrap-break-word text-xs text-slate-500">
+                            <p className="mt-1 wrap-break-word text-xs text-slate-500 dark:text-slate-400">
                               /berita/{item.slug}
                             </p>
-                            <p className="mt-2 text-xs text-slate-500">
+                            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                               {formatDate(getItemBaseDate(item))}
                             </p>
                           </div>
                         </td>
 
-                        <td className="px-4 py-4 text-sm text-slate-700">
+                        <td className="px-4 py-4 text-sm text-slate-700 dark:text-slate-300">
                           {item.category || "-"}
                         </td>
 
-                        <td className="px-4 py-4 text-sm text-slate-700">
+                        <td className="px-4 py-4 text-sm text-slate-700 dark:text-slate-300">
                           {Number(item.views || 0)}
                         </td>
 
@@ -1645,7 +1796,7 @@ export default function AdminBeritaManager() {
                                   ? "Menghapus berita"
                                   : "Hapus berita"
                               }
-                              onClick={() => handleDelete(item)}
+                              onClick={() => handleAskDelete(item)}
                               disabled={deletingId === item.id}
                               variant="danger"
                             >
@@ -1670,7 +1821,7 @@ export default function AdminBeritaManager() {
           </div>
 
           <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               Halaman {safeCurrentPage} dari {totalPages}
             </p>
 
@@ -1679,7 +1830,7 @@ export default function AdminBeritaManager() {
                 type="button"
                 onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                 disabled={safeCurrentPage === 1}
-                className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-emerald-300 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-emerald-300 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-emerald-600 dark:hover:text-emerald-300"
               >
                 Sebelumnya
               </button>
@@ -1699,7 +1850,7 @@ export default function AdminBeritaManager() {
                     onClick={() => setCurrentPage(item)}
                     className={`rounded-xl px-3 py-2 text-sm font-medium transition ${safeCurrentPage === item
                       ? "bg-emerald-700 text-white"
-                      : "border border-slate-200 text-slate-700 hover:border-emerald-300 hover:text-emerald-700"
+                      : "border border-slate-200 text-slate-700 hover:border-emerald-300 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-emerald-600 dark:hover:text-emerald-300"
                       }`}
                   >
                     {item}
@@ -1713,7 +1864,7 @@ export default function AdminBeritaManager() {
                   setCurrentPage((prev) => Math.min(totalPages, prev + 1))
                 }
                 disabled={safeCurrentPage === totalPages}
-                className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-emerald-300 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-emerald-300 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-emerald-600 dark:hover:text-emerald-300"
               >
                 Berikutnya
               </button>
@@ -1723,17 +1874,17 @@ export default function AdminBeritaManager() {
       </section>
 
       {openForm ? (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/50 p-4">
-          <div className="mx-auto flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-3xl bg-slate-50 shadow-2xl">
-            <div className="sticky top-0 z-10 flex items-start justify-between gap-4 rounded-t-3xl border-b border-slate-200 bg-white px-6 py-5">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 p-4">
+          <div className="mx-auto flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-3xl bg-slate-50 shadow-2xl dark:bg-slate-950">
+            <div className="sticky top-0 z-10 flex items-start justify-between gap-4 rounded-t-3xl border-b border-slate-200 bg-white px-6 py-5 dark:border-slate-800 dark:bg-slate-900">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+                <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
                   Form berita
                 </p>
-                <h3 className="mt-1 text-2xl font-bold text-slate-900">
+                <h3 className="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">
                   {editingId ? "Edit berita" : "Tambah berita"}
                 </h3>
-                <p className="mt-2 text-sm text-slate-500">
+                <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
                   {dirty
                     ? "Ada perubahan yang belum disimpan."
                     : "Form siap disimpan."}
@@ -1743,7 +1894,7 @@ export default function AdminBeritaManager() {
               <button
                 type="button"
                 onClick={handleCloseForm}
-                className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-rose-300 hover:text-rose-700"
+                className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-rose-300 hover:text-rose-700 dark:border-slate-700 dark:text-slate-300 dark:hover:border-rose-700 dark:hover:text-rose-300"
               >
                 Tutup
               </button>
@@ -1752,10 +1903,10 @@ export default function AdminBeritaManager() {
             <div className="min-h-0 overflow-y-auto p-6">
               <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
                 <div className="space-y-5">
-                  <div className="rounded-3xl border border-slate-200 bg-white p-6">
+                  <div className="rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900/80">
                     <div className="grid gap-5 md:grid-cols-2">
                       <div className="md:col-span-2">
-                        <label className="mb-2 block text-sm font-medium text-slate-700">
+                        <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
                           Judul berita
                         </label>
                         <input
@@ -1763,12 +1914,12 @@ export default function AdminBeritaManager() {
                           value={form.title}
                           onChange={handleChange}
                           placeholder="Masukkan judul berita"
-                          className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500"
+                          className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                         />
                       </div>
 
                       <div>
-                        <label className="mb-2 block text-sm font-medium text-slate-700">
+                        <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
                           Slug
                         </label>
                         <input
@@ -1776,22 +1927,22 @@ export default function AdminBeritaManager() {
                           value={form.slug}
                           onChange={handleChange}
                           placeholder="slug-berita"
-                          className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500"
+                          className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                         />
-                        <p className="mt-2 text-xs text-slate-500">
+                        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                           Preview URL: /berita/{previewSlug}
                         </p>
                       </div>
 
                       <div>
-                        <label className="mb-2 block text-sm font-medium text-slate-700">
+                        <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
                           Kategori
                         </label>
                         <select
                           name="category"
                           value={form.category}
                           onChange={handleChange}
-                          className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500"
+                          className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                         >
                           {BERITA_CATEGORIES.map((category) => (
                             <option key={category} value={category}>
@@ -1802,7 +1953,7 @@ export default function AdminBeritaManager() {
                       </div>
 
                       <div>
-                        <label className="mb-2 block text-sm font-medium text-slate-700">
+                        <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
                           Tanggal publish
                         </label>
                         <input
@@ -1810,24 +1961,24 @@ export default function AdminBeritaManager() {
                           name="published_at"
                           value={form.published_at}
                           onChange={handleChange}
-                          className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500"
+                          className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                         />
                       </div>
                     </div>
                   </div>
 
-                  <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white p-6">
+                  <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900/80">
                     <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                       <div>
                         <h4 className="text-lg font-bold text-slate-900">
                           Editor isi berita
                         </h4>
-                        <p className="text-sm text-slate-500">
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
                           Fokus pada struktur yang rapi dan mudah dibaca.
                         </p>
                       </div>
 
-                      <div className="rounded-full bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-600">
+                      <div className="rounded-full bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                         {wordCount} kata • {readingTime} menit baca
                       </div>
                     </div>
@@ -1939,14 +2090,14 @@ export default function AdminBeritaManager() {
                       contentEditable
                       suppressContentEditableWarning
                       onInput={handleEditorInput}
-                      className="h-125 overflow-y-auto rounded-2xl border border-slate-300 bg-white px-4 py-4 text-sm leading-7 text-slate-800 outline-none focus:border-emerald-500"
+                      className="h-125 overflow-y-auto rounded-2xl border border-slate-300 bg-white px-4 py-4 text-sm leading-7 text-slate-800 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-50 dark:**:text-slate-50"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  <div className="rounded-3xl border border-slate-200 bg-white p-6">
-                    <h4 className="text-lg font-bold text-slate-900">Status</h4>
+                  <div className="rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900/80">
+                    <h4 className="text-lg font-bold text-slate-900 dark:text-slate-100">Status</h4>
 
                     <div className="mt-4">
                       <ToggleSwitch
@@ -1959,7 +2110,7 @@ export default function AdminBeritaManager() {
                     </div>
                   </div>
 
-                  <div className="rounded-3xl border border-slate-200 bg-white p-6">
+                  <div className="rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900/80">
                     <div className="flex items-center justify-between gap-4">
                       <h4 className="text-lg font-bold text-slate-900">
                         Cover image
@@ -2005,7 +2156,7 @@ export default function AdminBeritaManager() {
                     </div>
                   </div>
 
-                  <div className="rounded-3xl border border-slate-200 bg-white p-5">
+                  <div className="rounded-3xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900/80">
                     <div className="flex flex-col gap-3">
                       <button
                         type="button"
@@ -2042,17 +2193,17 @@ export default function AdminBeritaManager() {
       ) : null}
 
       {openGalleryForm ? (
-        <div className="fixed inset-0 z-60 overflow-y-auto bg-slate-950/50 p-4">
-          <div className="mx-auto w-full max-w-3xl rounded-3xl bg-white shadow-2xl">
-            <div className="flex items-start justify-between gap-4 rounded-t-3xl border-b border-slate-200 px-6 py-5">
+        <div className="fixed inset-0 z-60 overflow-y-auto bg-slate-950/70 p-4">
+          <div className="mx-auto w-full max-w-3xl rounded-3xl bg-white shadow-2xl dark:bg-slate-900">
+            <div className="flex items-start justify-between gap-4 rounded-t-3xl border-b border-slate-200 px-6 py-5 dark:border-slate-800">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-wide text-sky-700">
+                <p className="text-sm font-semibold uppercase tracking-wide text-sky-700 dark:text-sky-400">
                   Form galeri
                 </p>
-                <h3 className="mt-1 text-2xl font-bold text-slate-900">
+                <h3 className="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">
                   Kirim ke galeri
                 </h3>
-                <p className="mt-2 text-sm text-slate-500">
+                <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
                   Upload cover galeri dengan kompres otomatis.
                 </p>
               </div>
@@ -2060,7 +2211,7 @@ export default function AdminBeritaManager() {
               <button
                 type="button"
                 onClick={handleCloseGalleryForm}
-                className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-rose-300 hover:text-rose-700"
+                className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-rose-300 hover:text-rose-700 dark:border-slate-700 dark:text-slate-300 dark:hover:border-rose-700 dark:hover:text-rose-300"
               >
                 Tutup
               </button>
@@ -2069,7 +2220,7 @@ export default function AdminBeritaManager() {
             <div className="grid gap-6 p-6 lg:grid-cols-[minmax(0,1fr)_280px]">
               <div className="space-y-5">
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                  <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
                     Judul berita
                   </label>
                   <input
@@ -2080,7 +2231,7 @@ export default function AdminBeritaManager() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                  <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
                     Link berita
                   </label>
                   <input
@@ -2111,7 +2262,7 @@ export default function AdminBeritaManager() {
                   </label>
 
                   {galleryPrefillLoading ? (
-                    <div className="rounded-2xl border border-sky-100 bg-sky-50 px-4 py-3 text-sm text-sky-700">
+                    <div className="rounded-2xl border border-sky-100 bg-sky-50 px-4 py-3 text-sm text-sky-700 dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-300">
                       Memuat data galeri yang sudah ada...
                     </div>
                   ) : null}
@@ -2156,8 +2307,8 @@ export default function AdminBeritaManager() {
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                <p className="text-sm font-semibold text-slate-900">
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/60">
+                <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                   Preview cover galeri
                 </p>
 

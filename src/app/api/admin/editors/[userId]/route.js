@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { getCurrentSessionContext } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
@@ -13,9 +13,11 @@ function json(data, status = 200) {
 
 export async function PATCH(request, context) {
   try {
-    const session = await requireAdmin({
-      loginRedirect: "/admin/login",
-    });
+    const session = await getCurrentSessionContext();
+
+    if (!session?.isAuthenticated) {
+      return json({ message: "Unauthorized." }, 401);
+    }
 
     if (session?.role !== "super_admin") {
       return json(

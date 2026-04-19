@@ -134,7 +134,7 @@ export default function AdminHeader({ onOpenSidebar }) {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 xl:justify-end">
+        <div className="flex w-full flex-wrap items-center gap-3 xl:w-auto xl:justify-end">
           <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 dark:border-slate-700 dark:bg-slate-900">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
               Tanggal
@@ -144,7 +144,7 @@ export default function AdminHeader({ onOpenSidebar }) {
             </p>
           </div>
 
-          <div className="max-w-[320px] rounded-2xl border border-slate-200 bg-white px-4 py-2 dark:border-slate-700 dark:bg-slate-900">
+          <div className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-2 sm:min-w-65 sm:flex-none sm:w-[320px] dark:border-slate-700 dark:bg-slate-900">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
               Login sebagai
             </p>

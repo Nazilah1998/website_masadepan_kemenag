@@ -3,24 +3,34 @@
 export const EMPTY_DOC_FORM = {
   title: "",
   description: "",
-  year: String(new Date().getFullYear()),
+  year: "",
   is_published: true,
 };
 
 export const ITEMS_PER_PAGE = 4;
 
 export function normalizeCategoryMap(categories = []) {
-  if (!Array.isArray(categories)) return {};
+  if (Array.isArray(categories)) {
+    return categories.reduce((acc, category) => {
+      if (!category?.slug) return acc;
 
-  return categories.reduce((acc, category) => {
-    if (!category?.slug) return acc;
+      acc[category.slug] = Array.isArray(category.documents)
+        ? category.documents
+        : [];
 
-    acc[category.slug] = Array.isArray(category.documents)
-      ? category.documents
-      : [];
+      return acc;
+    }, {});
+  }
 
-    return acc;
-  }, {});
+  if (categories?.slug) {
+    return {
+      [categories.slug]: Array.isArray(categories.documents)
+        ? categories.documents
+        : [],
+    };
+  }
+
+  return {};
 }
 
 export function normalizeDocUrl(doc) {
@@ -37,11 +47,26 @@ export function formatBytes(size) {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
-export function replaceDocumentInList(list = [], nextDocument) {
-  if (!nextDocument?.id) return list;
+export function replaceDocumentInList(
+  list = [],
+  idOrNextDocument,
+  maybeNextDocument,
+) {
+  const hasLegacySignature =
+    maybeNextDocument !== undefined &&
+    (typeof idOrNextDocument === "string" ||
+      typeof idOrNextDocument === "number");
+
+  const nextDocument = hasLegacySignature
+    ? maybeNextDocument
+    : idOrNextDocument;
+  const targetId = hasLegacySignature ? idOrNextDocument : nextDocument?.id;
+
+  if (targetId === undefined || targetId === null) return list;
+  if (!nextDocument || typeof nextDocument !== "object") return list;
 
   return list.map((item) =>
-    item.id === nextDocument.id ? nextDocument : item,
+    item?.id === targetId ? { ...item, ...nextDocument } : item,
   );
 }
 
@@ -62,7 +87,9 @@ export function createLaporanAdminInitialState({
 
   return {
     activeSlug: initialSlug,
-    docsBySlug: normalizeCategoryMap(categories),
+    docsBySlug: initialCategory?.slug
+      ? normalizeCategoryMap(initialCategory)
+      : {},
     loadingSlug: null,
 
     docForm: { ...EMPTY_DOC_FORM },
