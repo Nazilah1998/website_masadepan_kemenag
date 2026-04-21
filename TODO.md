@@ -7,3 +7,9 @@
 - [ ] Update styling tema di `src/app/profil/tujuan/page.js` agar konsisten light/dark mode.
 - [ ] Rapikan label konteks halaman profil agar pola “Profil > [Submenu]” konsisten.
 - [ ] Verifikasi cepat area yang diubah dan finalisasi.
+
+- [x] Update alur register editor agar tanpa verifikasi email Supabase dan diarahkan ke login admin.
+- [x] Pastikan endpoint register editor mengembalikan pesan menunggu verifikasi super_admin.
+- [x] Ubah guard dashboard agar editor pending tetap bisa masuk dashboard saja.
+- [x] Pertahankan blokir permissions editor pending untuk halaman admin selain dashboard.
+- [ ] Verifikasi cepat flow register -> login -> dashboard pending.

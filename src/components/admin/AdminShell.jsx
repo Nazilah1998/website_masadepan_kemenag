@@ -172,15 +172,18 @@ export default function AdminShell({ children }) {
                             <button
                                 type="button"
                                 onClick={toggleTheme}
-                                className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition hover:border-emerald-300 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-emerald-500 dark:hover:text-emerald-400"
+                                className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-slate-700 transition hover:border-emerald-300 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-emerald-500 dark:hover:text-emerald-400"
                                 aria-label={isDark ? "Aktifkan mode terang" : "Aktifkan mode gelap"}
-                                title={isDark ? "Mode terang" : "Mode gelap"}
+                                title={isDark ? "Ganti ke mode terang" : "Ganti ke mode gelap"}
                             >
                                 <ThemeToggleIcon isDark={isDark} />
+                                <span className="hidden text-xs font-semibold sm:inline">
+                                    {isDark ? "Light Mode" : "Dark Mode"}
+                                </span>
                             </button>
-                            <div className="hidden max-w-[40%] min-w-0 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 dark:border-slate-700 dark:bg-slate-800 sm:block">
-                                <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">{compactName}</p>
-                                <p className="truncate text-xs text-slate-500 dark:text-slate-400">{profile?.email || "-"}</p>
+                            <div className="hidden w-55 min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800 sm:block">
+                                <p className="truncate text-sm font-semibold leading-5 text-slate-900 dark:text-slate-100">{compactName}</p>
+                                <p className="truncate text-xs leading-5 text-slate-500 dark:text-slate-400">{profile?.email || "-"}</p>
                             </div>
                         </div>
                     </div>

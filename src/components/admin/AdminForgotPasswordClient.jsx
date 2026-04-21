@@ -114,7 +114,7 @@ export default function AdminForgotPasswordClient() {
                                 type="email"
                                 inputMode="email"
                                 autoComplete="email"
-                                placeholder="nama@domain.go.id"
+                                placeholder="nama@gmail.com"
                                 value={email}
                                 onChange={(event) => setEmail(event.target.value)}
                                 className={inputClassName()}

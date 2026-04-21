@@ -851,7 +851,7 @@ export default function EditorsManagementClient({ initialEditors = [] }) {
     const nextActive = !editor.is_active;
     updateEditor(
       editor.user_id,
-      { action: "toggle_active", is_active: nextActive },
+      { action: nextActive ? "activate" : "deactivate" },
       "toggle",
       nextActive ? "Akun berhasil diaktifkan." : "Akun berhasil dinonaktifkan."
     );

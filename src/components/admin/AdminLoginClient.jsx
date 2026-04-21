@@ -8,6 +8,12 @@ import { createClient } from "@/lib/supabase/client";
 import { siteInfo } from "@/data/site";
 
 function mapLoginError(error) {
+  const rawMessage = String(error?.message || "").toLowerCase();
+
+  if (rawMessage.includes("invalid login credentials")) {
+    return "Password salah / akun tidak ada, silahkan coba lagi.";
+  }
+
   return error?.message || "Terjadi kesalahan saat login admin.";
 }
 
@@ -269,7 +275,7 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               className={inputClassName()}
-              placeholder="nama@domain.go.id"
+              placeholder="nama@gmail.com"
               autoComplete="email"
               required
             />
@@ -385,7 +391,7 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
               href="/admin/register-editor"
               className="text-sm font-medium text-slate-600 transition hover:text-slate-900"
             >
-              Daftar akun editor
+              Daftar Akun Admin/Editor
             </Link>
           </div>
         </form>

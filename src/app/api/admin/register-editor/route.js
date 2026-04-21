@@ -203,7 +203,7 @@ export async function POST(request) {
     return json({
       success: true,
       message:
-        "Pendaftaran editor berhasil diproses. Jika user auth sudah ada, data editor berhasil dipulihkan.",
+        "Pendaftaran editor berhasil. Akun dapat langsung login tanpa verifikasi email Supabase, namun akses fitur menunggu verifikasi super admin.",
     });
   } catch (error) {
     return json(

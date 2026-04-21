@@ -1,6 +1,7 @@
-import { requirePermission } from "@/lib/user-permissions";
-import { PERMISSIONS } from "@/lib/permissions";
+import { getCurrentSessionContext } from "@/lib/auth";
+import { getUserPermissionContext } from "@/lib/user-permissions";
 import { getDashboardStats } from "@/lib/admin-stats";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -39,15 +40,28 @@ function numberFmt(n) {
 }
 
 export default async function AdminDashboardPage() {
-  const { session } = await requirePermission(PERMISSIONS.DASHBOARD_VIEW, {
-    loginRedirect: "/admin/login",
-    forbiddenRedirect:
+  const session = await getCurrentSessionContext();
+
+  if (!session?.isAuthenticated) {
+    redirect("/admin/login");
+  }
+
+  if (!session?.hasAdminAccess) {
+    redirect(
       "/error?message=" +
       encodeURIComponent("Anda tidak memiliki akses ke dashboard admin."),
-    inactiveRedirect:
-      "/error?message=" +
-      encodeURIComponent("Akun editor Anda belum diverifikasi oleh super admin."),
+    );
+  }
+
+  const permissionContext = await getUserPermissionContext({
+    userId: session?.profile?.id || session?.user?.id || null,
+    role: session?.role || null,
+    email: session?.profile?.email || session?.user?.email || null,
   });
+
+  const isPendingEditor =
+    session?.role === "editor" &&
+    (!permissionContext?.approved || !permissionContext?.isActive);
 
   const user = session.profile;
   const stats = await getDashboardStats({ days: 14 });
@@ -84,6 +98,13 @@ export default async function AdminDashboardPage() {
           </span>
         </p>
       </div>
+
+      {isPendingEditor ? (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          Akun editor Anda sudah bisa login, tetapi akses fitur masih dikunci.
+          Silakan tunggu verifikasi super admin untuk membuka permissions.
+        </div>
+      ) : null}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard
