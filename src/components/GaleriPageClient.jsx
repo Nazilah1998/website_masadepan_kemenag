@@ -86,7 +86,7 @@ function GalleryCard({ item, onOpen }) {
                             className="inline-flex items-center gap-2 text-xs font-semibold text-emerald-700 transition hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
                         >
                             Buka berita
-                            <span aria-hidden="true">â†’</span>
+                            <span aria-hidden="true">→</span>
                         </Link>
                     ) : null}
                 </div>

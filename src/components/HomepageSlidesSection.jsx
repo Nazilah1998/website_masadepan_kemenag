@@ -67,22 +67,34 @@ export default function HomepageSlidesSection({ slides = [] }) {
         );
     }
 
-    function nextSlide() {
+    function handleNextSlide() {
         setActiveIndex((prev) => (prev + 1) % normalizedSlides.length);
     }
+
+    const nextSlide = normalizedSlides[(safeActiveIndex + 1) % normalizedSlides.length];
 
     return (
         <section className="w-full px-6 py-14 sm:px-10 lg:px-16 xl:px-20">
             <div className="mx-auto max-w-5xl">
                 <div className="relative overflow-hidden rounded-2xl">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                        src={resolveImage(current.image_url)}
-                        alt={current.title || "Slide beranda"}
-                        className="mx-auto h-[320px] w-auto max-w-full object-contain sm:h-[420px] lg:h-[520px]"
-                    />
+                    {nextSlide?.image_url ? (
+                        <link rel="preload" as="image" href={resolveImage(nextSlide.image_url)} />
+                    ) : null}
 
-                    <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+                    <div className="relative h-[320px] sm:h-[420px] lg:h-[520px]">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                            key={current.id || `${safeActiveIndex}-${current.title}`}
+                            src={resolveImage(current.image_url)}
+                            alt={current.title || "Slide beranda"}
+                            className="mx-auto h-[320px] w-auto max-w-full object-contain animate-[fadeIn_700ms_ease-in-out] sm:h-[420px] lg:h-[520px]"
+                            loading={safeActiveIndex === 0 ? "eager" : "lazy"}
+                            decoding="async"
+                            fetchPriority={safeActiveIndex === 0 ? "high" : "auto"}
+                        />
+                    </div>
+
+                    <div className="absolute bottom-4 left-4 right-4 z-20 flex items-center justify-between">
                         <div className="rounded-full bg-black/55 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
                             {safeActiveIndex + 1} / {normalizedSlides.length}
                         </div>
@@ -98,7 +110,7 @@ export default function HomepageSlidesSection({ slides = [] }) {
                             </button>
                             <button
                                 type="button"
-                                onClick={nextSlide}
+                                onClick={handleNextSlide}
                                 className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-black/35 text-white backdrop-blur transition hover:bg-black/55"
                                 aria-label="Slide berikutnya"
                             >

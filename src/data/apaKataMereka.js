@@ -21,7 +21,7 @@ export const apaKataMereka = [
   {
     name: "H. Arbaja, S.Ag., M.A.P",
     position: "Kepala Kantor Kemenag Kabupaten Barito Utara",
-    image: "/kemenag-kepala.png",
+    image: "/Kemenag-kepala.png",
     quote: [
       "Ladang perbedaan sebagai ujian keimanan dalam berbangsa dan bernegara agar tetap indah dengan berbagai warna dan jenis.",
       "Jangankan menjadi sebab perbedaan sebagai kesomobongan akan rasa paling benar dalam berfikir dan bertindak, karena perbedaan yang mengikatkan perpecahanan yang membut bangsa dan negara melemah, hingga akhirnya mu dah terijah.",
