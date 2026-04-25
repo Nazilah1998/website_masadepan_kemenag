@@ -1,44 +1,37 @@
-# TODO - Homepage Slider + Admin CRUD
+# TODO - Optimasi + Fitur Viewer PDF Laporan
 
-- [x] 1. Add DB schema for `homepage_slides` in `docs/schema.sql`
-- [x] 2. Create library `src/lib/homepage-slides.js` for public/admin queries
-- [x] 3. Create admin APIs:
-  - [x] `src/app/api/admin/homepage-slides/route.js`
-  - [x] `src/app/api/admin/homepage-slides/[id]/route.js`
-- [x] 4. Create admin UI:
-  - [x] `src/app/admin/homepage-slides/page.jsx`
-  - [x] `src/components/admin/AdminHomepageSlidesManager.jsx`
-- [x] 5. Update permissions and admin navigation:
-  - [x] `src/lib/permissions.js`
-  - [x] `src/components/admin/AdminSidebar.jsx`
-  - [x] `src/components/admin/AdminHeader.jsx`
-- [x] 6. Create homepage section slider:
-  - [x] `src/components/HomepageSlidesSection.jsx`
-  - [x] integrate into `src/app/page.js`
-- [ ] 7. Run critical-path testing and fix issues
+- [ ] 1. Optimasi loading preview PDF agar lebih cepat:
+  - [ ] Lazy mount viewer hanya saat dibuka
+  - [ ] Render bertahap (halaman awal dulu), bukan blocking semua halaman sekaligus
+  - [ ] Gunakan ukuran render responsif agar tidak terlalu berat
+  - [ ] Cegah re-render berulang yang tidak perlu
 
-# TODO - Modernisasi Konfirmasi Tutup Form Berita
+- [ ] 2. Tambah toolbar viewer:
+  - [ ] Indikator Halaman X / Y
+  - [ ] Tombol Prev / Next
+  - [ ] Tombol Download dokumen (ikon + label)
 
-- [x] 1. Tambah state kontrol modal konfirmasi tutup form di `src/components/admin/AdminBeritaManager.jsx`
-- [x] 2. Ganti `window.confirm` pada `handleCloseForm()` menjadi alur modal modern
-- [x] 3. Tambah komponen modal konfirmasi “Perubahan belum disimpan” dengan style konsisten (light/dark)
-- [x] 4. Hubungkan aksi tombol modal:
-  - [x] batal / lanjut edit (modal tertutup, form tetap)
-  - [x] konfirmasi tutup (form ditutup dan perubahan dibuang)
-- [ ] 5. Verifikasi alur UI secara fungsional
+- [ ] 3. Tambah scroll internal pada area PDF:
+  - [ ] Container tinggi tetap
+  - [ ] Overflow vertikal aktif
+  - [ ] UX scroll halus untuk melihat halaman bawah
 
-# TODO - Smooth Transition Slider Beranda
+- [ ] 4. Integrasi properti viewer dari daftar dokumen:
+  - [ ] Kirim `fileUrl` dan `title` dari `LaporanDocumentsClient` ke `PdfViewerClient`
+  - [ ] Rapikan fallback agar tetap inline (tidak memaksa tab baru)
 
-- [x] 1. Refactor render gambar slider di `src/components/HomepageSlidesSection.jsx` ke layered slide
-- [x] 2. Tambahkan animasi transisi halus (opacity + timing + easing) antar slide
-- [x] 3. Tambahkan subtle zoom/transform pada slide aktif agar perpindahan lebih lembut
-- [x] 4. Pastikan autoplay, tombol prev/next, dan dot indicator tetap sinkron
-- [ ] 5. Verifikasi visual perpindahan slider pada UI
+- [ ] 5. Critical-path testing halaman `/laporan/[slug]`:
+  - [ ] Buka/Tutup dokumen tetap normal
+  - [ ] Preview tampil lebih cepat
+  - [ ] Halaman X/Y tampil
+  - [ ] Prev/Next berfungsi
+  - [ ] Scroll internal berfungsi
+  - [ ] Download berfungsi
 
-# TODO - Optimasi Performa Refresh Slider Beranda
+# TODO - Responsive PDF Viewer Mobile
 
-- [ ] 1. Ganti strategi render slider jadi single active image (hindari render semua slide sekaligus)
-- [ ] 2. Pertahankan transisi halus dengan pendekatan ringan (fade overlay / fade image)
-- [ ] 3. Tambahkan optimasi loading gambar (decoding async, fetchPriority tepat, preload terbatas)
-- [ ] 4. Kurangi efek visual berat agar refresh awal terasa lebih smooth
-- [ ] 5. Verifikasi performa visual setelah refresh halaman beranda
+- [ ] 1. Rapikan toolbar PDF agar responsif dan compact di mobile
+- [ ] 2. Pastikan lebar halaman PDF selalu fit container tanpa scroll horizontal
+- [ ] 3. Tambahkan kontrol Fit + batas zoom aman untuk mobile
+- [ ] 4. Tuning container preview di `LaporanDocumentsClient` untuk padding mobile
+- [ ] 5. Uji critical-path mobile/tablet/desktop setelah perbaikan

@@ -18,6 +18,8 @@ const ALLOWED_PERMISSIONS = new Set([
   "halaman:publish",
   "laporan:view",
   "laporan:manage",
+  "homepage_slides:view",
+  "homepage_slides:manage",
   "audit:view",
 ]);
 

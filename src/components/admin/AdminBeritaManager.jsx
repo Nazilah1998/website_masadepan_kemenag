@@ -108,6 +108,82 @@ function stripHtml(html = "") {
     .trim();
 }
 
+function escapeHtml(value = "") {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function sanitizeEditorHtml(html = "") {
+  if (!html) return "";
+
+  if (typeof window === "undefined" || !window.DOMParser) {
+    return String(html || "");
+  }
+
+  try {
+    const parser = new window.DOMParser();
+    const doc = parser.parseFromString(String(html || ""), "text/html");
+
+    const blockedTags = [
+      "script",
+      "style",
+      "meta",
+      "link",
+      "iframe",
+      "object",
+      "embed",
+    ];
+
+    blockedTags.forEach((selector) => {
+      doc.querySelectorAll(selector).forEach((element) => element.remove());
+    });
+
+    doc.body.querySelectorAll("*").forEach((element) => {
+      [...element.attributes].forEach((attr) => {
+        const name = attr.name.toLowerCase();
+
+        if (name.startsWith("on")) {
+          element.removeAttribute(attr.name);
+          return;
+        }
+
+        if (name === "style") {
+          element.removeAttribute("style");
+          return;
+        }
+
+        if (name === "bgcolor" || name === "color" || name === "face") {
+          element.removeAttribute(attr.name);
+        }
+      });
+
+      element.classList.remove("Apple-interchange-newline");
+    });
+
+    return doc.body.innerHTML;
+  } catch {
+    return String(html || "");
+  }
+}
+
+function plainTextToEditorHtml(text = "") {
+  const normalized = String(text || "").replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  const lines = normalized.split("\n");
+
+  if (!lines.length) return "";
+
+  return lines
+    .map((line) => {
+      const safe = escapeHtml(line);
+      return safe.trim() ? `<p>${safe}</p>` : "<p><br></p>";
+    })
+    .join("");
+}
+
 function countWords(value = "") {
   const plain = stripHtml(value);
   return plain ? plain.split(/\s+/).filter(Boolean).length : 0;
@@ -1319,17 +1395,44 @@ export default function AdminBeritaManager() {
   }
 
   function syncEditorToState() {
-    const html = editorRef.current?.innerHTML || "";
+    const rawHtml = editorRef.current?.innerHTML || "";
+    const sanitizedHtml = sanitizeEditorHtml(rawHtml);
+
+    if (editorRef.current && editorRef.current.innerHTML !== sanitizedHtml) {
+      editorRef.current.innerHTML = sanitizedHtml;
+    }
 
     setForm((prev) => {
-      if (prev.content === html) return prev;
-      return { ...prev, content: html };
+      if (prev.content === sanitizedHtml) return prev;
+      return { ...prev, content: sanitizedHtml };
     });
 
-    return html;
+    return sanitizedHtml;
   }
 
   function handleEditorInput() {
+    syncEditorToState();
+    setDirty(true);
+  }
+
+  function handleEditorPaste(event) {
+    event.preventDefault();
+
+    const clipboard = event.clipboardData || window.clipboardData;
+    const plainText = clipboard?.getData("text/plain") || "";
+    const htmlFromText = plainTextToEditorHtml(plainText);
+
+    editorRef.current?.focus();
+
+    if (
+      typeof document !== "undefined" &&
+      typeof document.execCommand === "function"
+    ) {
+      document.execCommand("insertHTML", false, htmlFromText);
+    } else if (editorRef.current) {
+      editorRef.current.innerHTML += htmlFromText;
+    }
+
     syncEditorToState();
     setDirty(true);
   }
@@ -1453,7 +1556,8 @@ export default function AdminBeritaManager() {
   }
 
   function buildPayload(nextPublishedState = form.is_published) {
-    const currentContent = editorRef.current?.innerHTML || form.content || "";
+    const currentContentRaw = editorRef.current?.innerHTML || form.content || "";
+    const currentContent = sanitizeEditorHtml(currentContentRaw);
     const finalSlug = sanitizeSlugInput(form.slug || slugPreview(form.title));
     const autoExcerpt = buildExcerptFromHtml(currentContent, 180);
 
@@ -2057,7 +2161,7 @@ export default function AdminBeritaManager() {
                   <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900/80">
                     <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                       <div>
-                        <h4 className="text-lg font-bold text-slate-900">
+                        <h4 className="text-lg font-bold text-slate-900 dark:text-slate-100">
                           Editor isi berita
                         </h4>
                         <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -2177,7 +2281,8 @@ export default function AdminBeritaManager() {
                       contentEditable
                       suppressContentEditableWarning
                       onInput={handleEditorInput}
-                      className="h-125 overflow-y-auto rounded-2xl border border-slate-300 bg-white px-4 py-4 text-sm leading-7 text-slate-800 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-50 dark:**:text-slate-50"
+                      onPaste={handleEditorPaste}
+                      className="h-125 overflow-y-auto rounded-2xl border border-slate-300 bg-white px-4 py-4 text-sm leading-7 text-slate-800 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:**:bg-transparent dark:**:text-inherit"
                     />
                   </div>
                 </div>

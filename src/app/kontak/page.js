@@ -3,12 +3,7 @@
 import { useEffect, useState } from "react";
 import PageBanner from "../../components/PageBanner";
 import KontakForm from "../../components/KontakForm";
-import {
-  buildWhatsAppLink,
-  contactUnits,
-  siteInfo,
-  siteLinks,
-} from "../../data/site";
+import { siteInfo, siteLinks } from "../../data/site";
 
 const WEEKDAY_LABELS = {
   Mon: "Senin",
@@ -296,56 +291,6 @@ export default function KontakPage() {
 
             <div>
               <KontakForm />
-            </div>
-          </section>
-
-          <section className="mt-10">
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900">
-              <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
-                Kontak per Unit
-              </p>
-              <h2 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
-                Pilih jalur komunikasi yang paling sesuai
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                Semua tombol di bawah tetap mengarah ke kanal resmi yang sama,
-                tetapi dengan pesan awal yang sudah disesuaikan agar lebih mudah
-                diproses oleh admin.
-              </p>
-
-              <div className="mt-6 space-y-4">
-                {contactUnits.map((unit) => (
-                  <div
-                    key={unit.title}
-                    className="rounded-2xl border border-slate-200 p-5 transition hover:border-emerald-300 dark:border-slate-800 dark:hover:border-emerald-700"
-                  >
-                    <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                      {unit.title}
-                    </h3>
-                    <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                      {unit.description}
-                    </p>
-
-                    <div className="mt-4 flex flex-wrap gap-3">
-                      <a
-                        href={buildWhatsAppLink(unit.message)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-500"
-                      >
-                        Hubungi via WhatsApp
-                      </a>
-
-                      <a
-                        href={siteLinks.emailHref}
-                        className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-                      >
-                        Kirim Email
-                      </a>
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
           </section>
         </div>

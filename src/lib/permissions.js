@@ -99,6 +99,85 @@ export const AVAILABLE_EDITOR_PERMISSIONS = [
   PERMISSIONS.AUDIT_VIEW,
 ];
 
+export const EDITOR_PERMISSION_GROUPS = {
+  DASHBOARD: "dashboard",
+  BERITA_MANAGE: "berita_manage",
+  LAPORAN_MANAGE: "laporan_manage",
+  HOMEPAGE_SLIDES_MANAGE: "homepage_slides_manage",
+};
+
+export const EDITOR_PERMISSION_GROUP_LABELS = {
+  [EDITOR_PERMISSION_GROUPS.DASHBOARD]: "Dashboard",
+  [EDITOR_PERMISSION_GROUPS.BERITA_MANAGE]: "Kelola Berita",
+  [EDITOR_PERMISSION_GROUPS.LAPORAN_MANAGE]: "Kelola Laporan",
+  [EDITOR_PERMISSION_GROUPS.HOMEPAGE_SLIDES_MANAGE]: "Kelola Slider Beranda",
+};
+
+export const AVAILABLE_EDITOR_PERMISSION_GROUPS = [
+  EDITOR_PERMISSION_GROUPS.DASHBOARD,
+  EDITOR_PERMISSION_GROUPS.BERITA_MANAGE,
+  EDITOR_PERMISSION_GROUPS.LAPORAN_MANAGE,
+  EDITOR_PERMISSION_GROUPS.HOMEPAGE_SLIDES_MANAGE,
+];
+
+export const EDITOR_PERMISSION_GROUP_TO_PERMISSIONS = {
+  [EDITOR_PERMISSION_GROUPS.DASHBOARD]: [PERMISSIONS.DASHBOARD_VIEW],
+  [EDITOR_PERMISSION_GROUPS.BERITA_MANAGE]: [
+    PERMISSIONS.BERITA_VIEW,
+    PERMISSIONS.BERITA_CREATE,
+    PERMISSIONS.BERITA_UPDATE,
+    PERMISSIONS.BERITA_DELETE,
+    PERMISSIONS.BERITA_PUBLISH,
+  ],
+  [EDITOR_PERMISSION_GROUPS.LAPORAN_MANAGE]: [
+    PERMISSIONS.LAPORAN_VIEW,
+    PERMISSIONS.LAPORAN_MANAGE,
+  ],
+  [EDITOR_PERMISSION_GROUPS.HOMEPAGE_SLIDES_MANAGE]: [
+    PERMISSIONS.HOMEPAGE_SLIDES_VIEW,
+    PERMISSIONS.HOMEPAGE_SLIDES_MANAGE,
+  ],
+};
+
+export function getEditorPermissionGroupLabel(group) {
+  return EDITOR_PERMISSION_GROUP_LABELS[group] || group;
+}
+
+export function expandEditorPermissionGroups(groups = []) {
+  const normalized = Array.isArray(groups) ? groups : [];
+  const out = new Set();
+
+  for (const group of normalized) {
+    const mapped = EDITOR_PERMISSION_GROUP_TO_PERMISSIONS[group] || [];
+    for (const permission of mapped) {
+      out.add(permission);
+    }
+  }
+
+  return [...out];
+}
+
+export function deriveEditorPermissionGroups(permissions = []) {
+  const normalized = new Set(Array.isArray(permissions) ? permissions : []);
+  const selectedGroups = [];
+
+  for (const group of AVAILABLE_EDITOR_PERMISSION_GROUPS) {
+    const requiredPermissions =
+      EDITOR_PERMISSION_GROUP_TO_PERMISSIONS[group] || [];
+    if (!requiredPermissions.length) continue;
+
+    const hasAll = requiredPermissions.every((permission) =>
+      normalized.has(permission),
+    );
+
+    if (hasAll) {
+      selectedGroups.push(group);
+    }
+  }
+
+  return selectedGroups;
+}
+
 const ROLE_PERMISSIONS = {
   [ROLES.SUPER_ADMIN]: Object.values(PERMISSIONS),
 
@@ -135,7 +214,6 @@ const ROLE_PERMISSIONS = {
     PERMISSIONS.BERITA_UPDATE,
     PERMISSIONS.BERITA_DELETE,
     PERMISSIONS.BERITA_PUBLISH,
-
 
     PERMISSIONS.LAPORAN_VIEW,
     PERMISSIONS.LAPORAN_MANAGE,
