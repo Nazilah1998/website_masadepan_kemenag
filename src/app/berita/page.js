@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import PageBanner from "../../components/PageBanner";
-import NewsPagination from "../../components/berita/NewsPagination";
-import BeritaFilters from "../../components/berita/BeritaFilters";
-import BeritaViewsBadge from "../../components/berita/BeritaViewsBadge";
+import PageBanner from "@/components/common/PageBanner";
+import NewsPagination from "@/components/features/berita/NewsPagination";
+import BeritaFilters from "@/components/features/berita/BeritaFilters";
+import BeritaViewsBadge from "@/components/features/berita/BeritaViewsBadge";
 import {
   filterAndSortBerita,
   getAllBerita,

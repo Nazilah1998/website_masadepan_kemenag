@@ -1,4 +1,4 @@
-import AdminForgotPasswordClient from "@/components/admin/AdminForgotPasswordClient";
+import AdminForgotPasswordClient from "@/components/features/admin/AdminForgotPasswordClient";
 
 export const dynamic = "force-dynamic";
 

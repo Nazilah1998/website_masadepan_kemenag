@@ -1,10 +1,9 @@
-import AdminLoginClient from "@/components/admin/AdminLoginClient";
+import AdminLoginClient from "@/components/features/admin/AdminLoginClient";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminLoginPage({ searchParams }) {
-  const params = await searchParams;
-  const initialUnauthorized = params?.error === "unauthorized";
+import { redirect } from "next/navigation";
 
-  return <AdminLoginClient initialUnauthorized={initialUnauthorized} />;
+export default function AdminLoginPage() {
+  redirect("/admin");
 }

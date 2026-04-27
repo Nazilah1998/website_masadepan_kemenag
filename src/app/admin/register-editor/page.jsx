@@ -1,4 +1,4 @@
-import AdminRegisterEditorClient from "@/components/admin/AdminRegisterEditorClient";
+import AdminRegisterEditorClient from "@/components/features/admin/AdminRegisterEditorClient";
 
 export const dynamic = "force-dynamic";
 

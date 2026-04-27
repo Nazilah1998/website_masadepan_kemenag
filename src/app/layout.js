@@ -1,13 +1,13 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Providers from "@/components/Providers";
-import AppShell from "@/components/AppShell";
-import ThemeInitializer from "@/components/ThemeInitializer";
+import Providers from "@/components/layout/Providers";
+import AppShell from "@/components/layout/AppShell";
+import ThemeInitializer from "@/components/layout/ThemeInitializer";
 import { siteInfo } from "@/data/site";
-import VercelAnalytics from "@/components/VercelAnalytics";
-import VercelSpeedInsights from "@/components/VercelSpeedInsights";
-import PwaRegister from "@/components/PwaRegister";
-import JsonLd from "@/components/seo/JsonLd";
+import VercelAnalytics from "@/components/layout/VercelAnalytics";
+import VercelSpeedInsights from "@/components/layout/VercelSpeedInsights";
+import PwaRegister from "@/components/layout/PwaRegister";
+import JsonLd from "@/components/features/seo/JsonLd";
 import { organizationSchema, websiteSchema } from "@/lib/structured-data";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -19,12 +19,8 @@ export const metadata = {
     template: `%s | ${siteInfo.shortName}`,
   },
   description: siteInfo.description,
-  alternates: {
-    canonical: "/",
-  },
-  icons: {
-    icon: "/kemenag.svg",
-  },
+  alternates: { canonical: "/" },
+  icons: { icon: "/kemenag.svg" },
   manifest: "/manifest.webmanifest",
   applicationName: siteInfo.shortName,
   appleWebApp: {
@@ -39,12 +35,7 @@ export const metadata = {
     siteName: siteInfo.shortName,
     title: `${siteInfo.name}`,
     description: siteInfo.description,
-    images: [
-      {
-        url: "/kemenag.svg",
-        alt: siteInfo.shortName,
-      },
-    ],
+    images: [{ url: "/kemenag.svg", alt: siteInfo.shortName }],
   },
   twitter: {
     card: "summary_large_image",
@@ -59,8 +50,7 @@ export const viewport = {
     { media: "(prefers-color-scheme: light)", color: "#059669" },
     { media: "(prefers-color-scheme: dark)", color: "#047857" },
   ],
-  width: "device-width",
-  initialScale: 1,
+  width: "device-width", initialScale: 1,
 };
 
 export default function RootLayout({ children }) {

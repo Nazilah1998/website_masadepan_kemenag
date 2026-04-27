@@ -1,15 +1,19 @@
 import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import PageBanner from "../../../components/PageBanner";
-import BeritaViewCounter from "@/components/BeritaViewCounter";
-import BeritaDetailActions from "@/components/berita/BeritaDetailActions";
+import PageBanner from "@/components/common/PageBanner";
+import BeritaViewCounter from "@/components/features/berita/BeritaViewCounter";
+import {
+  BeritaDetailBackLink,
+  BeritaDetailMetaPills,
+  BeritaDetailSidebar,
+} from "@/components/features/berita/BeritaDetailLocalized";
+import { BeritaDetailNavigation } from "@/components/features/berita/BeritaDetailNavigation";
 import {
   getAdjacentBerita,
   getBeritaBySlug,
   getRelatedBerita,
 } from "../../../lib/berita";
-import JsonLd from "@/components/seo/JsonLd";
+import JsonLd from "@/components/features/seo/JsonLd";
 import { breadcrumbSchema, newsArticleSchema } from "@/lib/structured-data";
 import { siteInfo } from "@/data/site";
 
@@ -23,9 +27,7 @@ function truncateText(value = "", maxLength = 180) {
 
 function toGoogleDriveDownloadUrl(url = "") {
   if (!url) return FALLBACK_IMAGE;
-
   const value = String(url);
-
   const fileIdMatch =
     value.match(/\/d\/([^/]+)/) ||
     value.match(/[?&]id=([^&]+)/) ||
@@ -34,96 +36,20 @@ function toGoogleDriveDownloadUrl(url = "") {
   if (fileIdMatch?.[1]) {
     return `https://drive.google.com/uc?export=download&id=${fileIdMatch[1]}`;
   }
-
   return value;
 }
 
-function MetaPill({ children }) {
-  return (
-    <div className="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white backdrop-blur">
-      {children}
-    </div>
-  );
+function stripTags(value = "") {
+  return String(value)
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
-function RelatedCard({ item }) {
-  const imageSrc = item.coverImage || FALLBACK_IMAGE;
-
-  return (
-    <article className="group overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
-      <Link
-        href={`/berita/${item.slug}`}
-        className="relative block aspect-16/10 bg-slate-100 dark:bg-slate-800"
-      >
-        <Image
-          src={imageSrc}
-          alt={item.title}
-          fill
-          className="object-cover transition duration-500 group-hover:scale-[1.03]"
-          sizes="(max-width: 1024px) 100vw, 33vw"
-        />
-      </Link>
-
-      <div className="p-5">
-        <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
-          <span>{item.date}</span>
-          <span>•</span>
-          <span>{item.category}</span>
-        </div>
-
-        <h3 className="mt-3 text-lg font-bold leading-snug text-slate-900 dark:text-slate-100">
-          <Link
-            href={`/berita/${item.slug}`}
-            className="transition hover:text-emerald-700 dark:hover:text-emerald-400"
-          >
-            {item.title}
-          </Link>
-        </h3>
-
-        <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
-          {truncateText(
-            item.excerpt || "Klik untuk membaca berita selengkapnya.",
-            120,
-          )}
-        </p>
-
-        <Link
-          href={`/berita/${item.slug}`}
-          className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 transition hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
-        >
-          Baca artikel
-          <span aria-hidden="true">→</span>
-        </Link>
-      </div>
-    </article>
-  );
-}
-
-function AdjacentArticleLink({ label, item, align = "left" }) {
-  if (!item) return null;
-
-  return (
-    <Link
-      href={`/berita/${item.slug}`}
-      className="block rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-emerald-200 hover:bg-emerald-50 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-700 dark:hover:bg-slate-800"
-    >
-      <p
-        className={`text-xs font-semibold uppercase tracking-[0.25em] text-emerald-700 dark:text-emerald-400 ${align === "right" ? "text-right" : ""}`}
-      >
-        {label}
-      </p>
-      <h3
-        className={`mt-3 text-base font-bold leading-7 text-slate-900 dark:text-slate-100 ${align === "right" ? "text-right" : ""}`}
-      >
-        {item.title}
-      </h3>
-      <p
-        className={`mt-2 text-sm text-slate-500 dark:text-slate-400 ${align === "right" ? "text-right" : ""}`}
-      >
-        {item.date}
-      </p>
-    </Link>
-  );
+function toIso(value) {
+  if (!value) return undefined;
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? undefined : d.toISOString();
 }
 
 export const dynamic = "force-dynamic";
@@ -175,19 +101,6 @@ export async function generateMetadata({ params }) {
   };
 }
 
-function stripTags(value = "") {
-  return String(value)
-    .replace(/<[^>]*>/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function toIso(value) {
-  if (!value) return undefined;
-  const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? undefined : d.toISOString();
-}
-
 export default async function DetailBeritaPage({ params }) {
   const { slug } = await params;
   const berita = await getBeritaBySlug(slug);
@@ -227,13 +140,7 @@ export default async function DetailBeritaPage({ params }) {
 
       <main className="bg-slate-50 transition-colors dark:bg-slate-950">
         <section className="w-full px-6 py-8 sm:px-10 lg:px-16 xl:px-20">
-          <Link
-            href="/berita"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 transition hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
-          >
-            <span aria-hidden="true">←</span>
-            Kembali ke halaman berita
-          </Link>
+          <BeritaDetailBackLink />
 
           <article className="mt-6 space-y-8">
             <div className="overflow-hidden rounded-4xl border border-slate-200 bg-slate-900 shadow-xl dark:border-slate-800">
@@ -262,15 +169,12 @@ export default async function DetailBeritaPage({ params }) {
                 </div>
 
                 <div className="absolute inset-x-0 bottom-0 p-6 md:p-10">
-                  <div className="flex flex-wrap gap-3">
-                    <MetaPill>Dipublikasikan {berita.date}</MetaPill>
-                    <MetaPill>
-                      <BeritaViewCounter
-                        slug={berita.slug}
-                        initialViews={berita.views}
-                      />
-                    </MetaPill>
-                  </div>
+                  <BeritaDetailMetaPills date={berita.date}>
+                    <BeritaViewCounter
+                      slug={berita.slug}
+                      initialViews={berita.views}
+                    />
+                  </BeritaDetailMetaPills>
                 </div>
               </a>
             </div>
@@ -284,90 +188,20 @@ export default async function DetailBeritaPage({ params }) {
                 />
               </div>
 
-              <aside className="space-y-5 xl:sticky xl:top-24 xl:self-start">
-                <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                    Info artikel
-                  </p>
-
-                  <div className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300">
-                    <div className="flex items-start justify-between gap-4">
-                      <span>Kategori</span>
-                      <span className="font-semibold text-slate-900 dark:text-slate-100">
-                        {berita.category}
-                      </span>
-                    </div>
-                    <div className="flex items-start justify-between gap-4">
-                      <span>Tanggal tayang</span>
-                      <span className="text-right font-semibold text-slate-900 dark:text-slate-100">
-                        {berita.date}
-                      </span>
-                    </div>
-                    <div className="flex items-start justify-between gap-4">
-                      <span>Jumlah pembaca</span>
-                      <span className="text-right font-semibold text-slate-900 dark:text-slate-100">
-                        {berita.views ?? 0} kali
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                    Aksi cepat artikel
-                  </p>
-
-                  <div className="mt-4">
-                    <BeritaDetailActions berita={berita} />
-                  </div>
-                </div>
-              </aside>
+              <BeritaDetailSidebar
+                category={berita.category}
+                date={berita.date}
+                views={berita.views}
+                title={berita.title}
+                slug={berita.slug}
+              />
             </div>
           </article>
 
-          {adjacent?.prev || adjacent?.next ? (
-            <section className="mt-12">
-              <div className="mb-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-emerald-700 dark:text-emerald-400">
-                  Lanjutkan membaca
-                </p>
-                <h2 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
-                  Jelajahi artikel lainnya
-                </h2>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <AdjacentArticleLink
-                  label="Artikel sebelumnya"
-                  item={adjacent?.prev}
-                />
-                <AdjacentArticleLink
-                  label="Artikel berikutnya"
-                  item={adjacent?.next}
-                  align="right"
-                />
-              </div>
-            </section>
-          ) : null}
-
-          {relatedItems?.length > 0 ? (
-            <section className="mt-12">
-              <div className="mb-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-emerald-700 dark:text-emerald-400">
-                  Rekomendasi bacaan
-                </p>
-                <h2 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
-                  Berita terkait
-                </h2>
-              </div>
-
-              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                {relatedItems.map((item) => (
-                  <RelatedCard key={item.id} item={item} />
-                ))}
-              </div>
-            </section>
-          ) : null}
+          <BeritaDetailNavigation
+            adjacent={adjacent}
+            relatedItems={relatedItems}
+          />
         </section>
       </main>
     </>

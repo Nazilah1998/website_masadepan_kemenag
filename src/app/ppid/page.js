@@ -1,5 +1,5 @@
 import Link from "next/link";
-import PageBanner from "@/components/PageBanner";
+import PageBanner from "@/components/common/PageBanner";
 import { siteInfo, siteLinks } from "@/data/site";
 
 export const metadata = {
@@ -64,10 +64,7 @@ export default function PpidPage() {
       <PageBanner
         title="PPID - Pejabat Pengelola Informasi dan Dokumentasi"
         description="Layanan keterbukaan informasi publik sesuai UU No. 14 Tahun 2008 tentang Keterbukaan Informasi Publik."
-        breadcrumb={[
-          { label: "Beranda", href: "/" },
-          { label: "PPID" },
-        ]}
+        breadcrumb={[{ label: "Beranda", href: "/" }, { label: "PPID" }]}
       />
 
       <main className="bg-slate-50/60 dark:bg-slate-950">
@@ -166,7 +163,9 @@ export default function PpidPage() {
                 Dasar Hukum
               </h3>
               <ul className="mt-4 space-y-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                <li>UU No. 14 Tahun 2008 tentang Keterbukaan Informasi Publik</li>
+                <li>
+                  UU No. 14 Tahun 2008 tentang Keterbukaan Informasi Publik
+                </li>
                 <li>PP No. 61 Tahun 2010 tentang Pelaksanaan UU KIP</li>
                 <li>PermenPAN-RB terkait pelayanan informasi publik</li>
                 <li>KMA tentang Pengelolaan Informasi dan Dokumentasi</li>

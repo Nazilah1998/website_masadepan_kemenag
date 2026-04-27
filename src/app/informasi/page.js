@@ -1,4 +1,4 @@
-import MaintenancePage from "../../components/MaintenancePage";
+import MaintenancePage from "@/components/features/maintenance/MaintenancePage";
 
 export const metadata = {
   title: "Informasi | Kementerian Agama Kabupaten Barito Utara",

@@ -1,5 +1,5 @@
 // src/app/admin/laporan/page.jsx
-import AdminLaporanPageClient from "@/components/admin/AdminLaporanPageClient";
+import AdminLaporanPageClient from "@/components/features/admin/AdminLaporanPageClient";
 
 export const dynamic = "force-dynamic";
 

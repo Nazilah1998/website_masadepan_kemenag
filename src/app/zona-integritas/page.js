@@ -1,5 +1,5 @@
 import Link from "next/link";
-import PageBanner from "@/components/PageBanner";
+import PageBanner from "@/components/common/PageBanner";
 
 export const metadata = {
   title: "Zona Integritas",

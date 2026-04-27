@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import EditorsManagementClient from "@/components/admin/EditorsManagementClient";
+import EditorsManagementClient from "@/components/features/admin/EditorsManagementClient";
 
 export const dynamic = "force-dynamic";
 

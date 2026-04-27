@@ -1,5 +1,5 @@
-import PageBanner from "@/components/PageBanner";
-import GaleriPageClient from "@/components/GaleriPageClient";
+import PageBanner from "@/components/common/PageBanner";
+import GaleriPageClient from "@/components/features/galeri/GaleriPageClient";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { normalizeCoverImageUrl, toCoverPreviewUrl } from "@/lib/cover-image";
 

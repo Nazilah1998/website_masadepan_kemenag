@@ -2,8 +2,8 @@
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import PageBanner from "@/components/PageBanner";
-import LaporanDocumentsClient from "@/components/laporan/LaporanDocumentsClient";
+import PageBanner from "@/components/common/PageBanner";
+import LaporanDocumentsClient from "@/components/features/laporan/LaporanDocumentsClient";
 import {
   getAllLaporanCategories,
   getLaporanCategoryBySlug,

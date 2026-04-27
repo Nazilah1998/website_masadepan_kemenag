@@ -1,4 +1,4 @@
-import AdminBeritaManager from "@/components/admin/AdminBeritaManager";
+import AdminBeritaManager from "@/components/features/admin/AdminBeritaManager";
 
 export const dynamic = "force-dynamic";
 

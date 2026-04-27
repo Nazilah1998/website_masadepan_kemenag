@@ -1,4 +1,4 @@
-import AdminHomepageSlidesManager from "@/components/admin/AdminHomepageSlidesManager";
+import AdminHomepageSlidesManager from "@/components/features/admin/AdminHomepageSlidesManager";
 
 export const metadata = {
     title: "Slider Beranda",

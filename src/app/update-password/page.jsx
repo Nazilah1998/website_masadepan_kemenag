@@ -1,4 +1,4 @@
-import AdminUpdatePasswordClient from "@/components/admin/AdminUpdatePasswordClient";
+import AdminUpdatePasswordClient from "@/components/features/admin/AdminUpdatePasswordClient";
 
 export const dynamic = "force-dynamic";
 

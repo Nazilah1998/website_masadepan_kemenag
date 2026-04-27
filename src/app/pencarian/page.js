@@ -1,5 +1,5 @@
-import PageBanner from "../../components/PageBanner";
-import SearchResultsClient from "../../components/SearchResultsClient";
+import PageBanner from "@/components/common/PageBanner";
+import SearchResultsClient from "@/components/features/search/SearchResultsClient";
 
 export const metadata = {
   title: "Pencarian | Kemenag Barito Utara",

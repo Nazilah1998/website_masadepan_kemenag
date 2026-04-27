@@ -39,18 +39,15 @@ function numberFmt(n) {
   return new Intl.NumberFormat("id-ID").format(Number(n || 0));
 }
 
-export default async function AdminDashboardPage() {
+import AdminLoginClient from "@/components/features/admin/AdminLoginClient";
+
+export default async function AdminDashboardPage({ searchParams }) {
   const session = await getCurrentSessionContext();
+  const params = await searchParams;
+  const isUnauthorized = params?.error === "unauthorized";
 
-  if (!session?.isAuthenticated) {
-    redirect("/admin/login");
-  }
-
-  if (!session?.hasAdminAccess) {
-    redirect(
-      "/error?message=" +
-      encodeURIComponent("Anda tidak memiliki akses ke dashboard admin."),
-    );
+  if (!session?.isAuthenticated || !session?.hasAdminAccess) {
+    return <AdminLoginClient initialUnauthorized={isUnauthorized} />;
   }
 
   const permissionContext = await getUserPermissionContext({

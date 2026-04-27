@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import PageBanner from "../../components/PageBanner";
-import KontakForm from "../../components/KontakForm";
+import PageBanner from "@/components/common/PageBanner";
+import KontakForm from "@/components/features/kontak/KontakForm";
 import { siteInfo, siteLinks } from "../../data/site";
 
 const WEEKDAY_LABELS = {

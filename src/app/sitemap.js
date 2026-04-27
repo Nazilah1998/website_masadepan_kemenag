@@ -65,8 +65,8 @@ export default async function sitemap() {
 
     const { data: beritaList, error: beritaError } = await supabase
       .from("berita")
-      .select("slug, updated_at, published_at, created_at, status")
-      .eq("status", "published")
+      .select("slug, updated_at, published_at, created_at, is_published")
+      .eq("is_published", true)
       .order("published_at", { ascending: false });
 
     if (beritaError) {

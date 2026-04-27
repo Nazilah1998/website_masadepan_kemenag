@@ -13,6 +13,8 @@ import {
   leadershipProfiles,
 } from "../data/profile";
 import { galleryList } from "../data/gallery";
+import { laporanCategories } from "../data/laporan";
+import { getNavigationItems } from "../data/navigation";
 
 function normalizeText(value = "") {
   return String(value)
@@ -62,6 +64,8 @@ function safeHref(value, fallback = "/") {
   return href || fallback;
 }
 
+const navigationItems = getNavigationItems();
+
 const searchIndex = [
   ...beritaItems.map((item) => ({
     id: `berita-${item.slug}`,
@@ -95,6 +99,42 @@ const searchIndex = [
       item.fileLabel,
     ),
   })),
+
+  ...laporanCategories.map((item, index) => ({
+    id: `laporan-${index}`,
+    title: item.title,
+    description: item.description,
+    section: "Laporan",
+    category: "Laporan Publik",
+    href: `/laporan/${item.slug}`,
+    keywords: buildKeywords(item.title, item.description, item.slug),
+  })),
+
+  ...navigationItems.flatMap((item) => {
+    const parent = {
+      id: `nav-${item.label}`,
+      title: item.label,
+      description: `Halaman ${item.label}`,
+      section: "Navigasi",
+      category: "Menu Utama",
+      href: item.href,
+      keywords: item.label,
+    };
+
+    if (item.children) {
+      const children = item.children.map((child) => ({
+        id: `nav-${item.label}-${child.label}`,
+        title: child.label,
+        description: `${item.label} > ${child.label}`,
+        section: "Navigasi",
+        category: item.label,
+        href: child.href,
+        keywords: `${item.label} ${child.label}`,
+      }));
+      return [parent, ...children];
+    }
+    return [parent];
+  }),
 
   ...serviceHighlights.map((item, index) => ({
     id: `layanan-highlight-${index}`,
@@ -152,7 +192,7 @@ const searchIndex = [
     description: profileOverview.description,
     section: "Profil",
     category: "Instansi",
-    href: "/profil",
+    href: "/profil/sejarah",
     keywords: buildKeywords(
       profileOverview.title,
       profileOverview.description,

@@ -1,8 +1,5 @@
-import JsonLd from "@/components/seo/JsonLd";
-import {
-  breadcrumbSchema,
-  contactPageSchema,
-} from "@/lib/structured-data";
+import JsonLd from "@/components/features/seo/JsonLd";
+import { breadcrumbSchema, contactPageSchema } from "@/lib/structured-data";
 import { siteInfo } from "@/data/site";
 
 const title = `Kontak Kami - ${siteInfo.shortName}`;

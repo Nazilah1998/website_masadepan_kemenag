@@ -1,5 +1,5 @@
 import Link from "next/link";
-import PageBanner from "@/components/PageBanner";
+import PageBanner from "@/components/common/PageBanner";
 
 export const metadata = {
   title: "Survey Kepuasan Masyarakat",
@@ -37,10 +37,7 @@ export default function SurveyPage() {
       <PageBanner
         title="Survey Kepuasan Masyarakat"
         description="Pendapat Anda membantu kami meningkatkan kualitas layanan publik."
-        breadcrumb={[
-          { label: "Beranda", href: "/" },
-          { label: "Survey" },
-        ]}
+        breadcrumb={[{ label: "Beranda", href: "/" }, { label: "Survey" }]}
       />
 
       <main className="bg-slate-50/60 dark:bg-slate-950">
@@ -52,8 +49,8 @@ export default function SurveyPage() {
             <div className="mt-3 space-y-3 text-sm leading-7 text-slate-600 dark:text-slate-300">
               <p>
                 Kementerian Agama Kabupaten Barito Utara berkomitmen memberikan
-                pelayanan publik yang cepat, mudah, dan bebas pungutan.
-                Masukan dari Anda menjadi dasar perbaikan berkelanjutan.
+                pelayanan publik yang cepat, mudah, dan bebas pungutan. Masukan
+                dari Anda menjadi dasar perbaikan berkelanjutan.
               </p>
               <p>
                 Seluruh jawaban bersifat anonim dan tidak memengaruhi status

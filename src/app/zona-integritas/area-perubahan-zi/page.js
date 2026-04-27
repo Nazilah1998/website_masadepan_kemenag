@@ -1,4 +1,4 @@
-import PremiumMaintenancePage from "@/components/PremiumMaintenancePage";
+import PremiumMaintenancePage from "@/components/features/maintenance/PremiumMaintenancePage";
 
 export const metadata = {
   title: "Area Perubahan ZI",
