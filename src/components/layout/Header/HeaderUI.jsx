@@ -14,6 +14,7 @@ export function HeaderLogo() {
         <p className="truncate text-sm font-black uppercase tracking-wide text-emerald-800 dark:text-emerald-300">{siteInfo.shortName}</p>
         <p className="mt-0.5 line-clamp-1 text-xs font-medium text-slate-500 dark:text-slate-400">{siteInfo.tagline}</p>
       </div>
+
     </Link>
   );
 }

@@ -317,7 +317,7 @@ export function BeritaFormModal({
                           : "Upload cover berita"}
                       </p>
                       <p className="mt-1 text-xs text-slate-500">
-                        JPG, PNG, atau WEBP. Sistem Kompres Otomatis Maksimal 100 KB.
+                        JPG, PNG, atau WEBP. Sistem Kompres Otomatis Aktif.
                       </p>
                     </div>
                   </label>

@@ -22,20 +22,22 @@ export function MobileNavLinks({
               <div
                 className={`flex items-center justify-between rounded-2xl transition-all duration-200 ${isOpen ? "bg-slate-50 dark:bg-slate-900/50 ring-1 ring-slate-100 dark:ring-slate-800" : ""}`}
               >
-                <Link
-                  href={item.href}
-                  onClick={(e) => {
-                    if (hasChildren) {
-                      e.preventDefault();
-                      toggleMobileDropdown(item.label);
-                    } else {
-                      onNavigate();
-                    }
-                  }}
-                  className={`flex-1 px-4 py-3.5 text-sm font-bold transition-colors ${active ? "text-emerald-700 dark:text-emerald-400" : "text-slate-600 dark:text-slate-400"}`}
-                >
-                  {item.label}
-                </Link>
+                {hasChildren ? (
+                  <div
+                    onClick={() => toggleMobileDropdown(item.label)}
+                    className={`flex-1 cursor-pointer px-4 py-3.5 text-sm font-bold transition-colors ${active ? "text-emerald-700 dark:text-emerald-400" : "text-slate-600 dark:text-slate-400"}`}
+                  >
+                    {item.label}
+                  </div>
+                ) : (
+                  <Link
+                    href={item.href}
+                    onClick={onNavigate}
+                    className={`flex-1 px-4 py-3.5 text-sm font-bold transition-colors ${active ? "text-emerald-700 dark:text-emerald-400" : "text-slate-600 dark:text-slate-400"}`}
+                  >
+                    {item.label}
+                  </Link>
+                )}
 
                 {hasChildren && (
                   <button

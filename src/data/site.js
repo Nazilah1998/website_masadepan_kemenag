@@ -8,8 +8,9 @@ const mapQuery = "Kementerian Agama Kabupaten Barito Utara";
 
 export const siteInfo = {
   name: "Kementerian Agama Kabupaten Barito Utara",
-  shortName: "KEMENAG BARITO UTARA",
-  tagline: "Melayani Umat dengan Integritas dan Profesionalitas",
+  shortName: "KEMENTERIAN AGAMA",
+  tagline: "KABUPATEN BARITO UTARA",
+
   description:
     "Kementerian Agama Kabupaten Barito Utara menyediakan informasi, publikasi kegiatan, pengumuman, agenda, dan akses layanan digital secara terpadu.",
   email: "kepegawaiankemenagbarut@gmail.com",

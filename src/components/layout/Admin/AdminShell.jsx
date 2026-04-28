@@ -86,19 +86,20 @@ function AdminUserBadge({ name, email }) {
 function MobileSidebar({ a }) {
   if (!a.sidebarOpen) return null;
   return (
-    <div className="fixed inset-0 z-50 lg:hidden">
-      <button type="button" onClick={() => a.setSidebarOpen(false)} className="absolute inset-0 bg-slate-950/45" />
-      <div className="relative h-full w-[85%] max-w-[320px] border-r border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex items-center justify-between border-b border-slate-200 px-4 py-4 dark:border-slate-800">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-emerald-700">Panel Admin</p>
-            <p className="mt-1 text-sm font-bold text-slate-900 dark:text-slate-100">Kemenag Barito Utara</p>
-          </div>
-          <button type="button" onClick={() => a.setSidebarOpen(false)} className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-700 transition hover:border-rose-300 hover:text-rose-700 dark:border-slate-700 dark:text-slate-300 dark:hover:border-rose-500 dark:hover:text-rose-400">
-            <CloseIcon />
-          </button>
-        </div>
-        <AdminSidebar profile={a.profile} role={a.role} permissionContext={a.permissionContext} onNavigate={() => a.setSidebarOpen(false)} />
+    <div className="fixed inset-0 z-[100] lg:hidden">
+      <button
+        type="button"
+        onClick={() => a.setSidebarOpen(false)}
+        className="absolute inset-0 bg-slate-950/45 backdrop-blur-[2px]"
+      />
+      <div className="relative flex h-full w-[85%] max-w-[320px] flex-col border-r border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+        <AdminSidebar
+          profile={a.profile}
+          role={a.role}
+          permissionContext={a.permissionContext}
+          onNavigate={() => a.setSidebarOpen(false)}
+          onClose={() => a.setSidebarOpen(false)}
+        />
       </div>
     </div>
   );

@@ -104,16 +104,8 @@ export default async function GaleriPage() {
   const items = await getPublishedGaleri();
 
   return (
-    <>
-      <PageBanner
-        title="Galeri"
-        description="Dokumentasi visual kegiatan, layanan, dan publikasi resmi Kementerian Agama Kabupaten Barito Utara."
-        breadcrumb={[{ label: "Beranda", href: "/" }, { label: "Galeri" }]}
-      />
-
-      <main className="bg-slate-50 transition-colors dark:bg-slate-950">
-        <GaleriPageClient items={items} />
-      </main>
-    </>
+    <main className="bg-slate-50 transition-colors dark:bg-slate-950">
+      <GaleriPageClient items={items} />
+    </main>
   );
 }

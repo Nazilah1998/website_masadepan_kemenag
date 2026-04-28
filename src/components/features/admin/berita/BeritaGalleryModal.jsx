@@ -8,6 +8,7 @@ export function BeritaGalleryModal({
   sendingId,
   uploading,
   prefillLoading,
+  isAlreadyInGallery,
   onClose,
   onChange,
   onFileChange,
@@ -20,17 +21,28 @@ export function BeritaGalleryModal({
     <div className="fixed inset-0 z-60 overflow-y-auto bg-slate-950/70 p-4">
       <div className="mx-auto w-full max-w-3xl rounded-3xl bg-white shadow-2xl dark:bg-slate-900">
         <div className="flex items-start justify-between gap-4 rounded-t-3xl border-b border-slate-200 px-6 py-5 dark:border-slate-800">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-sky-700 dark:text-sky-400">
-              Form galeri
-            </p>
+          <div className="flex-1">
+            <div className="flex items-center gap-3">
+              <p className="text-sm font-semibold uppercase tracking-wide text-sky-700 dark:text-sky-400">
+                Form galeri
+              </p>
+              {isAlreadyInGallery && (
+                <span className="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
+                  <span className="mr-1 h-1 w-1 rounded-full bg-emerald-500"></span>
+                  Terdaftar di Galeri
+                </span>
+              )}
+            </div>
             <h3 className="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">
-              Kirim ke galeri
+              {isAlreadyInGallery ? "Perbarui Galeri" : "Kirim ke Galeri"}
             </h3>
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-              Upload cover galeri dengan kompres otomatis.
+              {isAlreadyInGallery
+                ? "Data galeri sudah ada. Anda dapat memperbarui informasi atau mengganti foto."
+                : "Upload cover galeri dengan kompres otomatis."}
             </p>
           </div>
+
 
           <button
             type="button"
@@ -109,10 +121,14 @@ export function BeritaGalleryModal({
                 />
                 <div>
                   <p className="text-sm font-semibold text-sky-700">
-                    {uploading ? "Memproses..." : "Pilih gambar baru"}
+                    {uploading
+                      ? "Memproses..."
+                      : isAlreadyInGallery
+                        ? "Ganti Foto Galeri (Portrait)"
+                        : "Pilih Foto Galeri (Portrait)"}
                   </p>
                   <p className="mt-1 text-xs text-slate-500">
-                    Maksimal 100 KB (Auto Compress)
+                    Auto Compress Gambar
                   </p>
                 </div>
               </label>
@@ -121,11 +137,12 @@ export function BeritaGalleryModal({
                 key={previewSrc || "gallery-empty"}
                 src={previewSrc}
                 alt="Preview gambar galeri"
-                className="h-44 w-full"
+                className="aspect-[3/4] w-full max-w-[240px] mx-auto rounded-2xl shadow-md"
                 fallbackText={
                   prefillLoading ? "Memuat data..." : "Belum ada gambar"
                 }
               />
+
             </div>
           </div>
         </div>
@@ -147,8 +164,13 @@ export function BeritaGalleryModal({
             }
             className="rounded-2xl bg-sky-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {sendingId ? "Mengirim..." : "Simpan ke Galeri"}
+            {sendingId
+              ? "Mengirim..."
+              : isAlreadyInGallery
+                ? "Perbarui Data Galeri"
+                : "Simpan ke Galeri"}
           </button>
+
         </div>
       </div>
     </div>

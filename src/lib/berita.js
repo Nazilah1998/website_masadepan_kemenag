@@ -32,7 +32,7 @@ export function formatDateIndonesia(value) {
 
 export function normalizeBerita(item = {}) {
   if (!item) return null;
-  
+
   const publishedAt = item.published_at || null;
   const createdAt = item.created_at || null;
   const updatedAt = item.updated_at || null;
@@ -221,7 +221,7 @@ export function estimateReadingTime(value = "", wordsPerMinute = 200) {
  */
 export async function getRelatedBerita(currentSlug, category, limit = 3) {
   const supabase = await createClient();
-  
+
   const { data, error } = await supabase
     .from("berita")
     .select(BERITA_SELECT_FIELDS)
@@ -248,7 +248,7 @@ export async function getRelatedBerita(currentSlug, category, limit = 3) {
       .neq("category", category)
       .order("published_at", { ascending: false })
       .limit(limit - results.length);
-    
+
     if (fallbackData) {
       results.push(...fallbackData.map(normalizeBerita));
     }
@@ -291,4 +291,3 @@ export async function getAdjacentBerita(currentBerita) {
     older: olderData || null,
   };
 }
-

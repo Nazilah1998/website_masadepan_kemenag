@@ -140,6 +140,17 @@ export const messages = {
       relatedNews: "Berita terkait",
       readArticle: "Baca artikel",
     },
+    gallery: {
+      badge: "DOKUMENTASI",
+      title: "Galeri Kegiatan",
+      subtitle:
+        "Kumpulan dokumentasi visual yang terhubung langsung ke berita dan publikasi resmi.",
+      totalItems: "TOTAL ITEM",
+      preview: "Preview",
+      openNews: "Buka berita",
+      viewImage: "Lihat gambar",
+      empty: "Belum ada galeri kegiatan saat ini.",
+    },
   },
 
   en: {
@@ -281,6 +292,17 @@ export const messages = {
       recommendation: "Reading recommendation",
       relatedNews: "Related news",
       readArticle: "Read article",
+    },
+    gallery: {
+      badge: "DOCUMENTATION",
+      title: "Activity Gallery",
+      subtitle:
+        "A collection of visual documentation directly linked to official news and publications.",
+      totalItems: "TOTAL ITEMS",
+      preview: "Preview",
+      openNews: "Open news",
+      viewImage: "View image",
+      empty: "No activity gallery available at this time.",
     },
   },
 };

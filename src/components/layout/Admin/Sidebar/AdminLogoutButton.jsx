@@ -11,8 +11,7 @@ export default function AdminLogoutButton() {
     try {
       setLoading(true);
       await fetch("/api/admin/logout", { method: "POST" });
-      router.replace("/admin/login");
-      router.refresh();
+      window.location.href = "/admin/login";
     } finally {
       setLoading(false);
     }

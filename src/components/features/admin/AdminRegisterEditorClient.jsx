@@ -18,9 +18,9 @@ export default function AdminRegisterEditorClient() {
         <div className="rounded-4xl border border-slate-200 bg-white p-6 shadow-2xl sm:p-8">
           <RegisterHeader />
 
-          <form onSubmit={r.handleSubmit} className="mt-8 space-y-5">
-            <RegisterInput label="Nama Lengkap" value={r.fullName} onChange={(e) => r.setFullName(e.target.value)} placeholder="Nama editor" />
-            <RegisterInput label="Email" type="email" value={r.email} onChange={(e) => r.setEmail(e.target.value)} placeholder="editor@domain.go.id" />
+          <form onSubmit={r.handleSubmit} className="mt-8 space-y-5" autoComplete="off">
+            <RegisterInput label="Nama Lengkap" value={r.fullName} onChange={(e) => r.setFullName(e.target.value)} placeholder="Nama Lengkap" />
+            <RegisterInput label="Email" type="email" value={r.email} onChange={(e) => r.setEmail(e.target.value)} placeholder="email@gmail.com" />
             <RegisterSelect label="Unit Kerja" value={r.unitName} onChange={(e) => r.setUnitName(e.target.value)} options={UNIT_KERJA_OPTIONS} />
             <RegisterPasswordInput value={r.password} onChange={(e) => r.setPassword(e.target.value)} show={r.showPassword} onToggle={() => r.setShowPassword(!r.showPassword)} />
 

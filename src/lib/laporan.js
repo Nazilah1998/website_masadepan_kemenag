@@ -159,7 +159,6 @@ export async function getAllLaporanCategories() {
   }
 }
 
-
 export async function getLaporanDetailBySlug(slug) {
   try {
     const supabase = createAdminClient();

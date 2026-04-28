@@ -12,12 +12,13 @@ export const UNIT_KERJA_OPTIONS = [
   "Penyelenggara Zakat & Wakaf",
 ];
 
-export function RegisterInput({ label, type = "text", value, onChange, placeholder, required = true }) {
+export function RegisterInput({ label, type = "text", value, onChange, placeholder, required = true, autoComplete = "off" }) {
   return (
     <div>
       <label className="mb-2 block text-sm font-semibold text-black">{label}</label>
       <input
         type={type} value={value} onChange={onChange} placeholder={placeholder} required={required}
+        autoComplete={autoComplete}
         className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3.5 text-sm font-medium text-black outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
       />
     </div>
@@ -39,7 +40,7 @@ export function RegisterSelect({ label, value, onChange, options, required = tru
   );
 }
 
-export function RegisterPasswordInput({ value, onChange, show, onToggle }) {
+export function RegisterPasswordInput({ value, onChange, show, onToggle, autoComplete = "new-password" }) {
   return (
     <div>
       <label className="mb-2 block text-sm font-semibold text-black">Password</label>
@@ -47,6 +48,7 @@ export function RegisterPasswordInput({ value, onChange, show, onToggle }) {
         <input
           type={show ? "text" : "password"} value={value} onChange={onChange}
           placeholder="Minimal 8 karakter" required
+          autoComplete={autoComplete}
           className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3.5 text-sm font-medium text-black outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 pr-12"
         />
         <button

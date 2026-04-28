@@ -18,6 +18,7 @@ export function FooterBrand() {
           <p className="text-sm font-black uppercase tracking-[0.22em] text-(--primary-strong)">{siteInfo.shortName}</p>
           <p className="theme-footer-muted text-xs">{siteInfo.tagline}</p>
         </div>
+
       </div>
       <p className="theme-footer-muted mt-4 max-w-md text-sm leading-6">
         {t("home.hero.description")}

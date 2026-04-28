@@ -227,7 +227,6 @@ async function findBestBlobForCanvas(
   return null;
 }
 
-
 function getNextScaleFactor(currentBytes, targetBytes) {
   if (!Number.isFinite(currentBytes) || currentBytes <= 0 || targetBytes <= 0) {
     return 0.82;

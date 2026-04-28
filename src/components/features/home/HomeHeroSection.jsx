@@ -39,6 +39,8 @@ export default function HomeHeroSection() {
               {t("home.hero.title")}
             </h1>
 
+
+
             <p className="mt-7 max-w-2xl text-base leading-8 text-white/80 sm:text-lg">
               {t("home.hero.description")}
             </p>

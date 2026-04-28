@@ -113,8 +113,7 @@ export function useAdminLogin(initialUnauthorized) {
         refreshCaptcha();
         return;
       }
-      router.replace("/admin");
-      router.refresh();
+      window.location.href = "/admin";
     } catch (err) {
       setError(err?.message || "Terjadi kesalahan jaringan saat login.");
       refreshCaptcha();

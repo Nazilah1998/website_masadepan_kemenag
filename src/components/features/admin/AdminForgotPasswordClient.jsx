@@ -19,7 +19,7 @@ export default function AdminForgotPasswordClient() {
 
           <form onSubmit={f.handleSubmit} className="mt-8 space-y-5">
             <div>
-              <label htmlFor="email" className="mb-2 block text-sm font-semibold text-black">Email admin</label>
+              <label htmlFor="email" className="mb-2 ml-1 block text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Email admin</label>
               <input
                 id="email" type="email" value={f.email} onChange={(e) => f.setEmail(e.target.value)}
                 placeholder="nama@gmail.com" required
@@ -54,8 +54,8 @@ function ForgotPasswordHeader() {
         <Link href="/" className="inline-flex items-center gap-3">
           <Image src={siteInfo.logoSrc} alt={siteInfo.shortName} width={44} height={44} priority />
           <div>
-            <p className="text-sm font-bold text-slate-900">{siteInfo.shortName}</p>
-            <p className="text-xs text-slate-500">Panel Admin</p>
+            <p className="text-sm font-bold text-slate-900">PANEL ADMINISTRASI</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Kemenag Barito Utara</p>
           </div>
         </Link>
         <Link href="/admin/login" className="inline-flex items-center rounded-2xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Kembali</Link>

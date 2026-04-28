@@ -125,21 +125,13 @@ async function resolveGaleriImage({
   const requestedUrl = cleanString(body?.image_url);
 
   if (!uploadBase64) {
-    const resolvedUrl = requestedUrl || currentUrl || beritaFallbackUrl || "";
+    const resolvedUrl = requestedUrl || currentUrl || "";
 
-    if (resolvedUrl === currentUrl) {
+    if (resolvedUrl === currentUrl && currentUrl) {
       return {
         publicUrl: resolvedUrl,
         sizeKB: toSafeSizeNumber(currentSizeKB),
         sizeBytes: toSafeSizeNumber(currentSizeBytes),
-      };
-    }
-
-    if (resolvedUrl && resolvedUrl === beritaFallbackUrl) {
-      return {
-        publicUrl: resolvedUrl,
-        sizeKB: toSafeSizeNumber(beritaFallbackSizeKB),
-        sizeBytes: toSafeSizeNumber(beritaFallbackSizeBytes),
       };
     }
 
@@ -226,7 +218,9 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
+  console.log("POST /api/admin/galeri-berita hit");
   const auth = await validateAdmin();
+
   if (!auth.ok) return auth.response;
 
   try {

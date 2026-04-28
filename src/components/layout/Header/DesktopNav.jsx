@@ -31,18 +31,27 @@ export function DesktopNav({
                 onMouseEnter={() => hasChildren && setOpenDesktopDropdown(item.label)}
                 onMouseLeave={() => hasChildren && setOpenDesktopDropdown(null)}
               >
-                <Link
-                  href={item.href}
-                  className={`inline-flex flex-shrink-0 items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-bold transition ${active
-                    ? "text-emerald-700 dark:text-emerald-400"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-100"
-                    }`}
-                >
-                  {item.label}
-                  {hasChildren && (
+                {hasChildren ? (
+                  <div
+                    className={`inline-flex cursor-default flex-shrink-0 items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-bold transition ${active
+                      ? "text-emerald-700 dark:text-emerald-400"
+                      : "text-slate-600 dark:text-slate-400"
+                      }`}
+                  >
+                    {item.label}
                     <ChevronDownIcon className={`h-3.5 w-3.5 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
-                  )}
-                </Link>
+                  </div>
+                ) : (
+                  <Link
+                    href={item.href}
+                    className={`inline-flex flex-shrink-0 items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-bold transition ${active
+                      ? "text-emerald-700 dark:text-emerald-400"
+                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-100"
+                      }`}
+                  >
+                    {item.label}
+                  </Link>
+                )}
 
                 {hasChildren && isOpen && (
                   <div className="absolute left-0 top-full z-50 pt-2 min-w-[220px] animate-scale-in">

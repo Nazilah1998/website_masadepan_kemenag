@@ -82,6 +82,7 @@ export function useBeritaManager() {
   const [gallerySendingId, setGallerySendingId] = useState(null);
   const [uploadingGalleryImage, setUploadingGalleryImage] = useState(false);
   const [galleryPrefillLoading, setGalleryPrefillLoading] = useState(false);
+  const [isAlreadyInGallery, setIsAlreadyInGallery] = useState(false);
 
   async function loadItems() {
     try {
@@ -280,6 +281,7 @@ export function useBeritaManager() {
     setGalleryForm(emptyGalleryForm);
     setGallerySendingId(null);
     setUploadingGalleryImage(false);
+    setIsAlreadyInGallery(false);
   }
 
   function handleOpenCreate() {
@@ -364,7 +366,7 @@ export function useBeritaManager() {
 
     try {
       const response = await fetch(
-        `/api/admin/galeri/from-berita?berita_id=${encodeURIComponent(item.id)}`,
+        `/api/admin/galeri-berita?berita_id=${encodeURIComponent(item.id)}`,
         {
           method: "GET",
           cache: "no-store",
@@ -375,21 +377,19 @@ export function useBeritaManager() {
 
       if (galleryPrefillRequestRef.current !== requestId) return;
 
-      if (!response.ok) {
-        throw new Error(data?.message || "Gagal mengambil data galeri.");
-      }
-
       if (data?.item) {
+        setIsAlreadyInGallery(true);
         setGalleryForm((prev) => ({
           ...prev,
-          image_url: data.item.image_url || item.cover_image || "",
+          image_url: data.item.image_url || "",
           link_url: data.item.link_url || prev.link_url || baseLinkUrl,
           published_at: data.item.published_at || prev.published_at || "",
         }));
       } else {
+        setIsAlreadyInGallery(false);
         setGalleryForm((prev) => ({
           ...prev,
-          image_url: item.cover_image || "",
+          image_url: "", // Biarkan kosong untuk upload pertama kali
           link_url: prev.link_url || baseLinkUrl,
           published_at: prev.published_at || basePublishedAt,
         }));
@@ -558,9 +558,9 @@ export function useBeritaManager() {
       setMessage("");
 
       const compressed = await compressImageToBase64(file, {
-        targetSizeKB: 90,
-        hardMaxSizeKB: 100,
-        throwIfOverHardLimit: true,
+        targetSizeKB: 95,
+        hardMaxSizeKB: 180, // Lebih longgar agar tidak gampang error saat kirim ke galeri
+        throwIfOverHardLimit: false, // Jangan throw error, biarkan API yang memvalidasi hasil terbaik
         maxWidth: 1200,
         maxHeight: 1600,
       });
@@ -767,7 +767,7 @@ export function useBeritaManager() {
       setError("");
       setMessage("");
 
-      const response = await fetch("/api/admin/galeri/from-berita", {
+      const response = await fetch("/api/admin/galeri-berita", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -826,6 +826,7 @@ export function useBeritaManager() {
     gallerySendingId,
     uploadingGalleryImage,
     galleryPrefillLoading,
+    isAlreadyInGallery,
     stats,
     yearOptions,
     monthOptions,

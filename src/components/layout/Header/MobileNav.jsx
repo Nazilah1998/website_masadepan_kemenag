@@ -40,24 +40,21 @@ export function MobileNav({
   if (!mounted) return null;
 
   const content = (
-    <div 
-      className={`fixed inset-0 z-[9999] lg:hidden transition-all duration-500 ease-in-out ${
-        isMobileMenuOpen ? "visible" : "invisible pointer-events-none"
-      }`}
+    <div
+      className={`fixed inset-0 z-[9999] lg:hidden transition-all duration-500 ease-in-out ${isMobileMenuOpen ? "visible" : "invisible pointer-events-none"
+        }`}
     >
       {/* Backdrop: Animasi Fade-in/out */}
-      <div 
-        className={`absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-500 ease-in-out ${
-          isMobileMenuOpen ? "opacity-100" : "opacity-0"
-        }`}
+      <div
+        className={`absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-500 ease-in-out ${isMobileMenuOpen ? "opacity-100" : "opacity-0"
+          }`}
         onClick={closeMobileMenu}
       />
 
       {/* Drawer Container: Animasi Slide-in/out */}
-      <div 
-        className={`absolute top-0 right-0 bottom-0 w-[300px] max-w-[85vw] flex flex-col bg-white dark:bg-slate-950 shadow-2xl transition-transform duration-500 cubic-bezier(0.4, 0, 0.2, 1) ${
-          isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+      <div
+        className={`absolute top-0 right-0 bottom-0 w-[300px] max-w-[85vw] flex flex-col bg-white dark:bg-slate-950 shadow-2xl transition-transform duration-500 cubic-bezier(0.4, 0, 0.2, 1) ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
+          }`}
         style={{ isolation: 'isolate' }}
       >
         <MobileNavHeader onClose={closeMobileMenu} />
