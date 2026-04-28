@@ -186,42 +186,35 @@ async function findBestBlobForCanvas(
   outputType,
   { initialQuality, minQuality, qualityStep, targetBytes },
 ) {
-  let quality = normalizeQuality(initialQuality);
-  const minQ = normalizeQuality(minQuality);
-  const step = Math.max(0.01, qualityStep);
-
+  let low = minQuality;
+  let high = initialQuality;
   let bestBlob = null;
-  let bestQuality = quality;
-  const triedQualities = new Set();
+  let bestQuality = low;
 
-  while (quality >= minQ) {
-    const normalizedQ = normalizeQuality(quality);
+  // Gunakan Binary Search untuk mencari kualitas tertinggi yang masuk target size
+  // Max 6-7 iterasi cukup untuk akurasi 0.01 (2^7 = 128)
+  for (let i = 0; i < 7; i++) {
+    const mid = Number(((low + high) / 2).toFixed(2));
+    const blob = await canvasToBlob(canvas, outputType, mid);
 
-    if (triedQualities.has(normalizedQ)) {
-      break;
-    }
-
-    triedQualities.add(normalizedQ);
-
-    const blob = await canvasToBlob(canvas, outputType, normalizedQ);
-
-    if (!blob) {
-      throw new Error("Gagal membuat blob hasil kompresi.");
-    }
-
-    if (!bestBlob || blob.size < bestBlob.size) {
-      bestBlob = blob;
-      bestQuality = normalizedQ;
-    }
+    if (!blob) break;
 
     if (blob.size <= targetBytes) {
-      return {
-        blob,
-        quality: normalizedQ,
-      };
+      // Size masuk target, coba naikkan kualitas lagi
+      bestBlob = blob;
+      bestQuality = mid;
+      low = mid + 0.01;
+    } else {
+      // Size kegedean, turunkan kualitas
+      high = mid - 0.01;
+      // Tetap simpan sebagai fallback jika tidak ada yang masuk target
+      if (!bestBlob || blob.size < bestBlob.size) {
+        bestBlob = blob;
+        bestQuality = mid;
+      }
     }
 
-    quality = normalizeQuality(quality - step);
+    if (low > high) break;
   }
 
   if (bestBlob) {
@@ -233,6 +226,7 @@ async function findBestBlobForCanvas(
 
   return null;
 }
+
 
 function getNextScaleFactor(currentBytes, targetBytes) {
   if (!Number.isFinite(currentBytes) || currentBytes <= 0 || targetBytes <= 0) {

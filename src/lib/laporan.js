@@ -148,16 +148,17 @@ export async function getAllLaporanCategories() {
       return laporanCategories.map(normalizeFallbackCategory);
     }
 
-    return data.map((item) =>
-      normalizeLaporanCategory(
-        item,
-        Array.isArray(item?.documents) ? item.documents : [],
-      ),
-    );
+    return data.map((item) => {
+      const publicDocs = Array.isArray(item?.documents)
+        ? item.documents.filter((doc) => isPublishedDocument(doc))
+        : [];
+      return normalizeLaporanCategory(item, publicDocs);
+    });
   } catch {
     return laporanCategories.map(normalizeFallbackCategory);
   }
 }
+
 
 export async function getLaporanDetailBySlug(slug) {
   try {

@@ -2,7 +2,7 @@ import { unstable_noStore as noStore } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeCoverImageUrl } from "@/lib/cover-image";
 
-const BERITA_SELECT_FIELDS = `
+export const BERITA_SELECT_FIELDS = `
   id,
   slug,
   title,
@@ -17,7 +17,7 @@ const BERITA_SELECT_FIELDS = `
   updated_at
 `;
 
-function formatDateIndonesia(value) {
+export function formatDateIndonesia(value) {
   if (!value) return "-";
 
   const date = new Date(value);
@@ -30,25 +30,9 @@ function formatDateIndonesia(value) {
   }).format(date);
 }
 
-function normalizeSearchValue(value) {
-  return String(value || "")
-    .trim()
-    .toLowerCase();
-}
-
-function stripHtml(value = "") {
-  return String(value)
-    .replace(/<[^>]*>/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function getTimeValue(value) {
-  const time = new Date(value || 0).getTime();
-  return Number.isNaN(time) ? 0 : time;
-}
-
-function normalizeBerita(item = {}) {
+export function normalizeBerita(item = {}) {
+  if (!item) return null;
+  
   const publishedAt = item.published_at || null;
   const createdAt = item.created_at || null;
   const updatedAt = item.updated_at || null;
@@ -77,6 +61,26 @@ function normalizeBerita(item = {}) {
     updated_at: updatedAt,
     views: Number(item.views || 0),
   };
+}
+
+function normalizeSearchValue(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase();
+}
+
+function stripHtml(value = "") {
+  return String(value)
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getTimeValue(value) {
+  const time = new Date(value || 0).getTime();
+  return Number.isNaN(time) ? 0 : time;
 }
 
 export function getAvailableBeritaCategories(items = []) {
@@ -129,10 +133,15 @@ export function filterAndSortBerita(items = [], filters = {}) {
   });
 }
 
+/**
+ * Mengambil semua berita dengan filter dasar.
+ * Tetap disediakan untuk kompatibilitas, tapi sebaiknya gunakan query terarah.
+ */
 export async function getAllBerita(options = {}) {
-  const { includeDrafts = false } = options;
+  const { includeDrafts = false, limit = null } = options;
 
-  noStore();
+  // Hanya gunakan noStore jika benar-benar butuh data real-time terbaru (misal admin)
+  if (includeDrafts) noStore();
 
   const supabase = await createClient();
 
@@ -146,6 +155,10 @@ export async function getAllBerita(options = {}) {
     query = query.eq("is_published", true);
   }
 
+  if (limit) {
+    query = query.limit(limit);
+  }
+
   const { data, error } = await query;
 
   if (error) {
@@ -156,10 +169,11 @@ export async function getAllBerita(options = {}) {
   return (data || []).map(normalizeBerita);
 }
 
+/**
+ * Optimasi: Langsung limit di database.
+ */
 export async function getLatestBerita(limit = 3) {
-  const safeLimit = Math.max(1, Number(limit) || 3);
-  const items = await getAllBerita();
-  return items.slice(0, safeLimit);
+  return getAllBerita({ limit });
 }
 
 export async function getBeritaBySlug(slug, options = {}) {
@@ -168,7 +182,7 @@ export async function getBeritaBySlug(slug, options = {}) {
 
   if (!safeSlug) return null;
 
-  noStore();
+  if (includeDrafts) noStore();
 
   const supabase = await createClient();
 
@@ -188,20 +202,11 @@ export async function getBeritaBySlug(slug, options = {}) {
     return null;
   }
 
-  if (!data) return null;
-
-  return normalizeBerita(data);
-}
-
-function stripHtmlForReading(value = "") {
-  return String(value)
-    .replace(/<[^>]*>/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+  return data ? normalizeBerita(data) : null;
 }
 
 export function estimateReadingTime(value = "", wordsPerMinute = 200) {
-  const plainText = stripHtmlForReading(value);
+  const plainText = stripHtml(value);
   const totalWords = plainText
     ? plainText.split(/\s+/).filter(Boolean).length
     : 0;
@@ -211,34 +216,79 @@ export function estimateReadingTime(value = "", wordsPerMinute = 200) {
   return Math.max(1, Math.ceil(totalWords / wordsPerMinute));
 }
 
+/**
+ * Optimasi: Cari berita terkait langsung di database.
+ */
 export async function getRelatedBerita(currentSlug, category, limit = 3) {
-  const safeLimit = Math.max(1, Number(limit) || 3);
-  const items = await getAllBerita();
+  const supabase = await createClient();
+  
+  const { data, error } = await supabase
+    .from("berita")
+    .select(BERITA_SELECT_FIELDS)
+    .eq("is_published", true)
+    .eq("category", category)
+    .neq("slug", currentSlug)
+    .order("published_at", { ascending: false })
+    .limit(limit);
 
-  const sameCategory = items.filter(
-    (item) => item.slug !== currentSlug && item.category === category,
-  );
-
-  const fallback = items.filter(
-    (item) => item.slug !== currentSlug && item.category !== category,
-  );
-
-  return [...sameCategory, ...fallback].slice(0, safeLimit);
-}
-
-export async function getAdjacentBerita(slug) {
-  const items = await getAllBerita();
-  const currentIndex = items.findIndex((item) => item.slug === slug);
-
-  if (currentIndex === -1) {
-    return {
-      newer: null,
-      older: null,
-    };
+  if (error) {
+    console.error("getRelatedBerita error:", error);
+    return [];
   }
 
+  const results = (data || []).map(normalizeBerita);
+
+  // Jika kurang dari limit, ambil berita terbaru lainnya sebagai fallback
+  if (results.length < limit) {
+    const { data: fallbackData } = await supabase
+      .from("berita")
+      .select(BERITA_SELECT_FIELDS)
+      .eq("is_published", true)
+      .neq("slug", currentSlug)
+      .neq("category", category)
+      .order("published_at", { ascending: false })
+      .limit(limit - results.length);
+    
+    if (fallbackData) {
+      results.push(...fallbackData.map(normalizeBerita));
+    }
+  }
+
+  return results;
+}
+
+/**
+ * Optimasi: Cari berita sebelum dan sesudah berdasarkan tanggal.
+ */
+export async function getAdjacentBerita(currentBerita) {
+  if (!currentBerita?.isoDate) return { newer: null, older: null };
+
+  const supabase = await createClient();
+  const date = currentBerita.isoDate;
+
+  // Ambil yang lebih baru (yang dipublish setelah berita ini)
+  const { data: newerData } = await supabase
+    .from("berita")
+    .select("slug, title")
+    .eq("is_published", true)
+    .gt("published_at", date)
+    .order("published_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  // Ambil yang lebih lama (yang dipublish sebelum berita ini)
+  const { data: olderData } = await supabase
+    .from("berita")
+    .select("slug, title")
+    .eq("is_published", true)
+    .lt("published_at", date)
+    .order("published_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
   return {
-    newer: items[currentIndex - 1] || null,
-    older: items[currentIndex + 1] || null,
+    newer: newerData || null,
+    older: olderData || null,
   };
 }
+

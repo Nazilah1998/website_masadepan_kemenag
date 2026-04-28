@@ -1,9 +1,14 @@
 import { createClient } from "@supabase/supabase-js";
 import { unstable_cache } from "next/cache";
 import { env } from "@/lib/env";
-import { normalizeCoverImageUrl } from "@/lib/cover-image";
+import { 
+  normalizeBerita, 
+  BERITA_SELECT_FIELDS 
+} from "./berita";
 
-const supabase = createClient(env.supabaseUrl, env.supabasePublishableKey, {
+// Gunakan client standar (non-server version) untuk public cache
+// agar tidak memicu error "cookies() inside unstable_cache"
+const publicSupabase = createClient(env.supabaseUrl, env.supabasePublishableKey, {
   auth: {
     persistSession: false,
     autoRefreshToken: false,
@@ -11,50 +16,11 @@ const supabase = createClient(env.supabaseUrl, env.supabasePublishableKey, {
   },
 });
 
-function formatDateIndonesia(value) {
-  if (!value) return "-";
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "-";
-
-  return new Intl.DateTimeFormat("id-ID", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  }).format(date);
-}
-
-function normalizeBerita(item) {
-  return {
-    id: item.id,
-    slug: item.slug,
-    title: item.title,
-    excerpt: item.excerpt || "",
-    category: item.category || "Umum",
-    date: formatDateIndonesia(item.published_at || item.created_at),
-    isoDate: item.published_at || item.created_at,
-    coverImage: normalizeCoverImageUrl(item.cover_image || ""),
-    viewCount: Number(item.views || 0),
-  };
-}
-
 const getCachedLatestBeritaHome = unstable_cache(
   async () => {
-    const { data, error } = await supabase
+    const { data, error } = await publicSupabase
       .from("berita")
-      .select(
-        `
-          id,
-          slug,
-          title,
-          excerpt,
-          category,
-          cover_image,
-          published_at,
-          created_at,
-          views
-        `,
-      )
+      .select(BERITA_SELECT_FIELDS)
       .eq("is_published", true)
       .order("published_at", { ascending: false })
       .order("created_at", { ascending: false })
@@ -77,3 +43,5 @@ const getCachedLatestBeritaHome = unstable_cache(
 export async function getLatestBeritaHome() {
   return getCachedLatestBeritaHome();
 }
+
+
