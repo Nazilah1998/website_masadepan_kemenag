@@ -8,7 +8,11 @@ import VercelAnalytics from "@/components/layout/VercelAnalytics";
 import VercelSpeedInsights from "@/components/layout/VercelSpeedInsights";
 import PwaRegister from "@/components/layout/PwaRegister";
 import JsonLd from "@/components/features/seo/JsonLd";
-import { organizationSchema, websiteSchema } from "@/lib/structured-data";
+import {
+  organizationSchema,
+  websiteSchema,
+  navigationSchema,
+} from "@/lib/structured-data";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,9 +24,15 @@ export const metadata = {
   },
   description: siteInfo.description,
   alternates: { canonical: "/" },
-  icons: { icon: "/logo-share.png" },
+  icons: {
+    icon: [
+      { url: "/kemenag.svg", type: "image/svg+xml" },
+      { url: "/logo-share.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/logo-share.png", sizes: "512x512", type: "image/png" }],
+  },
   manifest: "/manifest.webmanifest",
-  applicationName: siteInfo.shortName,
+  applicationName: "Kemenag Barito Utara",
   appleWebApp: {
     capable: true,
     title: siteInfo.shortName,
@@ -66,7 +76,9 @@ export default function RootLayout({ children }) {
     <html lang="id" data-scroll-behavior="smooth" suppressHydrationWarning>
       <body className={`${inter.className} antialiased`}>
         <ThemeInitializer />
-        <JsonLd data={[organizationSchema(), websiteSchema()]} />
+        <JsonLd
+          data={[organizationSchema(), websiteSchema(), navigationSchema()]}
+        />
 
         <Providers>
           <AppShell>{children}</AppShell>

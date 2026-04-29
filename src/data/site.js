@@ -8,7 +8,7 @@ const mapQuery = "Kementerian Agama Kabupaten Barito Utara";
 
 export const siteInfo = {
   name: "Kementerian Agama Kabupaten Barito Utara",
-  shortName: "KEMENTERIAN AGAMA",
+  shortName: "Kemenag Barito Utara",
   tagline: "KABUPATEN BARITO UTARA",
 
   description:
@@ -38,6 +38,7 @@ export const siteLinks = {
   ),
   mapEmbedUrl: `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`,
   mapDirectionUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`,
+  instagram: "https://www.instagram.com/kemenag.barut",
 };
 
 export const footerMenuLinks = [

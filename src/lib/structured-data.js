@@ -11,8 +11,11 @@ export function organizationSchema() {
     "@context": "https://schema.org",
     "@type": "GovernmentOrganization",
     "@id": `${BASE}#organization`,
-    name: siteInfo.name,
-    alternateName: siteInfo.shortName,
+    name: "Kemenag Barito Utara",
+    alternateName: [
+      "Kementerian Agama Kabupaten Barito Utara",
+      "Kemenag Barut",
+    ],
     url: `${BASE}/`,
     logo: {
       "@type": "ImageObject",
@@ -38,7 +41,7 @@ export function organizationSchema() {
       name: "Kementerian Agama Republik Indonesia",
       url: "https://kemenag.go.id",
     },
-    sameAs: [siteLinks.mapDirectionUrl],
+    sameAs: [siteLinks.mapDirectionUrl, siteLinks.instagram],
   };
 }
 
@@ -51,7 +54,8 @@ export function websiteSchema() {
     "@type": "WebSite",
     "@id": `${BASE}#website`,
     url: `${BASE}/`,
-    name: siteInfo.name,
+    name: "Kemenag Barito Utara",
+    alternateName: ["Kementerian Agama Kabupaten Barito Utara"],
     description: siteInfo.description,
     inLanguage: "id-ID",
     publisher: { "@id": `${BASE}#organization` },
@@ -134,6 +138,29 @@ export function contactPageSchema() {
       "Kanal kontak resmi Kementerian Agama Kabupaten Barito Utara: WhatsApp, telepon, email, dan lokasi kantor.",
     isPartOf: { "@id": `${BASE}#website` },
     about: { "@id": `${BASE}#organization` },
+  };
+}
+
+/**
+ * Bangun schema SiteNavigationElement untuk membantu Sitelinks.
+ */
+export function navigationSchema() {
+  const items = [
+    { name: "Berita Terbaru", url: "/berita" },
+    { name: "Layanan Publik", url: "/layanan" },
+    { name: "Galeri Foto", url: "/galeri" },
+    { name: "Kontak Kantor", url: "/kontak" },
+  ];
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: items.map((item, idx) => ({
+      "@type": "SiteNavigationElement",
+      position: idx + 1,
+      name: item.name,
+      url: `${BASE}${item.url}`,
+    })),
   };
 }
 
