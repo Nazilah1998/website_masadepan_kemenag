@@ -6,6 +6,7 @@ import Link from "next/link";
 import { siteInfo } from "@/data/site";
 import { useForgotPassword } from "@/hooks/useForgotPassword";
 import { inputClassName, EyeIcon } from "./login/LoginUI";
+import Turnstile from "@/components/ui/Turnstile";
 
 export default function AdminForgotPasswordClient() {
   const f = useForgotPassword();
@@ -49,10 +50,17 @@ export default function AdminForgotPasswordClient() {
                 </div>
               </div>
 
+              <div className="flex justify-center mt-4">
+                <Turnstile
+                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+                  onVerify={f.setTurnstileToken}
+                />
+              </div>
+
               {f.error && <StatusAlert type="error" message={f.error} />}
 
               <button
-                type="submit" disabled={f.submitting || !f.email.trim()}
+                type="submit" disabled={f.submitting || !f.email.trim() || !f.turnstileToken}
                 className="group relative flex h-14 w-full items-center justify-center overflow-hidden rounded-xl bg-slate-900 text-xs font-black uppercase tracking-[0.25em] text-white transition-all hover:bg-black disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:bg-white dark:text-black dark:hover:bg-slate-200"
               >
                 <span className="relative z-10">{f.submitting ? "Memverifikasi..." : "Lanjutkan Verifikasi"}</span>

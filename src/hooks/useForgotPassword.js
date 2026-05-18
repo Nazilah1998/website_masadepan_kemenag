@@ -12,6 +12,7 @@ export function useForgotPassword() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState(null);
 
   // Detect step from URL (e.g. after redirect from email)
   useEffect(() => {
@@ -34,6 +35,7 @@ export function useForgotPassword() {
         body: JSON.stringify({
           action: "verify-email",
           email: email.trim().toLowerCase(),
+          turnstileToken,
         }),
       });
 
@@ -151,6 +153,7 @@ export function useForgotPassword() {
     submitting, setSubmitting,
     handleVerifyEmail,
     handleResetPassword,
-    strength // Ekspos data kekuatan password
+    strength, // Ekspos data kekuatan password
+    turnstileToken, setTurnstileToken
   };
 }
